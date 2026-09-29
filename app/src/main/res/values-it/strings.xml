@@ -28,6 +28,8 @@
     <string name="macros_line">P %1$d g / G %2$d g / C %3$d g</string>
     <string name="profile_needed">Compila il profilo per ottenere l\'obiettivo calorico giornaliero.</string>
     <string name="profile_fill">Compila il profilo</string>
+    <string name="goal_needed">Obiettivo non impostato: l\'obiettivo giornaliero presuppone di perdere %1$s kg a settimana senza peso finale.</string>
+    <string name="goal_set">Imposta l\'obiettivo</string>
     <string name="disclaimer_short">L\'obiettivo giornaliero è una stima con formule standard, non un consiglio medico. Non è pensato per donne in gravidanza o che allattano, minori di 18 anni o persone con disturbi alimentari: parlane con un medico.</string>
     <string name="disclaimer_ok">Ho capito</string>
 

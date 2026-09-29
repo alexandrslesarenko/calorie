@@ -28,6 +28,8 @@
     <string name="macros_line">단 %1$d g / 지 %2$d g / 탄 %3$d g</string>
     <string name="profile_needed">하루 목표 칼로리를 계산하려면 프로필을 입력하세요.</string>
     <string name="profile_fill">프로필 입력</string>
+    <string name="goal_needed">목표가 설정되지 않아 목표 체중 없이 주당 %1$s kg 감량으로 계산했습니다.</string>
+    <string name="goal_set">목표 설정</string>
     <string name="disclaimer_short">하루 목표는 표준 공식에 따른 추정치이며 의학적 조언이 아닙니다. 임신 중이거나 수유 중인 분, 18세 미만, 섭식 장애가 있는 분은 대상이 아닙니다. 의사와 상담하세요.</string>
     <string name="disclaimer_ok">확인</string>
 

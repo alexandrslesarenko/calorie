@@ -56,6 +56,14 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("custom_kcal", v).apply()
 
     /** The user has read and accepted the disclaimer about the calculated target. */
+    /**
+     * The goal page has been opened at least once. Until then the target silently uses the
+     * default pace, and Today asks to set the goal.
+     */
+    var goalSeen: Boolean
+        get() = sp.getBoolean("goal_seen", false)
+        set(v) = sp.edit().putBoolean("goal_seen", v).apply()
+
     var disclaimerAccepted: Boolean
         get() = sp.getBoolean("disclaimer_accepted", false)
         set(v) = sp.edit().putBoolean("disclaimer_accepted", v).apply()

@@ -28,6 +28,8 @@
     <string name="macros_line">P %1$d g / F %2$d g / C %3$d g</string>
     <string name="profile_needed">1日の目標カロリーを計算するにはプロフィールを入力してください。</string>
     <string name="profile_fill">プロフィールを入力</string>
+    <string name="goal_needed">目標が未設定です。目標体重なしで週 %1$s kg の減量として計算しています。</string>
+    <string name="goal_set">目標を設定</string>
     <string name="disclaimer_short">1日の目標は標準的な計算式による目安で、医学的な助言ではありません。妊娠中・授乳中の方、18歳未満の方、摂食障害のある方は対象外です。医師にご相談ください。</string>
     <string name="disclaimer_ok">わかりました</string>
 

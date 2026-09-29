@@ -28,6 +28,8 @@
     <string name="macros_line">P %1$d g / L %2$d g / G %3$d g</string>
     <string name="profile_needed">Remplissez votre profil pour obtenir un objectif calorique quotidien.</string>
     <string name="profile_fill">Remplir le profil</string>
+    <string name="goal_needed">Objectif non défini : l\'objectif du jour suppose une perte de %1$s kg par semaine, sans poids final.</string>
+    <string name="goal_set">Définir l\'objectif</string>
     <string name="disclaimer_short">L\'objectif quotidien est une estimation selon des formules standard, pas un avis médical. Non destiné aux femmes enceintes ou allaitantes, aux moins de 18 ans ni aux personnes souffrant de troubles alimentaires : parlez-en à un médecin.</string>
     <string name="disclaimer_ok">Compris</string>
 

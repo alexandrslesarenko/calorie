@@ -46,6 +46,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -362,6 +363,8 @@ private fun ProfileSettings(a: MainActivity) {
             }
             a.profileVersion++
             editing = false
+            // First fill: go straight on to the goal instead of silently using the default pace.
+            if (!prefs.goalSeen) a.settingsPage = SettingsPage.GOAL
         }) { Text(stringResource(R.string.done)) }
     }
 }
@@ -402,6 +405,12 @@ private fun pulsarCalibratedText(c: Calibration) =
 private fun GoalSettings(a: MainActivity) {
     val ctx = LocalContext.current
     val prefs = a.prefs
+    LaunchedEffect(Unit) {
+        if (!prefs.goalSeen) {
+            prefs.goalSeen = true
+            a.profileVersion++
+        }
+    }
     val lastWeight by remember { FoodDb.get(ctx).dao().lastWeight() }.collectAsState(null)
     var goal by remember { mutableStateOf(prefs.goalKg.takeIf { it > 0 }?.toDouble()?.gramsText() ?: "") }
     var pace by remember { mutableStateOf(prefs.pace) }

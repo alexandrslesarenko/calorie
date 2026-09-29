@@ -28,6 +28,8 @@
     <string name="macros_line">E %1$d g / F %2$d g / K %3$d g</string>
     <string name="profile_needed">Fülle dein Profil aus, um ein tägliches Kalorienziel zu erhalten.</string>
     <string name="profile_fill">Profil ausfüllen</string>
+    <string name="goal_needed">Kein Ziel festgelegt: das Tagesziel geht von %1$s kg Abnahme pro Woche ohne Zielgewicht aus.</string>
+    <string name="goal_set">Ziel festlegen</string>
     <string name="disclaimer_short">Das Tagesziel ist eine Schätzung nach Standardformeln, keine medizinische Empfehlung. Nicht gedacht für Schwangere und Stillende, Personen unter 18 und Menschen mit Essstörungen: sprich mit einer Ärztin oder einem Arzt.</string>
     <string name="disclaimer_ok">Verstanden</string>
 

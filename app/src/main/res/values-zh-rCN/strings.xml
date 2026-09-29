@@ -28,6 +28,8 @@
     <string name="macros_line">蛋 %1$d 克 / 脂 %2$d 克 / 碳 %3$d 克</string>
     <string name="profile_needed">填写个人资料以计算每日热量目标。</string>
     <string name="profile_fill">填写资料</string>
+    <string name="goal_needed">未设置目标：目前按每周减 %1$s 公斤、无目标体重计算。</string>
+    <string name="goal_set">设置目标</string>
     <string name="disclaimer_short">每日目标是按标准公式估算的，并非医疗建议。不适用于孕期或哺乳期女性、未满 18 岁者以及有进食障碍的人：请咨询医生。</string>
     <string name="disclaimer_ok">知道了</string>
 

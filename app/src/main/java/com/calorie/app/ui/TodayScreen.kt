@@ -70,6 +70,7 @@ import com.calorie.app.logic.Limit
 import com.calorie.app.logic.Nutrients
 import com.calorie.app.logic.Target
 import com.calorie.app.logic.gramsText
+import com.calorie.app.logic.shortText
 import com.calorie.app.logic.kcalText
 import com.calorie.app.logic.sum
 import kotlinx.coroutines.launch
@@ -106,6 +107,14 @@ fun TodayScreen(a: MainActivity) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.profile_needed))
                     Button(onClick = { a.openSettings(SettingsPage.PROFILE) }) { Text(stringResource(R.string.profile_fill)) }
+                }
+            }
+        }
+        if (target != null && !a.prefs.goalSeen) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.goal_needed, a.prefs.pace.kgPerWeek.shortText()))
+                    Button(onClick = { a.openSettings(SettingsPage.GOAL) }) { Text(stringResource(R.string.goal_set)) }
                 }
             }
         }

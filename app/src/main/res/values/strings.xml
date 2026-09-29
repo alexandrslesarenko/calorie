@@ -28,6 +28,8 @@
     <string name="macros_line">P %1$d g / F %2$d g / C %3$d g</string>
     <string name="profile_needed">Fill in your profile to get a daily calorie target.</string>
     <string name="profile_fill">Fill in profile</string>
+    <string name="goal_needed">The goal is not set: the target assumes losing %1$s kg a week with no end weight.</string>
+    <string name="goal_set">Set the goal</string>
     <string name="disclaimer_short">The daily target is an estimate from standard formulas, not medical advice. Not intended for pregnant or breastfeeding women, people under 18 or people with eating disorders: talk to a doctor.</string>
     <string name="disclaimer_ok">Got it</string>
 

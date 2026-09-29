@@ -28,6 +28,8 @@
     <string name="macros_line">Б %1$d г / Ж %2$d г / У %3$d г</string>
     <string name="profile_needed">Заполните профиль, чтобы рассчитать суточную норму калорий.</string>
     <string name="profile_fill">Заполнить профиль</string>
+    <string name="goal_needed">Цель не задана: норма посчитана на снижение %1$s кг в неделю без конечного веса.</string>
+    <string name="goal_set">Задать цель</string>
     <string name="disclaimer_short">Норма - оценка по стандартным формулам, а не медицинская рекомендация. Приложение не рассчитано на беременных и кормящих, подростков до 18 лет и людей с расстройствами пищевого поведения: посоветуйтесь с врачом.</string>
     <string name="disclaimer_ok">Понятно</string>
 
