@@ -15,4 +15,6 @@ object CalColors {
     val Barcode = Color(0xFF3F8FE8)
     val Text = Color(0xFF26A69A)
     val Manual = Color(0xFF7D8FA3)
+    /** Favorite star. */
+    val Star = Color(0xFFF5B301)
 }

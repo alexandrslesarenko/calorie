@@ -40,6 +40,11 @@ class Prefs(context: Context) {
         get() = Pace.byKey(sp.getString("pace", null)) ?: Pace.NORMAL
         set(v) = sp.edit().putString("pace", v.key).apply()
 
+    /** Activity level measured by Pulsar instead of the manual one, when there is enough data. */
+    var activityFromPulsar: Boolean
+        get() = sp.getBoolean("activity_from_pulsar", true)
+        set(v) = sp.edit().putBoolean("activity_from_pulsar", v).apply()
+
     /** Target weight, kg; 0 - not set (then just lose weight at the chosen pace). */
     var goalKg: Float
         get() = sp.getFloat("goal_kg", 0f)

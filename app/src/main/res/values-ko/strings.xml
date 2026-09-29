@@ -140,6 +140,18 @@
     <string name="activity_light_desc">산책, 주 1-3회 운동.</string>
     <string name="activity_moderate_desc">주 3-5회 운동 또는 서서 하는 일.</string>
     <string name="activity_high_desc">주 6-7회 고강도 운동 또는 육체노동.</string>
+    <string name="activity_by_pulsar">Pulsar 기준</string>
+    <string name="activity_pulsar_on">Pulsar 활동량 사용</string>
+    <string name="activity_pulsar_off">Pulsar 활동량 사용 (꺼짐)</string>
+    <string name="pulsar_not_installed">Pulsar가 설치되어 있지 않아 활동량을 직접 선택합니다.</string>
+    <string name="pulsar_no_access">Pulsar 데이터에 접근할 수 없습니다. Pulsar 다음에 Calorie를 다시 설치하세요. 접근 권한은 설치할 때 부여됩니다.</string>
+    <string name="pulsar_few_days">Pulsar 데이터가 부족합니다. 첫 산책이나 운동 후 %1$d일이 지나면 활동량을 측정합니다. 그때까지는 직접 선택한 값을 씁니다.</string>
+    <string name="pulsar_calibrated">%1$d일 동안 산책과 운동으로 하루 평균 %2$d kcal, 활동 계수 %3$s입니다.</string>
+    <string name="mode_walk">산책</string>
+    <string name="mode_training">운동</string>
+    <string name="session_line">%1$s-%2$s, %3$d분, 심박 %4$d</string>
+    <string name="activity_note">소모한 칼로리는 오늘 목표에 더하지 않고, 2주 평균을 통해 목표를 조정합니다.</string>
+    <string name="diary_burned">활동: %1$s kcal</string>
     <string name="edit">변경</string>
     <string name="done">완료</string>
 
@@ -149,8 +161,7 @@
     <string name="tile_goal">하루 %1$d kcal</string>
     <string name="tile_goal_empty">프로필을 입력하세요</string>
     <string name="goal_weight">목표 체중, kg</string>
-    <string name="pace">속도</string>
-    <string name="pace_value">주 %1$s kg</string>
+    <string name="pace">속도, 주당 kg</string>
     <string name="norm">하루 목표</string>
     <string name="norm_details">기초대사량 %1$d kcal, 소비량 %2$d kcal, 단백질 최소 %3$d g</string>
     <string name="forecast">예상: 주당 %1$s kg 감량</string>
@@ -173,6 +184,7 @@
     <string name="key_ok">키 %1$s이(가) 작동합니다.</string>
     <string name="key_bad">키 %1$s이(가) 거부되었습니다.</string>
     <string name="key_unchecked">키 %1$s은(는) 아직 확인하지 않았습니다.</string>
+    <string name="key_rejected">Claude가 키를 받아들이지 않았습니다. 키를 전부 복사했는지, Console에서 취소하지 않았는지 확인하세요.</string>
     <string name="key_field">API 키</string>
     <string name="key_format">Claude 키는 sk-ant-로 시작합니다</string>
     <string name="paste">붙여넣기</string>

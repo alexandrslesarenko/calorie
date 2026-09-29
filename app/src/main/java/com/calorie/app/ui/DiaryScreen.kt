@@ -38,7 +38,10 @@ import androidx.compose.ui.unit.sp
 import com.calorie.app.R
 import com.calorie.app.data.DayTotal
 import com.calorie.app.data.FoodDb
+import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.WeightMark
+import com.calorie.app.logic.Burn
+import java.time.ZoneId
 import com.calorie.app.logic.gramsText
 import com.calorie.app.logic.kcalText
 import java.time.LocalDate
@@ -56,7 +59,13 @@ fun DiaryScreen(a: MainActivity) {
     val today = LocalDate.now().toEpochDay()
     val totals by remember(today) { dao.totals(today - DIARY_DAYS, today) }.collectAsState(emptyList())
     val weights by remember { dao.weights() }.collectAsState(emptyList())
-    val target = remember(weights.lastOrNull(), a.profileVersion) { a.target(weights.lastOrNull()?.kg) }
+    val target = remember(weights.lastOrNull(), a.profileVersion, a.pulsar) { a.target(weights.lastOrNull()?.kg) }
+    // Burned kcal per day from Pulsar, for information next to what was eaten.
+    val burned = remember(weights.lastOrNull(), a.profileVersion, a.pulsar) {
+        val b = a.body(weights.lastOrNull()?.kg)
+        if (b == null || a.pulsar.status != PulsarStatus.OK) emptyMap()
+        else Burn.perDay(a.pulsar.minutes, b, ZoneId.systemDefault())
+    }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item { WeightSection(a, weights) }
@@ -79,12 +88,12 @@ fun DiaryScreen(a: MainActivity) {
                 Text(stringResource(R.string.diary_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        items(totals, key = { it.day }) { t -> DayRow(t, target?.kcal) { a.day = t.day; a.tabRequest = 0 } }
+        items(totals, key = { it.day }) { t -> DayRow(t, target?.kcal, burned[t.day]) { a.day = t.day; a.tabRequest = 0 } }
     }
 }
 
 @Composable
-private fun DayRow(t: DayTotal, target: Int?, onClick: () -> Unit) {
+private fun DayRow(t: DayTotal, target: Int?, burned: Double?, onClick: () -> Unit) {
     val over = target != null && t.kcal > target
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -110,6 +119,13 @@ private fun DayRow(t: DayTotal, target: Int?, onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (burned != null && burned >= 1) {
+                Text(
+                    stringResource(R.string.diary_burned, burned.kcalText()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

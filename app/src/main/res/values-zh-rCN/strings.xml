@@ -140,6 +140,18 @@
     <string name="activity_light_desc">散步，每周运动 1-3 次。</string>
     <string name="activity_moderate_desc">每周运动 3-5 次，或站立工作。</string>
     <string name="activity_high_desc">每周高强度训练 6-7 次，或体力劳动。</string>
+    <string name="activity_by_pulsar">按 Pulsar</string>
+    <string name="activity_pulsar_on">使用 Pulsar 活动量</string>
+    <string name="activity_pulsar_off">使用 Pulsar 活动量（已关闭）</string>
+    <string name="pulsar_not_installed">未安装 Pulsar：活动量需手动选择。</string>
+    <string name="pulsar_no_access">无法访问 Pulsar 数据。请在 Pulsar 之后重新安装 Calorie：访问权限在安装时授予。</string>
+    <string name="pulsar_few_days">Pulsar 数据不足：从第一次散步或训练起满 %1$d 天后开始测量活动量，在此之前使用手动选择。</string>
+    <string name="pulsar_calibrated">%1$d 天内散步和训练平均每天增加 %2$d 千卡，活动系数 %3$s。</string>
+    <string name="mode_walk">散步</string>
+    <string name="mode_training">训练</string>
+    <string name="session_line">%1$s-%2$s，%3$d 分钟，心率 %4$d</string>
+    <string name="activity_note">消耗的热量不会加到今天的目标上，而是通过两周平均值来调整目标。</string>
+    <string name="diary_burned">活动：%1$s 千卡</string>
     <string name="edit">修改</string>
     <string name="done">完成</string>
 
@@ -149,8 +161,7 @@
     <string name="tile_goal">每天 %1$d 千卡</string>
     <string name="tile_goal_empty">请填写资料</string>
     <string name="goal_weight">目标体重（公斤）</string>
-    <string name="pace">速度</string>
-    <string name="pace_value">%1$s 公斤/周</string>
+    <string name="pace">速度（公斤/周）</string>
     <string name="norm">每日目标</string>
     <string name="norm_details">基础代谢 %1$d 千卡，消耗 %2$d 千卡，蛋白质至少 %3$d 克</string>
     <string name="forecast">预计：每周减 %1$s 公斤</string>
@@ -173,6 +184,7 @@
     <string name="key_ok">密钥 %1$s 可用。</string>
     <string name="key_bad">密钥 %1$s 被拒绝。</string>
     <string name="key_unchecked">密钥 %1$s 尚未检查。</string>
+    <string name="key_rejected">Claude 没有接受该密钥。请检查是否完整复制，以及是否已在 Console 中撤销。</string>
     <string name="key_field">API 密钥</string>
     <string name="key_format">Claude 密钥以 sk-ant- 开头</string>
     <string name="paste">粘贴</string>

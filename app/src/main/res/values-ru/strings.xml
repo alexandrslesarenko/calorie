@@ -140,6 +140,18 @@
     <string name="activity_light_desc">Прогулки, тренировки 1-3 раза в неделю.</string>
     <string name="activity_moderate_desc">Тренировки 3-5 раз в неделю или работа на ногах.</string>
     <string name="activity_high_desc">Тяжёлые тренировки 6-7 раз в неделю или физический труд.</string>
+    <string name="activity_by_pulsar">По Pulsar</string>
+    <string name="activity_pulsar_on">Активность по Pulsar</string>
+    <string name="activity_pulsar_off">Активность по Pulsar (выключено)</string>
+    <string name="pulsar_not_installed">Pulsar не установлен: уровень активности выбирается вручную.</string>
+    <string name="pulsar_no_access">Нет доступа к данным Pulsar. Переустановите Calorie после Pulsar: доступ выдаётся при установке.</string>
+    <string name="pulsar_few_days">Мало данных Pulsar: уровень измеряется, когда с первой прогулки или тренировки пройдёт %1$d дней. До тех пор действует ручной выбор.</string>
+    <string name="pulsar_calibrated">За %1$d дн. прогулки и тренировки добавили в среднем %2$d ккал в день, коэффициент активности %3$s.</string>
+    <string name="mode_walk">Прогулка</string>
+    <string name="mode_training">Тренировка</string>
+    <string name="session_line">%1$s-%2$s, %3$d мин, пульс %4$d</string>
+    <string name="activity_note">Сожжённое не прибавляется к сегодняшней норме: оно уточняет её через среднее за две недели.</string>
+    <string name="diary_burned">Активность: %1$s ккал</string>
     <string name="edit">Изменить</string>
     <string name="done">Готово</string>
 
@@ -149,8 +161,7 @@
     <string name="tile_goal">%1$d ккал в день</string>
     <string name="tile_goal_empty">Заполните профиль</string>
     <string name="goal_weight">Целевой вес, кг</string>
-    <string name="pace">Темп</string>
-    <string name="pace_value">%1$s кг/нед</string>
+    <string name="pace">Темп, кг в неделю</string>
     <string name="norm">Норма в день</string>
     <string name="norm_details">Основной обмен %1$d ккал, расход %2$d ккал, белка не меньше %3$d г</string>
     <string name="forecast">Ожидаемо: минус %1$s кг в неделю</string>
@@ -173,6 +184,7 @@
     <string name="key_ok">Ключ %1$s работает.</string>
     <string name="key_bad">Ключ %1$s не принят.</string>
     <string name="key_unchecked">Ключ %1$s ещё не проверен.</string>
+    <string name="key_rejected">Claude не принял ключ. Проверьте, что он скопирован целиком и не отозван в Console.</string>
     <string name="key_field">API-ключ</string>
     <string name="key_format">Ключи Claude начинаются с sk-ant-</string>
     <string name="paste">Вставить</string>

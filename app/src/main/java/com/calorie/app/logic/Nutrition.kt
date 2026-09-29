@@ -43,6 +43,12 @@ fun List<Nutrients>.sum(): Nutrients = fold(Nutrients.ZERO) { a, b -> a + b }
 
 fun Double.kcalText(): String = roundToInt().toString()
 
+/** Up to two decimals without trailing zeros: 0.25, 0.5, 1. */
+fun Double.shortText(): String {
+    val r = (this * 100).roundToInt() / 100.0
+    return if (r == r.toLong().toDouble()) r.toLong().toString() else r.toString()
+}
+
 /** Grams for display: to one decimal, without ".0". */
 fun Double.gramsText(): String {
     val r = (this * 10).roundToInt() / 10.0

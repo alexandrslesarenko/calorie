@@ -97,9 +97,12 @@ object Goals {
         return (ref * PROTEIN_PER_KG).roundToInt()
     }
 
-    fun target(b: Body, activity: Activity, pace: Pace, goalKg: Double?): Target {
+    fun target(b: Body, activity: Activity, pace: Pace, goalKg: Double?): Target = target(b, activity.factor, pace, goalKg)
+
+    /** activityFactor - from the manual level or measured by Pulsar (Burn.calibrate). */
+    fun target(b: Body, activityFactor: Double, pace: Pace, goalKg: Double?): Target {
         val bmr = bmr(b)
-        val tdee = bmr * activity.factor
+        val tdee = bmr * activityFactor
         val protein = proteinG(b.heightCm, b.weightKg)
         fun maintain(limit: Limit) = Target(round10(tdee), bmr.roundToInt(), tdee.roundToInt(), 0.0, limit, protein, null)
 

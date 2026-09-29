@@ -29,8 +29,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.AlertDialog
@@ -61,6 +59,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
@@ -91,6 +90,7 @@ import kotlin.math.roundToInt
 private const val GRAMS_STEP = 10.0
 /** How many library dishes to show without a search. */
 private const val DISHES_SHOWN = 30
+private const val DISABLED_ALPHA = 0.45f
 
 @Composable
 fun OverlayScreen(a: MainActivity, o: Overlay) {
@@ -133,7 +133,7 @@ private fun AddMenu(a: MainActivity) {
         AddWay(R.string.way_manual, R.string.way_manual_hint, CalColors.Manual, false, { rememberVectorPainter(Icons.Filled.Create) }) { a.overlay = Overlay.Manual() },
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Header(stringResource(R.string.add_title, dayTitle(a.day).lowercaseFirstIfWord())) { a.closeOverlay() }
+        Header(stringResource(R.string.add_title, dayTitle(a.day, inline = true))) { a.closeOverlay() }
         if (!a.hasKey) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -215,22 +215,21 @@ private fun DishRow(d: Dish, onPick: () -> Unit, onStar: () -> Unit, onLongPress
             )
         }
         IconButton(onClick = onStar) {
+            // The core icon set has no outlined star, so both come from Material Symbols.
             Icon(
-                if (d.favorite) Icons.Filled.Star else Icons.Outlined.Star,
+                painterResource(if (d.favorite) R.drawable.ic_star else R.drawable.ic_star_border),
                 stringResource(R.string.dish_favorite),
-                tint = if (d.favorite) CalColors.Fat else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (d.favorite) CalColors.Star else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
 }
 
-/** "Today" in the "Add for today" title goes lowercase; a date stays as is. */
-private fun String.lowercaseFirstIfWord(): String = if (firstOrNull()?.isLetter() == true) replaceFirstChar { it.lowercase() } else this
-
 @Composable
 private fun WayTile(w: AddWay, enabled: Boolean, modifier: Modifier) {
     Card(onClick = w.go, enabled = enabled, modifier = modifier) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // A disabled card only dims its title; dim everything so the tile reads as off.
+        Column(Modifier.padding(12.dp).alpha(if (enabled) 1f else DISABLED_ALPHA), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.size(32.dp).background(w.color.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
                     Icon(w.icon(), null, tint = w.color, modifier = Modifier.size(20.dp))

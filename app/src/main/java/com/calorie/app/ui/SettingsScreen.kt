@@ -28,7 +28,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Card
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -66,6 +71,10 @@ import com.calorie.app.ai.ClaudeFood
 import com.calorie.app.data.ApiKeyStore
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Prefs
+import com.calorie.app.data.PulsarStatus
+import com.calorie.app.logic.Burn
+import com.calorie.app.logic.Calibration
+import kotlin.math.roundToInt
 import com.calorie.app.data.WeightMark
 import com.calorie.app.logic.Activity
 import com.calorie.app.logic.Goals
@@ -73,6 +82,7 @@ import com.calorie.app.logic.Pace
 import com.calorie.app.logic.Pricing
 import com.calorie.app.logic.Sex
 import com.calorie.app.logic.gramsText
+import com.calorie.app.logic.shortText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -190,13 +200,24 @@ private fun themeLabel(mode: String) = when (mode) {
  * and expanded by the icon next to the title, so it takes no space.
  */
 @Composable
-fun SettingsCard(title: String, text: String? = null, help: String? = null, actions: @Composable () -> Unit) {
+fun SettingsCard(
+    title: String,
+    text: String? = null,
+    help: String? = null,
+    /** A further card on the same page: smaller title, no back arrow. */
+    secondary: Boolean = false,
+    actions: @Composable () -> Unit,
+) {
     var showHelp by rememberSaveable(title) { mutableStateOf(false) }
-    val back = LocalSettingsBack.current
+    val back = LocalSettingsBack.current.takeUnless { secondary }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (back != null) IconButton(onClick = back) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) }
-            Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+            Text(
+                title,
+                style = if (secondary) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f).padding(start = if (secondary) 4.dp else 0.dp),
+            )
             if (help != null) {
                 IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(32.dp)) {
                     Icon(
@@ -217,6 +238,15 @@ fun SettingsCard(title: String, text: String? = null, help: String? = null, acti
             }
         }
     }
+}
+
+/**
+ * Outlined button with narrower side padding: three standard buttons do not fit in a
+ * 360 dp wide card at font scale 1.15 even with the smallest FitRow labels.
+ */
+@Composable
+private fun CompactButton(onClick: () -> Unit, enabled: Boolean = true, content: @Composable () -> Unit) {
+    OutlinedButton(onClick = onClick, enabled = enabled, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) { content() }
 }
 
 @Composable
@@ -280,8 +310,10 @@ private fun ProfileSettings(a: MainActivity) {
             AboutLine(stringResource(R.string.birth_year), prefs.birthYear.takeIf { it > 0 }?.let { "$it (${Goals.age(it)})" } ?: "--")
             AboutLine(stringResource(R.string.height), prefs.heightCm.takeIf { it > 0 }?.let { stringResource(R.string.height_value, it) } ?: "--")
             AboutLine(stringResource(R.string.weight_title), lastWeight?.let { stringResource(R.string.kg_value, it.kg.gramsText()) } ?: "--")
-            AboutLine(stringResource(R.string.activity), activityLabel(prefs.activity))
+            val calib = remember(lastWeight, a.profileVersion, a.pulsar) { a.calibration(lastWeight?.kg) }
+            AboutLine(stringResource(R.string.activity), if (calib != null) stringResource(R.string.activity_by_pulsar) else activityLabel(prefs.activity))
             OutlinedButton(onClick = { editing = true }) { Text(stringResource(R.string.edit)) }
+            PulsarBlock(a, lastWeight?.kg)
             return@SettingsCard
         }
         Text(stringResource(R.string.sex), style = MaterialTheme.typography.titleSmall)
@@ -290,18 +322,34 @@ private fun ProfileSettings(a: MainActivity) {
                 FilterChip(selected = sex == s, onClick = { sex = s }, label = { Text(stringResource(label), maxLines = 1, style = style) })
             }
         }
+        // Two per row: three fields in a row cut their labels at 360 dp.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberField(stringResource(R.string.birth_year), year, { year = it }, false, Modifier.weight(1f))
             NumberField(stringResource(R.string.height_cm), height, { height = it }, false, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberField(stringResource(R.string.weight_kg), weight, { weight = it }, true, Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
         }
         Text(stringResource(R.string.activity), style = MaterialTheme.typography.titleSmall)
-        FitRow { style ->
+        // A list with descriptions, not chips: four chips do not fit in a row, and the
+        // description is what tells the levels apart.
+        Column(Modifier.selectableGroup()) {
             Activity.entries.forEach { x ->
-                FilterChip(selected = activity == x, onClick = { activity = x }, label = { Text(activityLabel(x), maxLines = 1, style = style) })
+                Row(
+                    Modifier.fillMaxWidth()
+                        .selectable(selected = activity == x, onClick = { activity = x }, role = Role.RadioButton)
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = activity == x, onClick = null)
+                    Column(Modifier.padding(start = 12.dp)) {
+                        Text(activityLabel(x), style = MaterialTheme.typography.bodyLarge)
+                        Text(activityDesc(x), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
         }
-        Text(activityDesc(activity), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedButton(enabled = sex != null && y != null && h != null && w != null, onClick = {
             prefs.sex = sex
             prefs.birthYear = y!!
@@ -318,6 +366,38 @@ private fun ProfileSettings(a: MainActivity) {
     }
 }
 
+/**
+ * Activity from Pulsar: the switch and what it gives now. When Pulsar is missing, has no
+ * access or too few days, the manual level stays in force and the text says why.
+ */
+@Composable
+private fun PulsarBlock(a: MainActivity, weightKg: Double?) {
+    val prefs = a.prefs
+    var on by remember { mutableStateOf(prefs.activityFromPulsar) }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(if (on) R.string.activity_pulsar_on else R.string.activity_pulsar_off), Modifier.weight(1f))
+        Switch(checked = on, enabled = a.pulsar.status == PulsarStatus.OK, onCheckedChange = {
+            on = it
+            prefs.activityFromPulsar = it
+            a.profileVersion++
+        })
+    }
+    val calib = remember(weightKg, a.profileVersion, a.pulsar) { a.calibration(weightKg) }
+    val text = when {
+        a.pulsar.status == PulsarStatus.NOT_INSTALLED -> stringResource(R.string.pulsar_not_installed)
+        a.pulsar.status == PulsarStatus.NO_ACCESS -> stringResource(R.string.pulsar_no_access)
+        !on -> null
+        calib != null -> pulsarCalibratedText(calib)
+        else -> stringResource(R.string.pulsar_few_days, Burn.MIN_DAYS)
+    }
+    text?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+}
+
+@Composable
+private fun pulsarCalibratedText(c: Calibration) =
+    stringResource(R.string.pulsar_calibrated, c.days, c.kcalPerDay.roundToInt(), String.format(Locale.US, "%.2f", c.factor))
+
 @Composable
 private fun GoalSettings(a: MainActivity) {
     val ctx = LocalContext.current
@@ -327,7 +407,8 @@ private fun GoalSettings(a: MainActivity) {
     var pace by remember { mutableStateOf(prefs.pace) }
     var custom by remember { mutableStateOf(prefs.customKcal > 0) }
     var customText by remember { mutableStateOf(prefs.customKcal.takeIf { it > 0 }?.toString() ?: "") }
-    val t = remember(lastWeight, a.profileVersion) { a.target(lastWeight?.kg) }
+    val t = remember(lastWeight, a.profileVersion, a.pulsar) { a.target(lastWeight?.kg) }
+    val calib = remember(lastWeight, a.profileVersion, a.pulsar) { a.calibration(lastWeight?.kg) }
     fun changed() { a.profileVersion++ }
 
     SettingsCard(
@@ -345,13 +426,14 @@ private fun GoalSettings(a: MainActivity) {
             if (s.isBlank()) { prefs.goalKg = 0f; changed() }
             else if (v != null && v in 30.0..300.0) { prefs.goalKg = v.toFloat(); changed() }
         }, true, Modifier.fillMaxWidth())
+        // Units are in the heading: with them the "0.75" chip no longer fits in the row.
         Text(stringResource(R.string.pace), style = MaterialTheme.typography.titleSmall)
         FitRow { style ->
             Pace.entries.forEach { p ->
                 FilterChip(
                     selected = pace == p,
                     onClick = { pace = p; prefs.pace = p; changed() },
-                    label = { Text(stringResource(R.string.pace_value, p.kgPerWeek.gramsText()), maxLines = 1, style = style) },
+                    label = { Text(p.kgPerWeek.shortText(), maxLines = 1, style = style) },
                 )
             }
         }
@@ -363,10 +445,12 @@ private fun GoalSettings(a: MainActivity) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        // Where the expenditure comes from, so a changed target is not a mystery.
+        calib?.let { Text(pulsarCalibratedText(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         if (t.kgPerWeek > 0) {
             Text(
-                if (t.weeksToGoal != null) stringResource(R.string.forecast_goal, t.kgPerWeek.gramsText(), t.weeksToGoal)
-                else stringResource(R.string.forecast, t.kgPerWeek.gramsText()),
+                if (t.weeksToGoal != null) stringResource(R.string.forecast_goal, t.kgPerWeek.shortText(), t.weeksToGoal)
+                else stringResource(R.string.forecast, t.kgPerWeek.shortText()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -412,7 +496,7 @@ private fun ClaudeSettings(a: MainActivity) {
             } catch (e: AiException) {
                 // No network - nothing learned about the key, keep the previous status.
                 if (e.failure == AiFailure.BAD_KEY) status = Prefs.KEY_BAD
-                checkError = ctx.getString(if (e.failure == AiFailure.BAD_KEY) R.string.err_bad_key else R.string.err_network)
+                checkError = ctx.getString(if (e.failure == AiFailure.BAD_KEY) R.string.key_rejected else R.string.err_network)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -465,9 +549,9 @@ private fun ClaudeSettings(a: MainActivity) {
             }
         } else {
             FitRow { style ->
-                OutlinedButton(enabled = !checking, onClick = { check(saved!!) }) { Text(stringResource(R.string.key_check), maxLines = 1, style = style) }
-                OutlinedButton(onClick = { editing = true }) { Text(stringResource(R.string.key_replace), maxLines = 1, style = style) }
-                OutlinedButton(onClick = {
+                CompactButton(enabled = !checking, onClick = { check(saved!!) }) { Text(stringResource(R.string.key_check), maxLines = 1, style = style) }
+                CompactButton(onClick = { editing = true }) { Text(stringResource(R.string.key_replace), maxLines = 1, style = style) }
+                CompactButton(onClick = {
                     ApiKeyStore.clear(ctx)
                     saved = null
                     a.hasKey = false
@@ -479,12 +563,12 @@ private fun ClaudeSettings(a: MainActivity) {
         }
     }
 
-    SettingsCard(stringResource(R.string.console_title), help = stringResource(R.string.console_help)) {
+    SettingsCard(stringResource(R.string.console_title), help = stringResource(R.string.console_help), secondary = true) {
         Text(stringResource(R.string.console_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         FitRow { style ->
-            OutlinedButton(onClick = { a.openConsole(Console.KEYS) }) { Text(stringResource(R.string.console_keys), maxLines = 1, style = style) }
-            OutlinedButton(onClick = { a.openConsole(Console.BILLING) }) { Text(stringResource(R.string.console_billing), maxLines = 1, style = style) }
-            OutlinedButton(onClick = { a.openConsole(Console.USAGE) }) { Text(stringResource(R.string.console_usage), maxLines = 1, style = style) }
+            CompactButton(onClick = { a.openConsole(Console.KEYS) }) { Text(stringResource(R.string.console_keys), maxLines = 1, style = style) }
+            CompactButton(onClick = { a.openConsole(Console.BILLING) }) { Text(stringResource(R.string.console_billing), maxLines = 1, style = style) }
+            CompactButton(onClick = { a.openConsole(Console.USAGE) }) { Text(stringResource(R.string.console_usage), maxLines = 1, style = style) }
         }
     }
 
@@ -493,7 +577,7 @@ private fun ClaudeSettings(a: MainActivity) {
     val since = remember(usageTick) {
         prefs.usageSince.takeIf { it > 0 }?.let { SimpleDateFormat(dayMonthPattern(), Locale.getDefault()).format(Date(it)) }
     }
-    SettingsCard(stringResource(R.string.spend_title), help = stringResource(R.string.spend_help)) {
+    SettingsCard(stringResource(R.string.spend_title), help = stringResource(R.string.spend_help), secondary = true) {
         if (prefs.aiRequests == 0) {
             Text(stringResource(R.string.spend_none), style = MaterialTheme.typography.bodyMedium)
         } else {

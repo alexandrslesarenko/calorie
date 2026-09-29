@@ -55,7 +55,11 @@ import com.calorie.app.R
 import com.calorie.app.data.Entry
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
+import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.Source
+import com.calorie.app.logic.Burn
+import java.time.Instant
+import java.time.ZoneId
 import com.calorie.app.data.WeightMark
 import com.calorie.app.logic.Limit
 import com.calorie.app.logic.Nutrients
@@ -75,7 +79,7 @@ fun TodayScreen(a: MainActivity) {
     val dao = remember { FoodDb.get(ctx).dao() }
     val entries by remember(a.day) { dao.entries(a.day) }.collectAsState(emptyList())
     val lastWeight by remember { dao.lastWeight() }.collectAsState(null)
-    val target = remember(lastWeight, a.profileVersion) { a.target(lastWeight?.kg) }
+    val target = remember(lastWeight, a.profileVersion, a.pulsar) { a.target(lastWeight?.kg) }
     val eaten = entries.map { it.nutrients }.sum()
     var weightDialog by remember { mutableStateOf(false) }
 
@@ -117,6 +121,7 @@ fun TodayScreen(a: MainActivity) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        ActivityCard(a, lastWeight?.kg)
         WeightCard(lastWeight, a.day) { weightDialog = true }
     }
     if (weightDialog) WeightDialog(a, lastWeight?.kg) { weightDialog = false }
@@ -140,15 +145,17 @@ private fun DayHeader(a: MainActivity) {
     }
 }
 
+/** "Today", "Yesterday" or a date. inline - inside a phrase, so the word goes lowercase. */
 @Composable
-fun dayTitle(day: Long): String {
+fun dayTitle(day: Long, inline: Boolean = false): String {
     val today = LocalDate.now().toEpochDay()
     val date = LocalDate.ofEpochDay(day)
-    return when (day) {
+    val word = when (day) {
         today -> stringResource(R.string.today)
         today - 1 -> stringResource(R.string.yesterday)
-        else -> date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+        else -> return date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
     }
+    return if (inline) word.replaceFirstChar { it.lowercase() } else word
 }
 
 /** Calorie ring: what is left of the target, with macro bars below. */
@@ -258,6 +265,54 @@ private fun MealCard(a: MainActivity, meal: Meal, list: List<Entry>) {
     }
 }
 
+/** Mode name for a Pulsar session. */
+@Composable
+fun modeLabel(mode: String) = stringResource(if (mode == Burn.TRAINING) R.string.mode_training else R.string.mode_walk)
+
+/**
+ * Walks and workouts of the selected day from Pulsar. Shown for information: the burned
+ * kcal reach the target through the two-week average, not by adding to today.
+ */
+@Composable
+private fun ActivityCard(a: MainActivity, weightKg: Double?) {
+    if (a.pulsar.status != PulsarStatus.OK) return
+    val body = remember(weightKg, a.profileVersion) { a.body(weightKg) } ?: return
+    val zone = remember { ZoneId.systemDefault() }
+    val sessions = remember(a.pulsar, a.day, body) {
+        Burn.sessions(a.pulsar.minutes.filter { Burn.day(it.minute, zone) == a.day }, body)
+    }
+    if (sessions.isEmpty()) return
+    val fmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
+    fun hm(ms: Long) = Instant.ofEpochMilli(ms).atZone(zone).format(fmt)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.activity), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.kcal_n, sessions.sumOf { it.kcal }.kcalText()), style = MaterialTheme.typography.titleSmall)
+            }
+            sessions.forEachIndexed { i, s ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(modeLabel(s.mode))
+                        Text(
+                            stringResource(R.string.session_line, hm(s.start), hm(s.end), s.minutes, s.avgBpm),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(s.kcal.kcalText(), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            Text(
+                stringResource(R.string.activity_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @Composable
 private fun WeightCard(last: WeightMark?, day: Long, onRecord: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
@@ -266,7 +321,7 @@ private fun WeightCard(last: WeightMark?, day: Long, onRecord: () -> Unit) {
                 Text(stringResource(R.string.weight_title), style = MaterialTheme.typography.titleSmall)
                 Text(
                     if (last == null) stringResource(R.string.weight_none)
-                    else stringResource(R.string.weight_last, last.kg.gramsText(), dayTitle(last.day)),
+                    else stringResource(R.string.weight_last, last.kg.gramsText(), dayTitle(last.day, inline = true)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

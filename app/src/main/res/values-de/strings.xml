@@ -140,6 +140,18 @@
     <string name="activity_light_desc">Spaziergänge, Sport 1-3 Mal pro Woche.</string>
     <string name="activity_moderate_desc">Sport 3-5 Mal pro Woche oder Arbeit im Stehen.</string>
     <string name="activity_high_desc">Hartes Training 6-7 Mal pro Woche oder körperliche Arbeit.</string>
+    <string name="activity_by_pulsar">Nach Pulsar</string>
+    <string name="activity_pulsar_on">Aktivität aus Pulsar</string>
+    <string name="activity_pulsar_off">Aktivität aus Pulsar (aus)</string>
+    <string name="pulsar_not_installed">Pulsar ist nicht installiert: die Aktivität wird manuell gewählt.</string>
+    <string name="pulsar_no_access">Kein Zugriff auf Pulsar-Daten. Installiere Calorie nach Pulsar neu: der Zugriff wird bei der Installation erteilt.</string>
+    <string name="pulsar_few_days">Zu wenige Pulsar-Daten: das Niveau wird gemessen, sobald seit dem ersten Spaziergang oder Training %1$d Tage vergangen sind. Bis dahin gilt die manuelle Wahl.</string>
+    <string name="pulsar_calibrated">In %1$d Tagen brachten Spaziergänge und Training im Schnitt %2$d kcal pro Tag, Aktivitätsfaktor %3$s.</string>
+    <string name="mode_walk">Spaziergang</string>
+    <string name="mode_training">Training</string>
+    <string name="session_line">%1$s-%2$s, %3$d Min., Puls %4$d</string>
+    <string name="activity_note">Verbrannte kcal werden nicht zum heutigen Ziel addiert: sie verfeinern es über den Zwei-Wochen-Durchschnitt.</string>
+    <string name="diary_burned">Aktivität: %1$s kcal</string>
     <string name="edit">Ändern</string>
     <string name="done">Fertig</string>
 
@@ -149,8 +161,7 @@
     <string name="tile_goal">%1$d kcal pro Tag</string>
     <string name="tile_goal_empty">Profil ausfüllen</string>
     <string name="goal_weight">Zielgewicht, kg</string>
-    <string name="pace">Tempo</string>
-    <string name="pace_value">%1$s kg/Wo.</string>
+    <string name="pace">Tempo, kg pro Woche</string>
     <string name="norm">Tagesziel</string>
     <string name="norm_details">Grundumsatz %1$d kcal, Verbrauch %2$d kcal, Eiweiß mindestens %3$d g</string>
     <string name="forecast">Erwartet: minus %1$s kg pro Woche</string>
@@ -173,6 +184,7 @@
     <string name="key_ok">Schlüssel %1$s funktioniert.</string>
     <string name="key_bad">Schlüssel %1$s wurde abgelehnt.</string>
     <string name="key_unchecked">Schlüssel %1$s ist noch nicht geprüft.</string>
+    <string name="key_rejected">Claude hat den Schlüssel nicht akzeptiert. Prüfe, ob er vollständig kopiert und in der Console nicht widerrufen wurde.</string>
     <string name="key_field">API-Schlüssel</string>
     <string name="key_format">Claude-Schlüssel beginnen mit sk-ant-</string>
     <string name="paste">Einfügen</string>

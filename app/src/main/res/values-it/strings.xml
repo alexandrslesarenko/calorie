@@ -140,6 +140,18 @@
     <string name="activity_light_desc">Camminate, sport 1-3 volte a settimana.</string>
     <string name="activity_moderate_desc">Sport 3-5 volte a settimana o lavoro in piedi.</string>
     <string name="activity_high_desc">Allenamento intenso 6-7 volte a settimana o lavoro fisico.</string>
+    <string name="activity_by_pulsar">Da Pulsar</string>
+    <string name="activity_pulsar_on">Attività da Pulsar</string>
+    <string name="activity_pulsar_off">Attività da Pulsar (disattivato)</string>
+    <string name="pulsar_not_installed">Pulsar non è installato: il livello di attività si sceglie a mano.</string>
+    <string name="pulsar_no_access">Nessun accesso ai dati di Pulsar. Reinstalla Calorie dopo Pulsar: l\'accesso viene concesso all\'installazione.</string>
+    <string name="pulsar_few_days">Dati di Pulsar insufficienti: il livello si misura dopo %1$d giorni dalla prima camminata o allenamento. Fino ad allora vale la scelta manuale.</string>
+    <string name="pulsar_calibrated">In %1$d giorni camminate e allenamenti hanno aggiunto in media %2$d kcal al giorno, fattore di attività %3$s.</string>
+    <string name="mode_walk">Camminata</string>
+    <string name="mode_training">Allenamento</string>
+    <string name="session_line">%1$s-%2$s, %3$d min, polso %4$d</string>
+    <string name="activity_note">Le kcal bruciate non si aggiungono all\'obiettivo di oggi: lo affinano con la media di due settimane.</string>
+    <string name="diary_burned">Attività: %1$s kcal</string>
     <string name="edit">Modifica</string>
     <string name="done">Fatto</string>
 
@@ -149,8 +161,7 @@
     <string name="tile_goal">%1$d kcal al giorno</string>
     <string name="tile_goal_empty">Compila il profilo</string>
     <string name="goal_weight">Peso obiettivo, kg</string>
-    <string name="pace">Ritmo</string>
-    <string name="pace_value">%1$s kg/sett.</string>
+    <string name="pace">Ritmo, kg a settimana</string>
     <string name="norm">Obiettivo giornaliero</string>
     <string name="norm_details">Metabolismo basale %1$d kcal, dispendio %2$d kcal, proteine almeno %3$d g</string>
     <string name="forecast">Previsto: meno %1$s kg a settimana</string>
@@ -173,6 +184,7 @@
     <string name="key_ok">La chiave %1$s funziona.</string>
     <string name="key_bad">La chiave %1$s è stata rifiutata.</string>
     <string name="key_unchecked">La chiave %1$s non è ancora verificata.</string>
+    <string name="key_rejected">Claude non ha accettato la chiave. Controlla che sia stata copiata per intero e non sia stata revocata nella Console.</string>
     <string name="key_field">Chiave API</string>
     <string name="key_format">Le chiavi di Claude iniziano con sk-ant-</string>
     <string name="paste">Incolla</string>

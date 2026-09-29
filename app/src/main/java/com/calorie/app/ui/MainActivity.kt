@@ -47,6 +47,11 @@ import com.calorie.app.data.Entry
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.OffApi
+import com.calorie.app.data.PulsarData
+import com.calorie.app.data.PulsarSource
+import com.calorie.app.data.PulsarStatus
+import com.calorie.app.logic.Burn
+import com.calorie.app.logic.Calibration
 import com.calorie.app.data.Prefs
 import com.calorie.app.data.Source
 import com.calorie.app.logic.AiParser
@@ -118,6 +123,9 @@ class MainActivity : ComponentActivity() {
     var hasKey by mutableStateOf(false)
     /** Bumped on any profile or goal change so screens recalculate the target. */
     var profileVersion by mutableIntStateOf(0)
+    /** Walks and workouts from Pulsar for the last two weeks; refreshed on every resume. */
+    var pulsar by mutableStateOf(PulsarData(PulsarStatus.NOT_INSTALLED))
+
     /** Requested tab (from the diary - "go to day"); -1 - no request. */
     var tabRequest by mutableIntStateOf(-1)
 
@@ -177,6 +185,7 @@ class MainActivity : ComponentActivity() {
             if (day == shownToday) day = today
             shownToday = today
         }
+        lifecycleScope.launch { pulsar = withContext(Dispatchers.IO) { PulsarSource.load(this@MainActivity) } }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -218,13 +227,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Target from the profile and the latest weight; null - the profile is incomplete. */
-    fun target(lastWeightKg: Double?): Target? {
+    /** Profile as a Body for the formulas; null - the profile is incomplete. */
+    fun body(lastWeightKg: Double?): Body? {
         val sex = prefs.sex ?: return null
         val w = lastWeightKg ?: return null
         if (prefs.birthYear == 0 || prefs.heightCm == 0) return null
-        val body = Body(sex, Goals.age(prefs.birthYear), prefs.heightCm, w)
-        val t = Goals.target(body, prefs.activity, prefs.pace, prefs.goalKg.takeIf { it > 0 }?.toDouble())
+        return Body(sex, Goals.age(prefs.birthYear), prefs.heightCm, w)
+    }
+
+    /** Activity level measured by Pulsar, if it is switched on and there are enough days. */
+    fun calibration(lastWeightKg: Double?): Calibration? {
+        if (!prefs.activityFromPulsar || pulsar.status != PulsarStatus.OK) return null
+        val b = body(lastWeightKg) ?: return null
+        return Burn.calibrate(pulsar.minutes, b, LocalDate.now())
+    }
+
+    /** Target from the profile and the latest weight; null - the profile is incomplete. */
+    fun target(lastWeightKg: Double?): Target? {
+        val body = body(lastWeightKg) ?: return null
+        val factor = calibration(lastWeightKg)?.factor ?: prefs.activity.factor
+        val t = Goals.target(body, factor, prefs.pace, prefs.goalKg.takeIf { it > 0 }?.toDouble())
         return if (prefs.customKcal > 0) t.copy(kcal = prefs.customKcal) else t
     }
 

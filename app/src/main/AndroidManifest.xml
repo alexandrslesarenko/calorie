@@ -3,6 +3,12 @@
 
     <!-- No CAMERA permission: photos come from the system camera app, barcodes from the Google scanner. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Walks and workouts from Pulsar; granted only with the same signing key. -->
+    <uses-permission android:name="com.puls.app.permission.READ_ACTIVITY" />
+
+    <queries>
+        <package android:name="com.puls.app" />
+    </queries>
 
     <application
         android:allowBackup="true"
