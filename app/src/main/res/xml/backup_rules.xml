@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The diary and settings go to the cloud backup, the API key does not: it is encrypted with a key
+     from this phone's Keystore and could not be decrypted on another one anyway. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="secret.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="secret.xml" />
+    </device-transfer>
+</data-extraction-rules>

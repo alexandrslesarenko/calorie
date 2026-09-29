@@ -1,0 +1,21 @@
+# Gradle and build output
+.gradle/
+build/
+.kotlin/
+
+# Android SDK path on this machine
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Signing keys and other secrets
+*.jks
+*.keystore
+keystore.properties
+
+# OS files
+.DS_Store
+*.log
