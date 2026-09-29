@@ -131,7 +131,7 @@
     <string name="sex">Sex</string>
     <string name="sex_female">Female</string>
     <string name="sex_male">Male</string>
-    <string name="birth_year">Birth year</string>
+    <string name="birth_date">Date of birth</string>
     <string name="height">Height</string>
     <string name="height_cm">Height, cm</string>
     <string name="height_value">%1$d cm</string>

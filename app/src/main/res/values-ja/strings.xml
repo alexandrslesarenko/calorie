@@ -131,7 +131,7 @@
     <string name="sex">性別</string>
     <string name="sex_female">女性</string>
     <string name="sex_male">男性</string>
-    <string name="birth_year">生まれ年</string>
+    <string name="birth_date">生年月日</string>
     <string name="height">身長</string>
     <string name="height_cm">身長（cm）</string>
     <string name="height_value">%1$d cm</string>

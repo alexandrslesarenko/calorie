@@ -250,8 +250,9 @@ class MainActivity : ComponentActivity() {
     fun body(lastWeightKg: Double?): Body? {
         val sex = prefs.sex ?: return null
         val w = lastWeightKg ?: return null
-        if (prefs.birthYear == 0 || prefs.heightCm == 0) return null
-        return Body(sex, Goals.age(prefs.birthYear), prefs.heightCm, w)
+        val birth = prefs.birthDate ?: return null
+        if (prefs.heightCm == 0) return null
+        return Body(sex, Goals.age(birth), prefs.heightCm, w)
     }
 
     /** Activity level measured by Pulsar, if it is switched on and there are enough days. */

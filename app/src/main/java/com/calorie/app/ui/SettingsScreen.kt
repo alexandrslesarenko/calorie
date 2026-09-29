@@ -31,7 +31,16 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.FilterChip
@@ -90,6 +99,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Date
 import java.util.Locale
 
@@ -175,8 +186,8 @@ private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modif
 private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?): String = when (p) {
     SettingsPage.PROFILE -> {
         val prefs = a.prefs
-        if (prefs.sex == null || prefs.birthYear == 0 || prefs.heightCm == 0 || weight == null) stringResource(R.string.tile_profile_empty)
-        else stringResource(R.string.tile_profile, Goals.age(prefs.birthYear), prefs.heightCm, weight.gramsText())
+        if (prefs.sex == null || prefs.birthDate == null || prefs.heightCm == 0 || weight == null) stringResource(R.string.tile_profile_empty)
+        else stringResource(R.string.tile_profile, Goals.age(prefs.birthDate!!), prefs.heightCm, weight.gramsText())
     }
     SettingsPage.GOAL -> a.target(weight)?.let { stringResource(R.string.tile_goal, it.kcal) } ?: stringResource(R.string.tile_goal_empty)
     SettingsPage.CLAUDE -> stringResource(
@@ -267,6 +278,48 @@ private fun NumberField(label: String, value: String, onChange: (String) -> Unit
     )
 }
 
+/** Birth date: a read-only field that opens a date picker; typing is the default mode there. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BirthDateField(value: LocalDate?, onChange: (LocalDate) -> Unit, modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf(false) }
+    // A read-only text field consumes clicks, so the press is taken from its interaction source.
+    val interaction = remember { MutableInteractionSource() }
+    LaunchedEffect(interaction) {
+        interaction.interactions.collect { if (it is PressInteraction.Release) open = true }
+    }
+    OutlinedTextField(
+        value?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) ?: "", {}, modifier = modifier,
+        readOnly = true, singleLine = true, interactionSource = interaction,
+        label = { Text(stringResource(R.string.birth_date), maxLines = 1) },
+    )
+    if (!open) return
+    val latest = LocalDate.now().minusYears(14)
+    // The picker works in UTC midnights; any other zone shifts the day. floorDiv - dates before 1970 are negative.
+    val state = rememberDatePickerState(
+        initialSelectedDateMillis = value?.let { it.toEpochDay() * DAY_MS },
+        initialDisplayedMonthMillis = (value ?: latest.minusYears(16)).toEpochDay() * DAY_MS,
+        yearRange = 1920..latest.year,
+        initialDisplayMode = DisplayMode.Input,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = Math.floorDiv(utcTimeMillis, DAY_MS) <= latest.toEpochDay()
+            override fun isSelectableYear(year: Int) = year <= latest.year
+        },
+    )
+    DatePickerDialog(
+        onDismissRequest = { open = false },
+        confirmButton = {
+            TextButton(enabled = state.selectedDateMillis != null, onClick = {
+                state.selectedDateMillis?.let { onChange(LocalDate.ofEpochDay(Math.floorDiv(it, DAY_MS))) }
+                open = false
+            }) { Text(stringResource(R.string.done)) }
+        },
+        dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
+    ) { DatePicker(state) }
+}
+
+private const val DAY_MS = 86_400_000L
+
 @Composable
 private fun activityLabel(x: Activity) = stringResource(
     when (x) {
@@ -296,19 +349,21 @@ private fun ProfileSettings(a: MainActivity) {
     // Fields are easy to touch while scrolling, so by default the data is only shown.
     var editing by remember { mutableStateOf(prefs.sex == null) }
     var sex by remember { mutableStateOf(prefs.sex) }
-    var year by remember { mutableStateOf(prefs.birthYear.takeIf { it > 0 }?.toString() ?: "") }
+    // An old profile with only the year starts empty: a made-up July 1 must not be saved as a real date.
+    var birth by remember { mutableStateOf(prefs.birthDate.takeIf { !prefs.birthYearOnly }) }
     var height by remember { mutableStateOf(prefs.heightCm.takeIf { it > 0 }?.toString() ?: "") }
     var weight by remember(lastWeight) { mutableStateOf(lastWeight?.kg?.gramsText() ?: "") }
     var activity by remember { mutableStateOf(prefs.activity) }
-    val thisYear = LocalDate.now().year
-    val y = year.toIntOrNull()?.takeIf { it in 1920..thisYear - 14 }
     val h = height.toIntOrNull()?.takeIf { it in 120..230 }
     val w = parseNumber(weight)?.takeIf { it in 30.0..300.0 }
 
     SettingsCard(stringResource(R.string.profile_title), help = stringResource(R.string.profile_help)) {
         if (!editing) {
             AboutLine(stringResource(R.string.sex), sex?.let { stringResource(if (it == Sex.MALE) R.string.sex_male else R.string.sex_female) } ?: "--")
-            AboutLine(stringResource(R.string.birth_year), prefs.birthYear.takeIf { it > 0 }?.let { "$it (${Goals.age(it)})" } ?: "--")
+            AboutLine(stringResource(R.string.birth_date), prefs.birthDate?.let { d ->
+                val shown = if (prefs.birthYearOnly) d.year.toString() else d.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+                "$shown (${Goals.age(d)})"
+            } ?: "--")
             AboutLine(stringResource(R.string.height), prefs.heightCm.takeIf { it > 0 }?.let { stringResource(R.string.height_value, it) } ?: "--")
             AboutLine(stringResource(R.string.weight_title), lastWeight?.let { stringResource(R.string.kg_value, it.kg.gramsText()) } ?: "--")
             val calib = remember(lastWeight, a.profileVersion, a.pulsar) { a.calibration(lastWeight?.kg) }
@@ -325,7 +380,7 @@ private fun ProfileSettings(a: MainActivity) {
         }
         // Two per row: three fields in a row cut their labels at 360 dp.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            NumberField(stringResource(R.string.birth_year), year, { year = it }, false, Modifier.weight(1f))
+            BirthDateField(birth, { birth = it }, Modifier.weight(1f))
             NumberField(stringResource(R.string.height_cm), height, { height = it }, false, Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -351,9 +406,9 @@ private fun ProfileSettings(a: MainActivity) {
                 }
             }
         }
-        OutlinedButton(enabled = sex != null && y != null && h != null && w != null, onClick = {
+        OutlinedButton(enabled = sex != null && birth != null && h != null && w != null, onClick = {
             prefs.sex = sex
-            prefs.birthYear = y!!
+            prefs.birthDate = birth
             prefs.heightCm = h!!
             prefs.activity = activity
             // Weight from the profile is today's weight log entry: the target uses the latest weight.

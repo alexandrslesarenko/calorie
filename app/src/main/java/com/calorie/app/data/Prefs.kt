@@ -4,6 +4,7 @@ import android.content.Context
 import com.calorie.app.logic.Activity
 import com.calorie.app.logic.Pace
 import com.calorie.app.logic.Sex
+import java.time.LocalDate
 
 class Prefs(context: Context) {
     companion object {
@@ -22,10 +23,24 @@ class Prefs(context: Context) {
         get() = Sex.byKey(sp.getString("sex", null))
         set(v) = sp.edit().putString("sex", v?.key).apply()
 
-    /** Birth year; 0 - not set. */
-    var birthYear: Int
-        get() = sp.getInt("birth_year", 0)
-        set(v) = sp.edit().putInt("birth_year", v).apply()
+    /**
+     * Birth date; null - not set. Profiles saved before the full date keep only the year:
+     * then July 1 of that year, which is what the age was computed from before.
+     */
+    var birthDate: LocalDate?
+        get() = when {
+            sp.contains("birth_date") -> LocalDate.ofEpochDay(sp.getLong("birth_date", 0))
+            sp.getInt("birth_year", 0) > 0 -> LocalDate.of(sp.getInt("birth_year", 0), 7, 1)
+            else -> null
+        }
+        set(v) {
+            val e = sp.edit().remove("birth_year")
+            if (v == null) e.remove("birth_date") else e.putLong("birth_date", v.toEpochDay())
+            e.apply()
+        }
+
+    /** Only the birth year is known (old profile): show the year, not a made-up date. */
+    val birthYearOnly: Boolean get() = !sp.contains("birth_date") && sp.getInt("birth_year", 0) > 0
 
     /** Height, cm; 0 - not set. */
     var heightCm: Int

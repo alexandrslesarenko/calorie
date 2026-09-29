@@ -75,8 +75,13 @@ class GoalsTest {
     }
 
     @Test
-    fun ageByBirthYear() {
-        assertEquals(40, Goals.age(1986, LocalDate.of(2026, 7, 1)))
-        assertEquals(39, Goals.age(1986, LocalDate.of(2026, 6, 30)))
+    fun ageByBirthDate() {
+        val birth = LocalDate.of(1986, 10, 15)
+        assertEquals(39, Goals.age(birth, LocalDate.of(2026, 10, 14)))
+        assertEquals(40, Goals.age(birth, LocalDate.of(2026, 10, 15)))
+        // Born on February 29: a year older on March 1 of a common year.
+        val leap = LocalDate.of(1988, 2, 29)
+        assertEquals(37, Goals.age(leap, LocalDate.of(2026, 2, 28)))
+        assertEquals(38, Goals.age(leap, LocalDate.of(2026, 3, 1)))
     }
 }

@@ -1,6 +1,7 @@
 package com.calorie.app.logic
 
 import java.time.LocalDate
+import java.time.Period
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -127,9 +128,8 @@ object Goals {
         return Target(round10(kcal), bmr.roundToInt(), tdee.roundToInt(), rate, limit, protein, weeks)
     }
 
-    /** Age from the birth year; the birthday is assumed to be July 1 (off by half a year at most). */
-    fun age(birthYear: Int, today: LocalDate = LocalDate.now()): Int =
-        today.year - birthYear - if (today.monthValue < 7) 1 else 0
+    /** Full years on the given day. */
+    fun age(birth: LocalDate, today: LocalDate = LocalDate.now()): Int = Period.between(birth, today).years
 
     private fun round10(v: Double) = (v / 10).roundToInt() * 10
 }
