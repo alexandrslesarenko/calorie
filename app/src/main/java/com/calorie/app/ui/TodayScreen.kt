@@ -17,6 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -133,12 +138,23 @@ private fun DayHeader(a: MainActivity) {
     val today = LocalDate.now().toEpochDay()
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { a.day-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.day_prev)) }
-        Text(
-            dayTitle(a.day),
-            Modifier.weight(1f).clickable { a.day = today },
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
+        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            if (a.day == today) {
+                Text(dayTitle(a.day), style = MaterialTheme.typography.titleMedium)
+            } else {
+                // Not today: a bright badge, otherwise food quietly lands on the old day.
+                // Tapping it goes back to today.
+                Row(
+                    Modifier.clip(RoundedCornerShape(50)).background(CalColors.Warn)
+                        .clickable { a.day = today }.padding(start = 16.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(dayTitle(a.day), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Spacer(Modifier.size(8.dp))
+                    Icon(Icons.Filled.Refresh, stringResource(R.string.back_to_today), tint = Color.Black, modifier = Modifier.size(20.dp))
+                }
+            }
+        }
         IconButton(onClick = { a.day++ }, enabled = a.day < today) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.day_next))
         }

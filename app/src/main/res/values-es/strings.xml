@@ -10,6 +10,7 @@
     <string name="yesterday">Ayer</string>
     <string name="day_prev">Día anterior</string>
     <string name="day_next">Día siguiente</string>
+    <string name="back_to_today">Volver a hoy</string>
     <string name="kcal_left">kcal restantes</string>
     <string name="kcal_over">kcal de más</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">Revisar y añadir</string>
     <string name="edit_title">Editar entrada</string>
     <string name="review_check">Es una estimación. Revisa el peso: es lo que más importa.</string>
+    <string name="review_other_day">Se anotará en %1$s, no en hoy.</string>
     <string name="food_name">Nombre</string>
     <string name="grams_short">Gramos</string>
     <string name="less">Menos</string>

@@ -76,6 +76,8 @@ import java.util.Locale
 
 private const val STATE_DAY = "day"
 private const val STATE_SETTINGS_PAGE = "settings_page"
+/** Background time after which the diary returns to today. */
+private const val RETURN_TO_TODAY_MS = 10 * 60_000L
 /** How many recent Claude answers to keep in the cache. */
 private const val AI_CACHE_KEEP = 300
 
@@ -131,6 +133,8 @@ class MainActivity : ComponentActivity() {
 
     /** Which day was today when last shown: if it was being viewed, move to the new today. */
     private var shownToday = LocalDate.now().toEpochDay()
+    /** When the app went to the background; 0 - it is in the foreground. */
+    private var stoppedAt = 0L
     private var work: Job? = null
     private var shotUri: Uri? = null
     /** Hint for the next photo (prefilled for a nutrition label). */
@@ -175,6 +179,21 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
         outState.putLong(STATE_DAY, day)
         settingsPage?.let { outState.putString(STATE_SETTINGS_PAGE, it.name) }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stoppedAt = System.currentTimeMillis()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Back after a while with no food being added: show today, not the day looked at
+        // earlier - otherwise the next meal quietly lands on that old day. The camera and
+        // the photo picker also stop the activity, but then an overlay is open.
+        val away = System.currentTimeMillis() - stoppedAt
+        if (stoppedAt > 0 && away > RETURN_TO_TODAY_MS && overlay == null) day = LocalDate.now().toEpochDay()
+        stoppedAt = 0
     }
 
     override fun onResume() {

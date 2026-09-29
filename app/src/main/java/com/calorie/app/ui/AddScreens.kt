@@ -38,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.calorie.app.data.Dish
 import com.calorie.app.logic.Keys
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -326,6 +327,10 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
                 Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop,
             )
+        }
+        // The day is easy to miss in the header; a new entry for another day gets a warning.
+        if (o.editing == null && a.day != LocalDate.now().toEpochDay()) {
+            Text(stringResource(R.string.review_other_day, dayTitle(a.day, inline = true)), style = MaterialTheme.typography.bodyMedium, color = CalColors.Warn)
         }
         if (o.source == Source.PHOTO || o.source == Source.TEXT) {
             Text(

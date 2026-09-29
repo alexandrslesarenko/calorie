@@ -10,6 +10,7 @@
     <string name="yesterday">Yesterday</string>
     <string name="day_prev">Previous day</string>
     <string name="day_next">Next day</string>
+    <string name="back_to_today">Back to today</string>
     <string name="kcal_left">kcal left</string>
     <string name="kcal_over">kcal over</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">Check and add</string>
     <string name="edit_title">Edit entry</string>
     <string name="review_check">This is an estimate. Check the weight: it matters most.</string>
+    <string name="review_other_day">This goes to %1$s, not today.</string>
     <string name="food_name">Name</string>
     <string name="grams_short">Grams</string>
     <string name="less">Less</string>

@@ -10,6 +10,7 @@
     <string name="yesterday">Вчера</string>
     <string name="day_prev">Предыдущий день</string>
     <string name="day_next">Следующий день</string>
+    <string name="back_to_today">Вернуться к сегодня</string>
     <string name="kcal_left">ккал осталось</string>
     <string name="kcal_over">ккал сверх нормы</string>
     <string name="kcal_unit">ккал</string>
@@ -82,6 +83,7 @@
     <string name="review_title">Проверьте и добавьте</string>
     <string name="edit_title">Правка записи</string>
     <string name="review_check">Это оценка. Проверьте вес порции: от него зависит больше всего.</string>
+    <string name="review_other_day">Запишется на %1$s, не на сегодня.</string>
     <string name="food_name">Название</string>
     <string name="grams_short">Граммы</string>
     <string name="less">Меньше</string>

@@ -10,6 +10,7 @@
     <string name="yesterday">Ieri</string>
     <string name="day_prev">Giorno precedente</string>
     <string name="day_next">Giorno successivo</string>
+    <string name="back_to_today">Torna a oggi</string>
     <string name="kcal_left">kcal rimaste</string>
     <string name="kcal_over">kcal in più</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">Controlla e aggiungi</string>
     <string name="edit_title">Modifica voce</string>
     <string name="review_check">È una stima. Controlla il peso: è ciò che conta di più.</string>
+    <string name="review_other_day">Verrà registrato per %1$s, non per oggi.</string>
     <string name="food_name">Nome</string>
     <string name="grams_short">Grammi</string>
     <string name="less">Meno</string>

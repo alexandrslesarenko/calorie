@@ -10,6 +10,7 @@
     <string name="yesterday">Gestern</string>
     <string name="day_prev">Vorheriger Tag</string>
     <string name="day_next">Nächster Tag</string>
+    <string name="back_to_today">Zurück zu heute</string>
     <string name="kcal_left">kcal übrig</string>
     <string name="kcal_over">kcal zu viel</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">Prüfen und hinzufügen</string>
     <string name="edit_title">Eintrag bearbeiten</string>
     <string name="review_check">Das ist eine Schätzung. Prüfe das Gewicht: es zählt am meisten.</string>
+    <string name="review_other_day">Wird für %1$s eingetragen, nicht für heute.</string>
     <string name="food_name">Name</string>
     <string name="grams_short">Gramm</string>
     <string name="less">Weniger</string>

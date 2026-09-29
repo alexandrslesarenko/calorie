@@ -10,6 +10,7 @@
     <string name="yesterday">昨日</string>
     <string name="day_prev">前の日</string>
     <string name="day_next">次の日</string>
+    <string name="back_to_today">今日に戻る</string>
     <string name="kcal_left">kcal 残り</string>
     <string name="kcal_over">kcal オーバー</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">確認して追加</string>
     <string name="edit_title">記録を編集</string>
     <string name="review_check">これは推定値です。重さを確認してください。最も影響が大きい項目です。</string>
+    <string name="review_other_day">今日ではなく %1$s に記録されます。</string>
     <string name="food_name">名前</string>
     <string name="grams_short">グラム</string>
     <string name="less">減らす</string>

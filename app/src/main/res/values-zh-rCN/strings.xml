@@ -10,6 +10,7 @@
     <string name="yesterday">昨天</string>
     <string name="day_prev">前一天</string>
     <string name="day_next">后一天</string>
+    <string name="back_to_today">回到今天</string>
     <string name="kcal_left">千卡剩余</string>
     <string name="kcal_over">千卡超出</string>
     <string name="kcal_unit">千卡</string>
@@ -82,6 +83,7 @@
     <string name="review_title">核对并添加</string>
     <string name="edit_title">编辑记录</string>
     <string name="review_check">这是估算值。请核对重量：它的影响最大。</string>
+    <string name="review_other_day">将记录到 %1$s，而不是今天。</string>
     <string name="food_name">名称</string>
     <string name="grams_short">克数</string>
     <string name="less">减少</string>

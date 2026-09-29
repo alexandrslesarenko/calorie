@@ -10,6 +10,7 @@
     <string name="yesterday">어제</string>
     <string name="day_prev">이전 날</string>
     <string name="day_next">다음 날</string>
+    <string name="back_to_today">오늘로 돌아가기</string>
     <string name="kcal_left">kcal 남음</string>
     <string name="kcal_over">kcal 초과</string>
     <string name="kcal_unit">kcal</string>
@@ -82,6 +83,7 @@
     <string name="review_title">확인 후 추가</string>
     <string name="edit_title">기록 수정</string>
     <string name="review_check">추정치입니다. 무게를 확인하세요. 결과에 가장 큰 영향을 줍니다.</string>
+    <string name="review_other_day">오늘이 아니라 %1$s에 기록됩니다.</string>
     <string name="food_name">이름</string>
     <string name="grams_short">그램</string>
     <string name="less">줄이기</string>
