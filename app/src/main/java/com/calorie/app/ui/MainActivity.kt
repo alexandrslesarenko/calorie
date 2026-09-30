@@ -38,15 +38,15 @@ import androidx.lifecycle.lifecycleScope
 import com.calorie.app.R
 import com.calorie.app.ai.AiException
 import com.calorie.app.ai.AiFailure
-import com.calorie.app.ai.AiResponse
-import com.calorie.app.ai.ClaudeFood
+import com.calorie.app.ai.AiQueue
+import com.calorie.app.ai.AiRequest
 import com.calorie.app.ai.Photo
-import com.calorie.app.data.AiCached
 import com.calorie.app.data.ApiKeyStore
 import com.calorie.app.data.Entry
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.OffApi
+import com.calorie.app.data.Pending
 import com.calorie.app.data.PulsarData
 import com.calorie.app.data.PulsarSource
 import com.calorie.app.data.PulsarStatus
@@ -78,8 +78,6 @@ private const val STATE_DAY = "day"
 private const val STATE_SETTINGS_PAGE = "settings_page"
 /** Background time after which the diary returns to today. */
 private const val RETURN_TO_TODAY_MS = 10 * 60_000L
-/** How many recent Claude answers to keep in the cache. */
-private const val AI_CACHE_KEEP = 300
 
 /** Draft row on the review screen; confidence is set only for Claude results. */
 data class ReviewItem(val draft: FoodDraft, val confidence: Confidence? = null)
@@ -87,10 +85,11 @@ data class ReviewItem(val draft: FoodDraft, val confidence: Confidence? = null)
 /** Screen on top of the tabs: adding food step by step. */
 sealed interface Overlay {
     data object AddMenu : Overlay
-    data object TextInput : Overlay
+    data class TextInput(val text: String = "") : Overlay
     data class Manual(val name: String = "") : Overlay
     class PhotoHint(val jpeg: ByteArray, val hint: String = "") : Overlay
-    data class Busy(val text: Int) : Overlay
+    /** back - where Cancel leads: the input screen with what was typed, not an empty menu. */
+    data class Busy(val text: Int, val back: Overlay? = null) : Overlay
     class Review(
         val items: List<ReviewItem>,
         val source: Source,
@@ -101,9 +100,16 @@ sealed interface Overlay {
         /** The answer came from the cache; askAgain - ask Claude again, bypassing the cache. */
         val fromCache: Boolean = false,
         val askAgain: (() -> Unit)? = null,
+        /** Answer from the retry queue: its row goes away once saved; day and meal are the request's. */
+        val pendingId: Long? = null,
+        val day: Long? = null,
+        val meal: Meal? = null,
     ) : Overlay
     data class NotFound(val barcode: String) : Overlay
-    data class Failed(val failure: AiFailure?, val detail: String?) : Overlay
+    /** back - the input screen to return to; retry - send the same request again. */
+    class Failed(val failure: AiFailure?, val detail: String?, val back: Overlay? = null, val retry: (() -> Unit)? = null) : Overlay
+    /** A request in the retry queue: waiting for Claude or failed for good. */
+    data class Queued(val id: Long) : Overlay
 }
 
 /** Claude Console pages, opened in an in-app browser tab. */
@@ -205,6 +211,8 @@ class MainActivity : ComponentActivity() {
             shownToday = today
         }
         lifecycleScope.launch { pulsar = withContext(Dispatchers.IO) { PulsarSource.load(this@MainActivity) } }
+        // A delayed retry may be held back by Doze: the app is open, so try now if due.
+        lifecycleScope.launch { AiQueue.schedule(this@MainActivity) }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -282,9 +290,12 @@ class MainActivity : ComponentActivity() {
 
     fun closeOverlay() {
         work?.cancel()
-        overlay = when (overlay) {
-            null, Overlay.AddMenu -> null
-            is Overlay.Review -> if ((overlay as Overlay.Review).editing != null) null else Overlay.AddMenu
+        overlay = when (val o = overlay) {
+            null, Overlay.AddMenu, is Overlay.Queued -> null
+            // A queued answer stays on Today until it is saved or deleted.
+            is Overlay.Review -> if (o.editing != null || o.pendingId != null) null else Overlay.AddMenu
+            is Overlay.Busy -> o.back ?: Overlay.AddMenu
+            is Overlay.Failed -> o.back ?: Overlay.AddMenu
             else -> Overlay.AddMenu
         }
     }
@@ -316,70 +327,73 @@ class MainActivity : ComponentActivity() {
     private fun aiLanguage(): String = Locale.getDefault().getDisplayLanguage(Locale.ENGLISH).ifEmpty { "English" }
 
     fun recognizePhoto(jpeg: ByteArray, hint: String, useCache: Boolean = true) {
-        val h = hint.trim().ifEmpty { null }
+        val h = hint.trim()
         val lang = aiLanguage()
-        runAi(Source.PHOTO, jpeg, Keys.photo(jpeg, h, lang), useCache, { recognizePhoto(jpeg, hint, useCache = false) }) {
-            it.recognizePhoto(jpeg, h, lang)
-        }
+        val req = AiRequest(Source.PHOTO, h, lang, jpeg, Keys.photo(jpeg, h.ifEmpty { null }, lang), useCache)
+        runAi(req, Overlay.PhotoHint(jpeg, hint)) { recognizePhoto(jpeg, hint, useCache = false) }
     }
 
     fun recognizeText(text: String, useCache: Boolean = true) {
         val lang = aiLanguage()
-        runAi(Source.TEXT, null, Keys.description(text, lang), useCache, { recognizeText(text, useCache = false) }) {
-            it.recognizeText(text.trim(), lang)
-        }
+        val req = AiRequest(Source.TEXT, text.trim(), lang, null, Keys.description(text, lang), useCache)
+        runAi(req, Overlay.TextInput(text)) { recognizeText(text, useCache = false) }
     }
 
     /**
      * Claude request with a cache: the same photo or the same description with the same hint
-     * is answered from the database for free. askAgain - the same request bypassing the cache.
+     * is answered from the database for free. A temporary failure puts the request into the
+     * retry queue instead of an error screen. back - the input screen with what was entered;
+     * askAgain - the same request bypassing the cache.
      */
-    private fun runAi(
-        source: Source,
-        jpeg: ByteArray?,
-        cacheKey: String,
-        useCache: Boolean,
-        askAgain: () -> Unit,
-        request: (ClaudeFood) -> AiResponse,
-    ) {
-        val dao = FoodDb.get(this).dao()
+    private fun runAi(req: AiRequest, back: Overlay, askAgain: () -> Unit) {
         val key = ApiKeyStore.load(this)
-        overlay = Overlay.Busy(R.string.busy_ai)
+        overlay = Overlay.Busy(R.string.busy_ai, back)
         work = lifecycleScope.launch {
             try {
-                val cached = if (useCache) dao.aiCached(cacheKey) else null
-                val result = if (cached != null) {
-                    AiParser.parse(cached.json)
-                } else {
-                    if (key == null) {
-                        overlay = Overlay.Failed(AiFailure.BAD_KEY, null)
-                        return@launch
-                    }
-                    val r = withContext(Dispatchers.IO) { ClaudeFood(key).use(request) }
-                    prefs.addUsage(r.usage.inputTokens, r.usage.outputTokens)
-                    // An empty answer ("no food") is not cached: the photo will most likely be retaken.
-                    if (r.result.items.isNotEmpty()) {
-                        dao.putAiCached(AiCached(cacheKey, r.json, System.currentTimeMillis()))
-                        dao.trimAiCache(AI_CACHE_KEEP)
-                    }
-                    r.result
+                if (key == null && (!req.useCache || FoodDb.get(this@MainActivity).dao().aiCached(req.cacheKey) == null)) {
+                    overlay = Overlay.Failed(AiFailure.BAD_KEY, null, back)
+                    return@launch
                 }
-                overlay = if (result.items.isEmpty()) {
-                    Overlay.Failed(null, result.note ?: getString(R.string.ai_nothing))
+                // No key but a cached answer: ask() returns it without a request.
+                val a = AiQueue.ask(this@MainActivity, key ?: "", req)
+                overlay = if (a.result.items.isEmpty()) {
+                    Overlay.Failed(null, a.result.note ?: getString(R.string.ai_nothing), back)
                 } else {
                     Overlay.Review(
-                        result.items.map { ReviewItem(it.draft, it.confidence) }, source, result.note, jpeg,
-                        fromCache = cached != null, askAgain = askAgain,
+                        a.result.items.map { ReviewItem(it.draft, it.confidence) }, req.source, a.result.note, req.jpeg,
+                        fromCache = a.fromCache, askAgain = askAgain,
                     )
                 }
             } catch (e: AiException) {
                 if (e.failure == AiFailure.BAD_KEY) prefs.keyStatus = Prefs.KEY_BAD
-                overlay = Overlay.Failed(e.failure, e.message)
+                overlay = if (e.failure.retryable) {
+                    Overlay.Queued(AiQueue.enqueue(this@MainActivity, req, day, defaultMeal().key, e.failure, e.message))
+                } else {
+                    val retry = if (e.failure == AiFailure.BAD_ANSWER) ({ runAi(req, back, askAgain) }) else null
+                    Overlay.Failed(e.failure, e.message, back, retry)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                overlay = Overlay.Failed(null, e.message ?: e.javaClass.simpleName)
+                overlay = Overlay.Failed(null, e.message ?: e.javaClass.simpleName, back)
             }
+        }
+    }
+
+    /** Opens the answer of a queued request on the review screen. */
+    fun openPendingReview(p: Pending) {
+        val json = p.json ?: return
+        work = lifecycleScope.launch {
+            val result = runCatching { AiParser.parse(json) }.getOrNull()
+            if (result == null || result.items.isEmpty()) {
+                FoodDb.get(this@MainActivity).dao().pendingFailed(p.id, AiFailure.BAD_ANSWER.name, null)
+                overlay = Overlay.Queued(p.id)
+                return@launch
+            }
+            overlay = Overlay.Review(
+                result.items.map { ReviewItem(it.draft, it.confidence) }, Source.byKey(p.source), result.note,
+                AiQueue.jpeg(this@MainActivity, p), pendingId = p.id, day = p.day, meal = Meal.byKey(p.meal),
+            )
         }
     }
 
@@ -414,7 +428,7 @@ class MainActivity : ComponentActivity() {
 
     fun defaultMeal(): Meal = Meal.byHour(LocalTime.now().hour)
 
-    fun save(items: List<FoodDraft>, meal: Meal, source: Source, editing: Entry?) {
+    fun save(items: List<FoodDraft>, meal: Meal, source: Source, editing: Entry?, day: Long = this.day, pendingId: Long? = null) {
         val dao = FoodDb.get(this).dao()
         val now = System.currentTimeMillis()
         lifecycleScope.launch {
@@ -431,6 +445,8 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
+            // After the insert: if the app dies in between, a duplicate is better than a lost meal.
+            if (pendingId != null) AiQueue.delete(this@MainActivity, pendingId)
         }
         overlay = null
     }

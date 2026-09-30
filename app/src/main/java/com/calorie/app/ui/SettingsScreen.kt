@@ -33,6 +33,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -79,6 +82,11 @@ import com.calorie.app.ai.AiException
 import com.calorie.app.ai.AiFailure
 import com.calorie.app.ai.ClaudeFood
 import com.calorie.app.data.ApiKeyStore
+import com.calorie.app.data.BackupStore
+import com.calorie.app.data.Meal
+import com.calorie.app.logic.BackupData
+import com.calorie.app.logic.BackupError
+import com.calorie.app.logic.BackupException
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Prefs
 import com.calorie.app.data.PulsarStatus
@@ -115,13 +123,14 @@ private val APP_LANGUAGES = listOf(
     "es" to "Español", "it" to "Italiano", "ja" to "日本語", "ko" to "한국어", "zh-CN" to "简体中文",
 )
 
-/** Settings pages in tile order: who I am -> what I want -> how to recognize -> how it looks. */
+/** Settings pages in tile order: who I am -> what I want -> how to recognize -> how it looks -> my data. */
 enum class SettingsPage(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color) {
     PROFILE(R.string.profile_title, R.drawable.ic_set_person, Color(0xFF26A69A)),
     GOAL(R.string.goal_title, R.drawable.ic_set_flag, Color(0xFF3BA55C)),
     CLAUDE(R.string.claude_title, R.drawable.ic_set_key, Color(0xFFD97757)),
     THEME(R.string.theme_title, R.drawable.ic_set_palette, Color(0xFF00A5B8)),
     LANGUAGE(R.string.lang_title, R.drawable.ic_set_language, Color(0xFF5C6BC0)),
+    DATA(R.string.data_title, R.drawable.ic_set_data, Color(0xFF8D6E63)),
 }
 
 /** Not null - the card is open as a separate page with a back button. */
@@ -143,6 +152,7 @@ fun SettingsScreen(a: MainActivity) {
                 SettingsPage.CLAUDE -> ClaudeSettings(a)
                 SettingsPage.THEME -> ThemeSettings(a)
                 SettingsPage.LANGUAGE -> LanguageSettings()
+                SettingsPage.DATA -> DataSettings(a)
             }
         }
     }
@@ -152,12 +162,13 @@ fun SettingsScreen(a: MainActivity) {
 private fun SettingsGrid(a: MainActivity) {
     val ctx = LocalContext.current
     val lastWeight by remember { FoodDb.get(ctx).dao().lastWeight() }.collectAsState(null)
+    val entryCount by remember { FoodDb.get(ctx).dao().entryCount() }.collectAsState(0)
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // The per-app language setting exists only since Android 13.
         val pages = SettingsPage.entries.filter { it != SettingsPage.LANGUAGE || Build.VERSION.SDK_INT >= 33 }
         pages.chunked(2).forEach { pair ->
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                pair.forEach { p -> SettingsTile(a, p, tileStatus(a, p, lastWeight?.kg), Modifier.weight(1f).fillMaxHeight()) }
+                pair.forEach { p -> SettingsTile(a, p, tileStatus(a, p, lastWeight?.kg, entryCount), Modifier.weight(1f).fillMaxHeight()) }
                 if (pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
@@ -183,7 +194,7 @@ private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modif
 
 /** Short tile status: the key value, so the page need not be opened just to see it. */
 @Composable
-private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?): String = when (p) {
+private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?, entryCount: Int): String = when (p) {
     SettingsPage.PROFILE -> {
         val prefs = a.prefs
         if (prefs.sex == null || prefs.birthDate == null || prefs.heightCm == 0 || weight == null) stringResource(R.string.tile_profile_empty)
@@ -199,6 +210,7 @@ private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?): Strin
     )
     SettingsPage.THEME -> stringResource(themeLabel(a.themeMode))
     SettingsPage.LANGUAGE -> APP_LANGUAGES.firstOrNull { it.first == currentAppLanguage() }?.second ?: systemLanguageLabel()
+    SettingsPage.DATA -> stringResource(R.string.tile_data, entryCount)
 }
 
 private fun themeLabel(mode: String) = when (mode) {
@@ -710,5 +722,127 @@ private fun LanguageSettings() {
                 )
             }
         }
+    }
+}
+
+/**
+ * Backup to a file and back. Export: a JSON backup for this app or a CSV of the diary for
+ * spreadsheets. Import: add what is missing, or replace everything - the file is read first
+ * and its contents shown in the confirmation, since replacing cannot be undone.
+ */
+@Composable
+private fun DataSettings(a: MainActivity) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val count by remember { FoodDb.get(ctx).dao().entryCount() }.collectAsState(0)
+    var message by remember { mutableStateOf<String?>(null) }
+    var failed by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var toReplace by remember { mutableStateOf<BackupData?>(null) }
+    var replace by rememberSaveable { mutableStateOf(false) }
+
+    /** Runs a file operation; block returns the message to show, null - no message. */
+    fun run(block: suspend () -> String?) {
+        busy = true
+        message = null
+        scope.launch {
+            try {
+                message = block()
+                failed = false
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: BackupException) {
+                message = ctx.getString(if (e.error == BackupError.TOO_NEW) R.string.data_err_too_new else R.string.data_err_not_backup)
+                failed = true
+            } catch (e: Exception) {
+                message = ctx.getString(R.string.data_err_io, e.message ?: e.javaClass.simpleName)
+                failed = true
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    suspend fun importData(data: BackupData, replace: Boolean): String {
+        val r = BackupStore.import(ctx, data, replace)
+        // The profile, goal and theme may have come from the file.
+        a.themeMode = a.prefs.theme
+        a.profileVersion++
+        return listOfNotNull(
+            ctx.getString(R.string.data_imported, r.entries, r.weights, r.dishes),
+            if (r.skipped > 0) ctx.getString(R.string.data_skipped, r.skipped) else null,
+            if (r.profile) ctx.getString(R.string.data_profile) else null,
+        ).joinToString(" ")
+    }
+
+    val saveJson = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) run {
+            BackupStore.exportJson(ctx, uri)
+            ctx.getString(R.string.data_exported, count)
+        }
+    }
+    val saveCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null) run {
+            BackupStore.exportCsv(ctx, uri) { key -> ctx.getString(Meal.byKey(key).label) }
+            ctx.getString(R.string.data_exported, count)
+        }
+    }
+    val open = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) run {
+            val data = BackupStore.read(ctx, uri)
+            if (replace) {
+                toReplace = data
+                null
+            } else {
+                importData(data, replace = false)
+            }
+        }
+    }
+    val today = LocalDate.now().toString()
+    // Any type: file managers and Drive label JSON differently; the content is checked instead.
+    fun pick(replaceAll: Boolean) {
+        replace = replaceAll
+        open.launch(arrayOf("*/*"))
+    }
+
+    SettingsCard(stringResource(R.string.data_title), stringResource(R.string.tile_data, count), help = stringResource(R.string.data_export_help)) {
+        FitRow { style ->
+            CompactButton(enabled = !busy, onClick = { saveJson.launch("calorie-$today.json") }) {
+                Text(stringResource(R.string.data_export_json), maxLines = 1, style = style)
+            }
+            CompactButton(enabled = !busy && count > 0, onClick = { saveCsv.launch("calorie-diary-$today.csv") }) {
+                Text(stringResource(R.string.data_export_csv), maxLines = 1, style = style)
+            }
+        }
+    }
+    SettingsCard(stringResource(R.string.data_import_title), help = stringResource(R.string.data_import_help), secondary = true) {
+        FitRow { style ->
+            CompactButton(enabled = !busy, onClick = { pick(replaceAll = false) }) {
+                Text(stringResource(R.string.data_import_add), maxLines = 1, style = style)
+            }
+            CompactButton(enabled = !busy, onClick = { pick(replaceAll = true) }) {
+                Text(stringResource(R.string.data_import_replace), maxLines = 1, style = style)
+            }
+        }
+    }
+    message?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = if (failed) CalColors.Over else MaterialTheme.colorScheme.onSurface) }
+
+    toReplace?.let { data ->
+        val fmt = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
+        val days = data.entries.map { it.day }
+        val range = if (days.isEmpty()) "-"
+        else LocalDate.ofEpochDay(days.min()).format(fmt) + " - " + LocalDate.ofEpochDay(days.max()).format(fmt)
+        AlertDialog(
+            onDismissRequest = { toReplace = null },
+            title = { Text(stringResource(R.string.data_replace_title)) },
+            text = { Text(stringResource(R.string.data_replace_text, data.entries.size, range, count)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    toReplace = null
+                    run { importData(data, replace = true) }
+                }) { Text(stringResource(R.string.data_replace_ok)) }
+            },
+            dismissButton = { TextButton(onClick = { toReplace = null }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 }

@@ -228,4 +228,41 @@
     <string name="save">Guardar</string>
     <string name="delete">Eliminar</string>
     <string name="help_toggle">Explicación</string>
+
+    <!-- Retry queue for Claude requests -->
+    <string name="retry">Reintentar</string>
+    <string name="pending_title">Solicitudes a Claude</string>
+    <string name="pending_wait_title">Esperando a Claude</string>
+    <string name="pending_reason_overloaded">Claude está sobrecargado ahora mismo.</string>
+    <string name="pending_reason_rate">Demasiadas solicitudes seguidas.</string>
+    <string name="pending_reason_network">Sin conexión.</string>
+    <string name="pending_next">El intento %1$d no funcionó. Siguiente en %2$s</string>
+    <string name="pending_soon">Siguiente intento en breve</string>
+    <string name="pending_explain">La solicitud está guardada: la app la reenviará sola y mostrará el resultado para revisarlo. Puedes cerrar esta pantalla, la solicitud queda en \"Hoy\".</string>
+    <string name="pending_gave_up">Claude lleva varias horas sin responder. Reintenta o elimina la solicitud.</string>
+    <string name="pending_retry_now">Reintentar ahora</string>
+    <string name="pending_delete">Eliminar solicitud</string>
+    <string name="pending_at">Siguiente intento a las %1$s</string>
+    <string name="pending_ready">Listo: revisa y añade</string>
+
+    <!-- Backup: export and import -->
+    <string name="data_title">Datos</string>
+    <string name="tile_data">Entradas del diario: %1$d</string>
+    <string name="data_export_help">La copia incluye el diario, el registro de peso, Mis platos y el perfil con el objetivo. La clave de Claude, las respuestas guardadas de Claude y las solicitudes sin enviar no se incluyen. El CSV es solo el diario, para hojas de cálculo: no se puede volver a importar.</string>
+    <string name="data_export_json">Guardar copia</string>
+    <string name="data_export_csv">Diario a CSV</string>
+    <string name="data_import_title">Importar</string>
+    <string name="data_import_help">Añadir: solo se añaden los registros que aún no están en este teléfono, y el perfil se toma del archivo solo si aquí no está rellenado. Reemplazar: el diario, el registro de peso, los platos y el perfil quedan exactamente como en el archivo.</string>
+    <string name="data_import_add">Añadir desde archivo</string>
+    <string name="data_import_replace">Reemplazar desde archivo</string>
+    <string name="data_replace_title">¿Reemplazar todos los datos?</string>
+    <string name="data_replace_text">El diario, el registro de peso, Mis platos y el perfil de este teléfono se reemplazarán por el archivo. En el archivo: entradas del diario: %1$d (%2$s). Ahora en este teléfono: %3$d. Si tienes dudas, guarda antes una copia.</string>
+    <string name="data_replace_ok">Reemplazar</string>
+    <string name="data_exported">Guardado. Entradas del diario: %1$d</string>
+    <string name="data_imported">Añadido. Entradas del diario: %1$d, pesos: %2$d, platos: %3$d.</string>
+    <string name="data_skipped">Ya estaban, omitidas: %1$d.</string>
+    <string name="data_profile">Perfil y objetivo restaurados.</string>
+    <string name="data_err_not_backup">Este archivo no es una copia de Calorie.</string>
+    <string name="data_err_too_new">La copia se hizo con una versión más nueva de la app. Actualiza la app e inténtalo de nuevo.</string>
+    <string name="data_err_io">No se pudo leer o escribir el archivo: %1$s</string>
 </resources>

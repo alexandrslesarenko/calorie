@@ -228,4 +228,41 @@
     <string name="save">Enregistrer</string>
     <string name="delete">Supprimer</string>
     <string name="help_toggle">Explication</string>
+
+    <!-- Retry queue for Claude requests -->
+    <string name="retry">Réessayer</string>
+    <string name="pending_title">Requêtes à Claude</string>
+    <string name="pending_wait_title">En attente de Claude</string>
+    <string name="pending_reason_overloaded">Claude est surchargé en ce moment.</string>
+    <string name="pending_reason_rate">Trop de requêtes d\'affilée.</string>
+    <string name="pending_reason_network">Pas de connexion.</string>
+    <string name="pending_next">La tentative %1$d a échoué. Prochaine dans %2$s</string>
+    <string name="pending_soon">Prochaine tentative bientôt</string>
+    <string name="pending_explain">La requête est enregistrée : l\'application la renverra d\'elle-même et affichera le résultat à vérifier. Vous pouvez fermer cet écran, la requête reste dans \"Aujourd\'hui\".</string>
+    <string name="pending_gave_up">Claude ne répond plus depuis plusieurs heures. Réessayez ou supprimez la requête.</string>
+    <string name="pending_retry_now">Réessayer maintenant</string>
+    <string name="pending_delete">Supprimer la requête</string>
+    <string name="pending_at">Prochaine tentative à %1$s</string>
+    <string name="pending_ready">Prêt : vérifiez et ajoutez</string>
+
+    <!-- Backup: export and import -->
+    <string name="data_title">Données</string>
+    <string name="tile_data">Entrées du journal : %1$d</string>
+    <string name="data_export_help">La sauvegarde contient le journal, le suivi du poids, Mes plats et le profil avec l\'objectif. La clé Claude, les réponses Claude enregistrées et les requêtes non envoyées n\'y sont pas. Le CSV ne contient que le journal, pour les tableurs : il ne peut pas être réimporté.</string>
+    <string name="data_export_json">Enregistrer la sauvegarde</string>
+    <string name="data_export_csv">Journal en CSV</string>
+    <string name="data_import_title">Importer</string>
+    <string name="data_import_help">Ajouter : seules les entrées absentes de ce téléphone sont ajoutées, et le profil n\'est repris du fichier que s\'il n\'est pas rempli ici. Remplacer : le journal, le suivi du poids, les plats et le profil deviennent exactement ceux du fichier.</string>
+    <string name="data_import_add">Ajouter depuis un fichier</string>
+    <string name="data_import_replace">Remplacer depuis un fichier</string>
+    <string name="data_replace_title">Remplacer toutes les données ?</string>
+    <string name="data_replace_text">Le journal, le suivi du poids, Mes plats et le profil de ce téléphone seront remplacés par le fichier. Dans le fichier : entrées du journal : %1$d (%2$s). Sur ce téléphone actuellement : %3$d. En cas de doute, enregistrez d\'abord une sauvegarde.</string>
+    <string name="data_replace_ok">Remplacer</string>
+    <string name="data_exported">Enregistré. Entrées du journal : %1$d</string>
+    <string name="data_imported">Ajouté. Entrées du journal : %1$d, poids : %2$d, plats : %3$d.</string>
+    <string name="data_skipped">Déjà présentes, ignorées : %1$d.</string>
+    <string name="data_profile">Profil et objectif restaurés.</string>
+    <string name="data_err_not_backup">Ce fichier n\'est pas une sauvegarde Calorie.</string>
+    <string name="data_err_too_new">La sauvegarde a été faite par une version plus récente de l\'application. Mettez l\'application à jour et réessayez.</string>
+    <string name="data_err_io">Impossible de lire ou d\'écrire le fichier : %1$s</string>
 </resources>

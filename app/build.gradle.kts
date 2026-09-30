@@ -64,6 +64,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("androidx.room:room-runtime:2.7.2")
     implementation("androidx.room:room-ktx:2.7.2")
+    // Retry queue for Claude requests: resends in the background once the service is back.
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
     ksp("androidx.room:room-compiler:2.7.2")
     // Claude API (food recognition from photos and text).
     implementation("com.anthropic:anthropic-java:2.66.0")

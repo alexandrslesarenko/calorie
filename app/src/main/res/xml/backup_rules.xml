@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The diary and settings go to the cloud backup, the API key does not: it is encrypted with a key
-     from this phone's Keystore and could not be decrypted on another one anyway. -->
+     from this phone's Keystore and could not be decrypted on another one anyway. Photos of queued
+     Claude requests stay on the phone: only what went into the diary is kept. -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="secret.xml" />
+        <exclude domain="file" path="pending/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="secret.xml" />
+        <exclude domain="file" path="pending/" />
     </device-transfer>
 </data-extraction-rules>

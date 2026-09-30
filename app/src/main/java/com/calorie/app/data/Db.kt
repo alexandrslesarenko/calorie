@@ -14,6 +14,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.calorie.app.logic.FoodDraft
 import com.calorie.app.logic.Keys
 import com.calorie.app.logic.Nutrients
@@ -88,6 +90,40 @@ data class Dish(
 @Entity(tableName = "ai_cache")
 data class AiCached(@PrimaryKey val id: String, val json: String, val ts: Long)
 
+/**
+ * Claude request waiting for a retry after a temporary failure, or its answer waiting for
+ * the user. day and meal are fixed when the request was made: a lunch confirmed in the
+ * evening is still lunch. A photo lives in a file next to it (AiQueue.jpegFile), text or the
+ * photo hint in text. since - start of the current retry window (Retry.giveUp).
+ */
+@Entity(tableName = "pending")
+data class Pending(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val day: Long,
+    val meal: String,
+    /** Source.key: photo or text. */
+    val source: String,
+    val text: String,
+    val language: String,
+    val cacheKey: String,
+    val useCache: Boolean,
+    val state: String,
+    val attempts: Int,
+    val since: Long,
+    val nextTry: Long,
+    /** AiFailure.name of the last failure. */
+    val failure: String?,
+    val detail: String?,
+    /** report_food input once the answer has come. */
+    val json: String?,
+) {
+    companion object {
+        const val WAITING = "waiting"
+        const val READY = "ready"
+        const val FAILED = "failed"
+    }
+}
+
 data class DayTotal(val day: Long, val kcal: Double, val protein: Double, val fat: Double, val carbs: Double)
 
 @Dao
@@ -150,6 +186,87 @@ interface FoodDao {
         }
     }
 
+    @Query("SELECT * FROM pending ORDER BY id")
+    fun pendingAll(): Flow<List<Pending>>
+
+    @Query("SELECT * FROM pending WHERE id = :id")
+    fun pendingFlow(id: Long): Flow<Pending?>
+
+    @Query("SELECT * FROM pending WHERE id = :id")
+    suspend fun pending(id: Long): Pending?
+
+    @Query("SELECT * FROM pending WHERE state = 'waiting' AND nextTry <= :now ORDER BY id")
+    suspend fun pendingDue(now: Long): List<Pending>
+
+    @Query("SELECT MIN(nextTry) FROM pending WHERE state = 'waiting'")
+    suspend fun nextPendingTry(): Long?
+
+    @Insert
+    suspend fun insertPending(p: Pending): Long
+
+    @Query("DELETE FROM pending WHERE id = :id")
+    suspend fun deletePending(id: Long)
+
+    @Query("UPDATE pending SET state = 'ready', json = :json, failure = NULL, detail = NULL WHERE id = :id")
+    suspend fun pendingReady(id: Long, json: String)
+
+    @Query("UPDATE pending SET state = 'failed', failure = :failure, detail = :detail WHERE id = :id")
+    suspend fun pendingFailed(id: Long, failure: String?, detail: String?)
+
+    @Query("UPDATE pending SET attempts = :attempts, nextTry = :nextTry, failure = :failure, detail = :detail WHERE id = :id")
+    suspend fun pendingRetry(id: Long, attempts: Int, nextTry: Long, failure: String, detail: String?)
+
+    /** Not tried in this round because the service is down: wait with the one that was. */
+    @Query("UPDATE pending SET nextTry = :nextTry WHERE id = :id")
+    suspend fun pendingPostpone(id: Long, nextTry: Long)
+
+    /** Retry at once; a failed request gets a new retry window. */
+    @Query(
+        "UPDATE pending SET since = CASE WHEN state = 'failed' THEN :now ELSE since END, " +
+            "state = 'waiting', nextTry = :now WHERE id = :id AND state != 'ready'"
+    )
+    suspend fun pendingRetryNow(id: Long, now: Long)
+
+    @Query("SELECT * FROM entry ORDER BY day, ts")
+    suspend fun allEntries(): List<Entry>
+
+    @Query("SELECT * FROM weight ORDER BY day")
+    suspend fun allWeights(): List<WeightMark>
+
+    @Query("SELECT * FROM dish ORDER BY name")
+    suspend fun allDishes(): List<Dish>
+
+    @Query("SELECT COUNT(*) FROM entry")
+    fun entryCount(): Flow<Int>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putWeights(w: List<WeightMark>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putDishes(d: List<Dish>)
+
+    @Query("DELETE FROM entry")
+    suspend fun clearEntries()
+
+    @Query("DELETE FROM weight")
+    suspend fun clearWeights()
+
+    @Query("DELETE FROM dish")
+    suspend fun clearDishes()
+
+    /** Import in one transaction: a broken file must not leave half a diary. */
+    @Transaction
+    suspend fun importBackup(replace: Boolean, entries: List<Entry>, weights: List<WeightMark>, dishes: List<Dish>) {
+        if (replace) {
+            clearEntries()
+            clearWeights()
+            clearDishes()
+        }
+        insert(entries)
+        putWeights(weights)
+        putDishes(dishes)
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putWeight(w: WeightMark)
 
@@ -170,8 +287,8 @@ interface FoodDao {
 }
 
 @Database(
-    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class],
-    version = 1,
+    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class, Pending::class],
+    version = 2,
     exportSchema = false,
 )
 abstract class FoodDb : RoomDatabase() {
@@ -180,9 +297,23 @@ abstract class FoodDb : RoomDatabase() {
     companion object {
         @Volatile private var instance: FoodDb? = null
 
+        /** v2: the retry queue for Claude requests. SQL copied from the generated FoodDb_Impl. */
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(PENDING_SQL)
+            }
+        }
+
+        private const val PENDING_SQL = "CREATE TABLE IF NOT EXISTS `pending` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+            "`day` INTEGER NOT NULL, `meal` TEXT NOT NULL, `source` TEXT NOT NULL, `text` TEXT NOT NULL, " +
+            "`language` TEXT NOT NULL, `cacheKey` TEXT NOT NULL, `useCache` INTEGER NOT NULL, `state` TEXT NOT NULL, " +
+            "`attempts` INTEGER NOT NULL, `since` INTEGER NOT NULL, `nextTry` INTEGER NOT NULL, " +
+            "`failure` TEXT, `detail` TEXT, `json` TEXT)"
+
         // Migrations are written by hand: any schema change - bump version and add a Migration.
         fun get(context: Context): FoodDb = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, FoodDb::class.java, "food.db")
+                .addMigrations(MIGRATION_1_2)
                 .build().also { instance = it }
         }
     }

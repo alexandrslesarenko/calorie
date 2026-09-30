@@ -228,4 +228,41 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="help_toggle">Explanation</string>
+
+    <!-- Retry queue for Claude requests -->
+    <string name="retry">Try again</string>
+    <string name="pending_title">Claude requests</string>
+    <string name="pending_wait_title">Waiting for Claude</string>
+    <string name="pending_reason_overloaded">Claude is overloaded right now.</string>
+    <string name="pending_reason_rate">Too many requests in a row.</string>
+    <string name="pending_reason_network">No connection.</string>
+    <string name="pending_next">Failed attempts: %1$d. Next one in %2$s</string>
+    <string name="pending_soon">Next attempt soon</string>
+    <string name="pending_explain">The request is saved: the app will resend it on its own and show the result for you to check. You can close this screen, the request stays on Today.</string>
+    <string name="pending_gave_up">Claude has not answered for several hours. Try again or delete the request.</string>
+    <string name="pending_retry_now">Retry now</string>
+    <string name="pending_delete">Delete request</string>
+    <string name="pending_at">Next attempt at %1$s</string>
+    <string name="pending_ready">Ready: check and add</string>
+
+    <!-- Backup: export and import -->
+    <string name="data_title">Data</string>
+    <string name="tile_data">Diary entries: %1$d</string>
+    <string name="data_export_help">The backup holds the diary, the weight log, My dishes and the profile with the goal. The Claude key, saved Claude answers and unsent requests are not included. CSV is the diary only, for spreadsheets: it cannot be imported back.</string>
+    <string name="data_export_json">Save backup</string>
+    <string name="data_export_csv">Diary to CSV</string>
+    <string name="data_import_title">Import</string>
+    <string name="data_import_help">Add: only records that are not on this phone yet are added, and the profile is taken from the file only if none is filled in here. Replace: the diary, weight log, dishes and profile become exactly as in the file.</string>
+    <string name="data_import_add">Add from file</string>
+    <string name="data_import_replace">Replace from file</string>
+    <string name="data_replace_title">Replace all data?</string>
+    <string name="data_replace_text">The diary, weight log, My dishes and the profile on this phone will be replaced with the file. In the file: diary entries: %1$d (%2$s). On this phone now: %3$d. If unsure, save a backup first.</string>
+    <string name="data_replace_ok">Replace</string>
+    <string name="data_exported">Saved. Diary entries: %1$d</string>
+    <string name="data_imported">Added. Diary entries: %1$d, weights: %2$d, dishes: %3$d.</string>
+    <string name="data_skipped">Already there, skipped: %1$d.</string>
+    <string name="data_profile">Profile and goal restored.</string>
+    <string name="data_err_not_backup">This file is not a Calorie backup.</string>
+    <string name="data_err_too_new">The backup was made by a newer version of the app. Update the app and try again.</string>
+    <string name="data_err_io">Could not read or write the file: %1$s</string>
 </resources>

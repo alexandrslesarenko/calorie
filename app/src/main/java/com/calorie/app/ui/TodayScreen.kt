@@ -62,6 +62,7 @@ import com.calorie.app.R
 import com.calorie.app.data.Entry
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
+import com.calorie.app.data.Pending
 import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.Source
 import com.calorie.app.logic.Burn
@@ -126,6 +127,7 @@ fun TodayScreen(a: MainActivity) {
             Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.add_food))
         }
+        PendingCard(a)
         Meal.entries.forEach { meal ->
             val list = entries.filter { Meal.byKey(it.meal) == meal }
             if (list.isNotEmpty()) MealCard(a, meal, list)
@@ -291,6 +293,44 @@ private fun MealCard(a: MainActivity, meal: Meal, list: List<Entry>) {
                         )
                     }
                     Text(e.kcal.kcalText(), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Claude requests from the retry queue, for any day: waiting ones with the next try time,
+ * answered ones to check and add, failed ones to retry or delete.
+ */
+@Composable
+private fun PendingCard(a: MainActivity) {
+    val ctx = LocalContext.current
+    val list by remember { FoodDb.get(ctx).dao().pendingAll() }.collectAsState(emptyList())
+    if (list.isEmpty()) return
+    val fmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
+    val zone = remember { ZoneId.systemDefault() }
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.pending_title), style = MaterialTheme.typography.titleSmall)
+            list.forEachIndexed { i, p ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                val title = p.text.ifBlank { stringResource(R.string.way_photo) }
+                val (status, color) = when (p.state) {
+                    Pending.READY -> stringResource(R.string.pending_ready) to MaterialTheme.colorScheme.primary
+                    Pending.FAILED -> stringResource(R.string.failed_title) to CalColors.Warn
+                    // A past time means the try is held back (Doze, no network), not that it is late.
+                    else -> (if (p.nextTry <= System.currentTimeMillis()) stringResource(R.string.pending_soon)
+                        else stringResource(R.string.pending_at, Instant.ofEpochMilli(p.nextTry).atZone(zone).format(fmt))) to
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                Column(
+                    Modifier.fillMaxWidth().clickable {
+                        if (p.state == Pending.READY) a.openPendingReview(p) else a.overlay = Overlay.Queued(p.id)
+                    }.padding(vertical = 8.dp)
+                ) {
+                    Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(status, style = MaterialTheme.typography.bodySmall, color = color)
                 }
             }
         }

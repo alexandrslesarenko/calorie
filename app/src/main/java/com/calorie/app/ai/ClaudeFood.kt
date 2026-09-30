@@ -22,20 +22,27 @@ import com.calorie.app.logic.AiResult
 import java.time.Duration
 import java.util.Base64
 
-/** Why recognition failed; the UI shows its own text for each reason. */
-enum class AiFailure {
+/**
+ * Why recognition failed; the UI shows its own text for each reason.
+ * retryable - the same request is likely to succeed later, so it goes to the retry queue.
+ */
+enum class AiFailure(val retryable: Boolean) {
     /** The key was rejected (401) or has no access to the model (403). */
-    BAD_KEY,
+    BAD_KEY(false),
     /** The Console balance is empty. */
-    NO_CREDIT,
+    NO_CREDIT(false),
     /** Too many requests (429). */
-    RATE_LIMIT,
+    RATE_LIMIT(true),
     /** The service is overloaded or failed on its side (5xx, 529). */
-    OVERLOADED,
+    OVERLOADED(true),
     /** No network or the connection dropped. */
-    NETWORK,
+    NETWORK(true),
     /** The model refused or the answer does not match the schema. */
-    BAD_ANSWER,
+    BAD_ANSWER(false);
+
+    companion object {
+        fun byName(n: String?) = entries.firstOrNull { it.name == n }
+    }
 }
 
 class AiException(val failure: AiFailure, message: String? = null, cause: Throwable? = null) : Exception(message, cause)

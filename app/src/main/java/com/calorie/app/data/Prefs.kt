@@ -3,6 +3,7 @@ package com.calorie.app.data
 import android.content.Context
 import com.calorie.app.logic.Activity
 import com.calorie.app.logic.Pace
+import com.calorie.app.logic.ProfileData
 import com.calorie.app.logic.Sex
 import java.time.LocalDate
 
@@ -106,6 +107,27 @@ class Prefs(context: Context) {
             .putLong("ai_out", aiOutputTokens + output)
             .apply()
     }
+
+    /** Profile and goal for a backup file. */
+    var profile: ProfileData
+        get() = ProfileData(
+            sex?.key, birthDate?.toEpochDay(), heightCm, activity.key, pace.key, activityFromPulsar,
+            goalKg.toDouble(), customKcal, goalSeen, disclaimerAccepted, theme,
+        )
+        set(p) {
+            sex = Sex.byKey(p.sex)
+            birthDate = p.birthDay?.let { LocalDate.ofEpochDay(it) }
+            heightCm = p.heightCm
+            // Unknown keys (a newer app) keep the current value.
+            Activity.byKey(p.activity)?.let { activity = it }
+            Pace.byKey(p.pace)?.let { pace = it }
+            activityFromPulsar = p.activityFromPulsar
+            goalKg = p.goalKg.toFloat()
+            customKcal = p.customKcal
+            goalSeen = p.goalSeen
+            disclaimerAccepted = p.disclaimerAccepted
+            if (p.theme in listOf(THEME_SYSTEM, THEME_LIGHT, THEME_DARK)) theme = p.theme
+        }
 
     fun resetUsage() {
         sp.edit().remove("ai_requests").remove("ai_in").remove("ai_out")

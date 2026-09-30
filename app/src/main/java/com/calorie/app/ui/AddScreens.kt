@@ -33,7 +33,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
+import com.calorie.app.ai.AiQueue
+import com.calorie.app.data.Pending
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.calorie.app.data.Dish
 import com.calorie.app.logic.Keys
@@ -99,13 +104,14 @@ private const val DISABLED_ALPHA = 0.45f
 fun OverlayScreen(a: MainActivity, o: Overlay) {
     when (o) {
         Overlay.AddMenu -> AddMenu(a)
-        Overlay.TextInput -> TextInput(a)
+        is Overlay.TextInput -> TextInput(a, o)
         is Overlay.Manual -> ManualInput(a, o)
         is Overlay.PhotoHint -> PhotoHint(a, o)
         is Overlay.Busy -> Busy(a, o)
         is Overlay.Review -> Review(a, o)
         is Overlay.NotFound -> NotFound(a, o)
         is Overlay.Failed -> Failed(a, o)
+        is Overlay.Queued -> Queued(a, o)
     }
 }
 
@@ -132,7 +138,7 @@ private fun AddMenu(a: MainActivity) {
         AddWay(R.string.way_photo, R.string.way_photo_hint, CalColors.Photo, true, { painterResource(R.drawable.ic_photo_camera) }) { a.takePhoto() },
         AddWay(R.string.way_gallery, R.string.way_gallery_hint, CalColors.Gallery, true, { painterResource(R.drawable.ic_image) }, a::pickFromGallery),
         AddWay(R.string.way_barcode, R.string.way_barcode_hint, CalColors.Barcode, false, { painterResource(R.drawable.ic_barcode) }, a::scanBarcode),
-        AddWay(R.string.way_text, R.string.way_text_hint, CalColors.Text, true, { painterResource(R.drawable.ic_chat) }) { a.overlay = Overlay.TextInput },
+        AddWay(R.string.way_text, R.string.way_text_hint, CalColors.Text, true, { painterResource(R.drawable.ic_chat) }) { a.overlay = Overlay.TextInput() },
         AddWay(R.string.way_manual, R.string.way_manual_hint, CalColors.Manual, false, { rememberVectorPainter(Icons.Filled.Create) }) { a.overlay = Overlay.Manual() },
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -250,8 +256,8 @@ private fun WayTile(w: AddWay, enabled: Boolean, modifier: Modifier) {
 }
 
 @Composable
-private fun TextInput(a: MainActivity) {
-    var text by remember { mutableStateOf("") }
+private fun TextInput(a: MainActivity, o: Overlay.TextInput) {
+    var text by remember(o) { mutableStateOf(o.text) }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Header(stringResource(R.string.way_text)) { a.closeOverlay() }
         OutlinedTextField(
@@ -318,7 +324,8 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
     // Each row has a stable id, so Compose does not mix up text fields after a removal.
     val rows = remember(o) { mutableStateListOf(*o.items.mapIndexed { i, it -> i to it }.toTypedArray()) }
     val items = rows.map { it.second }
-    var meal by remember(o) { mutableStateOf(o.editing?.let { Meal.byKey(it.meal) } ?: a.defaultMeal()) }
+    var meal by remember(o) { mutableStateOf(o.editing?.let { Meal.byKey(it.meal) } ?: o.meal ?: a.defaultMeal()) }
+    val day = o.day ?: a.day
     val bmp = remember(o) { o.jpeg?.let { Photo.thumbnail(it) } }
     val total = items.map { it.draft.total }.sum()
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -331,8 +338,8 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             )
         }
         // The day is easy to miss in the header; a new entry for another day gets a warning.
-        if (o.editing == null && a.day != LocalDate.now().toEpochDay()) {
-            Text(stringResource(R.string.review_other_day, dayTitle(a.day, inline = true)), style = MaterialTheme.typography.bodyMedium, color = CalColors.Warn)
+        if (o.editing == null && day != LocalDate.now().toEpochDay()) {
+            Text(stringResource(R.string.review_other_day, dayTitle(day, inline = true)), style = MaterialTheme.typography.bodyMedium, color = CalColors.Warn)
         }
         if (o.source == Source.PHOTO || o.source == Source.TEXT) {
             Text(
@@ -384,7 +391,7 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             if (o.editing != null) {
                 OutlinedButton(onClick = { a.delete(o.editing) }) { Text(stringResource(R.string.delete), maxLines = 1, style = style) }
             }
-            FilledTonalButton(enabled = valid, onClick = { a.save(items.map { it.draft }, meal, o.source, o.editing) }) {
+            FilledTonalButton(enabled = valid, onClick = { a.save(items.map { it.draft }, meal, o.source, o.editing, day, o.pendingId) }) {
                 Text(stringResource(if (o.editing != null) R.string.save else R.string.add_to_diary), maxLines = 1, style = style)
             }
         }
@@ -502,27 +509,130 @@ private fun NotFound(a: MainActivity, o: Overlay.NotFound) {
     }
 }
 
+/** What went wrong, in words; null - no failure reason, show the detail instead. */
+@Composable
+private fun failureText(f: AiFailure?, hasKey: Boolean): String? = when (f) {
+    AiFailure.BAD_KEY -> stringResource(if (hasKey) R.string.err_bad_key else R.string.need_key)
+    AiFailure.NO_CREDIT -> stringResource(R.string.err_no_credit)
+    AiFailure.RATE_LIMIT -> stringResource(R.string.err_rate_limit)
+    AiFailure.OVERLOADED -> stringResource(R.string.err_overloaded)
+    AiFailure.NETWORK -> stringResource(R.string.err_network)
+    AiFailure.BAD_ANSWER -> stringResource(R.string.err_bad_answer)
+    null -> null
+}
+
+/** Key and balance problems need the user: a filled button straight to the fix. */
+@Composable
+private fun FixButton(a: MainActivity, f: AiFailure?) {
+    when (f) {
+        AiFailure.BAD_KEY -> Button(onClick = { a.openSettings(SettingsPage.CLAUDE) }) { Text(stringResource(R.string.need_key_btn)) }
+        AiFailure.NO_CREDIT -> Button(onClick = { a.openConsole(Console.BILLING) }) { Text(stringResource(R.string.console_billing)) }
+        else -> {}
+    }
+}
+
 @Composable
 private fun Failed(a: MainActivity, o: Overlay.Failed) {
-    val text = when (o.failure) {
-        AiFailure.BAD_KEY -> stringResource(if (a.hasKey) R.string.err_bad_key else R.string.need_key)
-        AiFailure.NO_CREDIT -> stringResource(R.string.err_no_credit)
-        AiFailure.RATE_LIMIT -> stringResource(R.string.err_rate_limit)
-        AiFailure.OVERLOADED -> stringResource(R.string.err_overloaded)
-        AiFailure.NETWORK -> stringResource(R.string.err_network)
-        AiFailure.BAD_ANSWER -> stringResource(R.string.err_bad_answer)
-        null -> o.detail ?: ""
-    }
+    val text = failureText(o.failure, a.hasKey) ?: o.detail ?: ""
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Header(stringResource(R.string.failed_title)) { a.closeOverlay() }
         Text(text)
         if (o.failure != null && o.detail != null) {
             Text(o.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 4)
         }
-        when (o.failure) {
-            AiFailure.BAD_KEY -> Button(onClick = { a.openSettings(SettingsPage.CLAUDE) }) { Text(stringResource(R.string.need_key_btn)) }
-            AiFailure.NO_CREDIT -> Button(onClick = { a.openConsole(Console.BILLING) }) { Text(stringResource(R.string.console_billing)) }
-            else -> OutlinedButton(onClick = { a.closeOverlay() }) { Text(stringResource(R.string.back)) }
+        FixButton(a, o.failure)
+        if (o.failure != AiFailure.BAD_KEY && o.failure != AiFailure.NO_CREDIT) {
+            // Back returns to the input with the text or photo kept, so it can be changed and sent again.
+            FitRow { style ->
+                OutlinedButton(onClick = { a.closeOverlay() }) { Text(stringResource(R.string.back), maxLines = 1, style = style) }
+                o.retry?.let { OutlinedButton(onClick = it) { Text(stringResource(R.string.retry), maxLines = 1, style = style) } }
+            }
         }
     }
 }
+
+/**
+ * A request in the retry queue. While it waits, the screen counts down to the next try and
+ * opens the review by itself when the answer comes; it can be closed - the request stays on
+ * Today. A failed one can be sent again or deleted.
+ */
+@Composable
+private fun Queued(a: MainActivity, o: Overlay.Queued) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dao = remember { FoodDb.get(ctx).dao() }
+    // Initial Unit: "not loaded yet" differs from "row is gone" (null).
+    val loaded by remember(o.id) { dao.pendingFlow(o.id) }.collectAsState(Unit)
+    if (loaded == Unit) return
+    val p = loaded as Pending?
+    LaunchedEffect(p?.state) {
+        when {
+            p == null -> a.closeOverlay()
+            p.state == Pending.READY -> a.openPendingReview(p)
+        }
+    }
+    if (p == null) return
+    val bmp by produceState<android.graphics.Bitmap?>(null, p.id) { value = AiQueue.jpeg(ctx, p)?.let { Photo.thumbnail(it) } }
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            value = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+    val failure = AiFailure.byName(p.failure)
+    val failed = p.state == Pending.FAILED
+    Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Header(stringResource(if (failed) R.string.failed_title else R.string.pending_wait_title)) { a.closeOverlay() }
+        bmp?.let {
+            Image(
+                it.asImageBitmap(), null,
+                Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop,
+            )
+        }
+        if (p.text.isNotBlank()) {
+            Card(Modifier.fillMaxWidth()) { Text(p.text, Modifier.padding(12.dp)) }
+        }
+        when {
+            p.state == Pending.WAITING -> {
+                failure?.let { Text(reasonText(it), style = MaterialTheme.typography.bodyMedium) }
+                val left = (p.nextTry - now) / 1000
+                Text(
+                    if (left > 0) stringResource(R.string.pending_next, p.attempts, "%d:%02d".format(left / 60, left % 60))
+                    else stringResource(R.string.pending_soon),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(stringResource(R.string.pending_explain), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            failed -> {
+                // A temporary reason here means the queue gave up after Retry.GIVE_UP_MS.
+                val text = if (failure?.retryable == true) stringResource(R.string.pending_gave_up) else failureText(failure, a.hasKey) ?: p.detail ?: ""
+                Text(text)
+                if (failure != null && p.detail != null) {
+                    Text(p.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 4)
+                }
+                FixButton(a, failure)
+            }
+        }
+        if (p.state != Pending.READY) {
+            FitRow { style ->
+                OutlinedButton(onClick = { scope.launch { AiQueue.delete(ctx, p.id) } }) {
+                    Text(stringResource(R.string.pending_delete), maxLines = 1, style = style)
+                }
+                OutlinedButton(enabled = a.hasKey, onClick = { scope.launch { AiQueue.retryNow(ctx, p.id) } }) {
+                    Text(stringResource(R.string.pending_retry_now), maxLines = 1, style = style)
+                }
+            }
+        }
+    }
+}
+
+/** Why the request is waiting, in one short sentence. */
+@Composable
+private fun reasonText(f: AiFailure): String = stringResource(
+    when (f) {
+        AiFailure.RATE_LIMIT -> R.string.pending_reason_rate
+        AiFailure.NETWORK -> R.string.pending_reason_network
+        else -> R.string.pending_reason_overloaded
+    }
+)

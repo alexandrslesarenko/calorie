@@ -228,4 +228,41 @@
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
     <string name="help_toggle">Пояснение</string>
+
+    <!-- Retry queue for Claude requests -->
+    <string name="retry">Повторить</string>
+    <string name="pending_title">Запросы к Claude</string>
+    <string name="pending_wait_title">Жду ответа Claude</string>
+    <string name="pending_reason_overloaded">Claude сейчас перегружен.</string>
+    <string name="pending_reason_rate">Слишком много запросов подряд.</string>
+    <string name="pending_reason_network">Нет связи.</string>
+    <string name="pending_next">Неудачных попыток: %1$d. Следующая через %2$s</string>
+    <string name="pending_soon">Следующая попытка скоро</string>
+    <string name="pending_explain">Запрос сохранён: приложение само отправит его ещё раз и покажет результат для проверки. Экран можно закрыть, запрос останется на вкладке \"Сегодня\".</string>
+    <string name="pending_gave_up">Claude не отвечает уже несколько часов. Повторите или удалите запрос.</string>
+    <string name="pending_retry_now">Повторить сейчас</string>
+    <string name="pending_delete">Удалить запрос</string>
+    <string name="pending_at">Следующая попытка в %1$s</string>
+    <string name="pending_ready">Готово: проверьте и добавьте</string>
+
+    <!-- Backup: export and import -->
+    <string name="data_title">Данные</string>
+    <string name="tile_data">Записей в дневнике: %1$d</string>
+    <string name="data_export_help">В резервной копии - дневник, журнал веса, \"Мои блюда\" и профиль с целью. Ключ Claude, сохранённые ответы Claude и неотправленные запросы в неё не входят. CSV - только дневник, для таблиц: обратно его не загрузить.</string>
+    <string name="data_export_json">Сохранить копию</string>
+    <string name="data_export_csv">Дневник в CSV</string>
+    <string name="data_import_title">Импорт</string>
+    <string name="data_import_help">Добавить: добавляются только записи, которых ещё нет на этом телефоне, а профиль берётся из файла, только если здесь он не заполнен. Заменить: дневник, журнал веса, блюда и профиль станут точно такими, как в файле.</string>
+    <string name="data_import_add">Добавить из файла</string>
+    <string name="data_import_replace">Заменить из файла</string>
+    <string name="data_replace_title">Заменить все данные?</string>
+    <string name="data_replace_text">Дневник, журнал веса, \"Мои блюда\" и профиль на этом телефоне будут заменены данными из файла. В файле записей дневника: %1$d (%2$s). Сейчас на телефоне: %3$d. Если сомневаетесь, сначала сохраните копию.</string>
+    <string name="data_replace_ok">Заменить</string>
+    <string name="data_exported">Сохранено. Записей в дневнике: %1$d</string>
+    <string name="data_imported">Добавлено. Записей в дневнике: %1$d, веса: %2$d, блюд: %3$d.</string>
+    <string name="data_skipped">Уже были, пропущено: %1$d.</string>
+    <string name="data_profile">Профиль и цель восстановлены.</string>
+    <string name="data_err_not_backup">Этот файл не резервная копия Calorie.</string>
+    <string name="data_err_too_new">Копия сделана более новой версией приложения. Обновите приложение и повторите.</string>
+    <string name="data_err_io">Не удалось прочитать или записать файл: %1$s</string>
 </resources>

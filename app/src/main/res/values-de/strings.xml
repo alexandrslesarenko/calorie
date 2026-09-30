@@ -228,4 +228,41 @@
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
     <string name="help_toggle">Erklärung</string>
+
+    <!-- Retry queue for Claude requests -->
+    <string name="retry">Erneut versuchen</string>
+    <string name="pending_title">Anfragen an Claude</string>
+    <string name="pending_wait_title">Warte auf Claude</string>
+    <string name="pending_reason_overloaded">Claude ist gerade überlastet.</string>
+    <string name="pending_reason_rate">Zu viele Anfragen hintereinander.</string>
+    <string name="pending_reason_network">Keine Verbindung.</string>
+    <string name="pending_next">Versuch %1$d hat nicht geklappt. Nächster in %2$s</string>
+    <string name="pending_soon">Nächster Versuch gleich</string>
+    <string name="pending_explain">Die Anfrage ist gespeichert: Die App sendet sie selbst erneut und zeigt das Ergebnis zur Prüfung. Du kannst diesen Bildschirm schließen, die Anfrage bleibt unter \"Heute\".</string>
+    <string name="pending_gave_up">Claude antwortet seit mehreren Stunden nicht. Versuche es erneut oder lösche die Anfrage.</string>
+    <string name="pending_retry_now">Jetzt wiederholen</string>
+    <string name="pending_delete">Anfrage löschen</string>
+    <string name="pending_at">Nächster Versuch um %1$s</string>
+    <string name="pending_ready">Fertig: prüfen und hinzufügen</string>
+
+    <!-- Backup: export and import -->
+    <string name="data_title">Daten</string>
+    <string name="tile_data">Tagebucheinträge: %1$d</string>
+    <string name="data_export_help">Die Sicherung enthält das Tagebuch, das Gewichtsprotokoll, Meine Gerichte und das Profil mit dem Ziel. Der Claude-Schlüssel, gespeicherte Claude-Antworten und nicht gesendete Anfragen sind nicht enthalten. CSV ist nur das Tagebuch, für Tabellen: Es kann nicht wieder importiert werden.</string>
+    <string name="data_export_json">Sicherung speichern</string>
+    <string name="data_export_csv">Tagebuch als CSV</string>
+    <string name="data_import_title">Import</string>
+    <string name="data_import_help">Hinzufügen: Nur Einträge, die auf diesem Telefon noch fehlen, werden hinzugefügt; das Profil wird nur übernommen, wenn hier keins ausgefüllt ist. Ersetzen: Tagebuch, Gewichtsprotokoll, Gerichte und Profil werden genau wie in der Datei.</string>
+    <string name="data_import_add">Aus Datei hinzufügen</string>
+    <string name="data_import_replace">Aus Datei ersetzen</string>
+    <string name="data_replace_title">Alle Daten ersetzen?</string>
+    <string name="data_replace_text">Tagebuch, Gewichtsprotokoll, Meine Gerichte und Profil auf diesem Telefon werden durch die Datei ersetzt. In der Datei: Tagebucheinträge: %1$d (%2$s). Jetzt auf diesem Telefon: %3$d. Im Zweifel zuerst eine Sicherung speichern.</string>
+    <string name="data_replace_ok">Ersetzen</string>
+    <string name="data_exported">Gespeichert. Tagebucheinträge: %1$d</string>
+    <string name="data_imported">Hinzugefügt. Tagebucheinträge: %1$d, Gewichte: %2$d, Gerichte: %3$d.</string>
+    <string name="data_skipped">Schon vorhanden, übersprungen: %1$d.</string>
+    <string name="data_profile">Profil und Ziel wiederhergestellt.</string>
+    <string name="data_err_not_backup">Diese Datei ist keine Calorie-Sicherung.</string>
+    <string name="data_err_too_new">Die Sicherung stammt von einer neueren App-Version. Aktualisiere die App und versuche es erneut.</string>
+    <string name="data_err_io">Datei konnte nicht gelesen oder geschrieben werden: %1$s</string>
 </resources>
