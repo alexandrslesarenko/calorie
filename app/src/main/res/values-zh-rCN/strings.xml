@@ -119,6 +119,8 @@
     <string name="diary_days">按天</string>
     <string name="diary_empty">日记是空的。</string>
     <string name="week_average">最近几天平均：%1$s 千卡（%2$d 天）</string>
+    <string name="week_deficit">这几天的缺口：%1$s 千卡，约 %2$s 千克脂肪</string>
+    <string name="week_surplus">这几天的超出：%1$s 千卡，约 %2$s 千克脂肪</string>
     <string name="weight_change">%1$s 公斤</string>
     <string name="period_days">%1$d 天</string>
     <string name="period_all">全部</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s，%3$d 分钟，心率 %4$d</string>
     <string name="activity_note">消耗的热量不会加到今天的目标上，而是通过两周平均值来调整目标。</string>
     <string name="diary_burned">活动：%1$s 千卡</string>
+    <string name="diary_under">低于目标%1$s千卡</string>
+    <string name="diary_over">超出目标%1$s千卡</string>
+    <string name="diary_left">剩余%1$s千卡</string>
     <string name="edit">修改</string>
     <string name="done">完成</string>
 

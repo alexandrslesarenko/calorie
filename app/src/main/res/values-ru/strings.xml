@@ -119,6 +119,8 @@
     <string name="diary_days">По дням</string>
     <string name="diary_empty">Дневник пока пуст.</string>
     <string name="week_average">В среднем за последние дни: %1$s ккал (дней: %2$d)</string>
+    <string name="week_deficit">Дефицит за эти дни: %1$s ккал, около %2$s кг жира</string>
+    <string name="week_surplus">Избыток за эти дни: %1$s ккал, около %2$s кг жира</string>
     <string name="weight_change">%1$s кг</string>
     <string name="period_days">%1$d дней</string>
     <string name="period_all">Всё</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s, %3$d мин, пульс %4$d</string>
     <string name="activity_note">Сожжённое не прибавляется к сегодняшней норме: оно уточняет её через среднее за две недели.</string>
     <string name="diary_burned">Активность: %1$s ккал</string>
+    <string name="diary_under">%1$s ккал ниже нормы</string>
+    <string name="diary_over">%1$s ккал сверх нормы</string>
+    <string name="diary_left">осталось %1$s ккал</string>
     <string name="edit">Изменить</string>
     <string name="done">Готово</string>
 

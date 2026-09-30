@@ -41,6 +41,8 @@ import com.calorie.app.data.FoodDb
 import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.WeightMark
 import com.calorie.app.logic.Burn
+import com.calorie.app.logic.Goals
+import com.calorie.app.logic.shortText
 import java.time.ZoneId
 import com.calorie.app.logic.gramsText
 import com.calorie.app.logic.kcalText
@@ -80,6 +82,19 @@ fun DiaryScreen(a: MainActivity) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (target != null) {
+                        // What the days add up to: the sum is what moves the scale.
+                        val balance = week.sumOf { target.kcal - it.kcal }
+                        val kg = kotlin.math.abs(balance) / Goals.KCAL_PER_KG
+                        Text(
+                            stringResource(
+                                if (balance >= 0) R.string.week_deficit else R.string.week_surplus,
+                                kotlin.math.abs(balance).kcalText(), kg.shortText(),
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (balance >= 0) CalColors.Carbs else CalColors.Over,
+                        )
+                    }
                 }
             }
         }
@@ -88,12 +103,12 @@ fun DiaryScreen(a: MainActivity) {
                 Text(stringResource(R.string.diary_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        items(totals, key = { it.day }) { t -> DayRow(t, target?.kcal, burned[t.day]) { a.day = t.day; a.tabRequest = 0 } }
+        items(totals, key = { it.day }) { t -> DayRow(t, target?.kcal, burned[t.day], t.day == today) { a.day = t.day; a.tabRequest = 0 } }
     }
 }
 
 @Composable
-private fun DayRow(t: DayTotal, target: Int?, burned: Double?, onClick: () -> Unit) {
+private fun DayRow(t: DayTotal, target: Int?, burned: Double?, isToday: Boolean, onClick: () -> Unit) {
     val over = target != null && t.kcal > target
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -113,6 +128,17 @@ private fun DayRow(t: DayTotal, target: Int?, burned: Double?, onClick: () -> Un
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     drawStopIndicator = {},
                 )
+            }
+            if (target != null) {
+                // Balance against the target: the day's deficit or excess in plain numbers.
+                // Today is not over yet, so it shows what is left instead of a verdict.
+                val diff = target - t.kcal
+                val (text, color) = when {
+                    diff < 0 -> R.string.diary_over to CalColors.Over
+                    isToday -> R.string.diary_left to MaterialTheme.colorScheme.onSurfaceVariant
+                    else -> R.string.diary_under to CalColors.Carbs
+                }
+                Text(stringResource(text, kotlin.math.abs(diff).kcalText()), style = MaterialTheme.typography.bodyMedium, color = color)
             }
             Text(
                 stringResource(R.string.macros_line, t.protein.roundToInt(), t.fat.roundToInt(), t.carbs.roundToInt()),

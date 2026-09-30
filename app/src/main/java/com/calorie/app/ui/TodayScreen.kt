@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -261,11 +263,16 @@ private fun MacroBar(label: String, grams: Double, goal: Int?, color: androidx.c
 @Composable
 private fun MealCard(a: MainActivity, meal: Meal, list: List<Entry>) {
     val sum = list.map { it.nutrients }.sum()
-    Card(Modifier.fillMaxWidth()) {
+    val hue = CalColors.meal(meal)
+    // A light tint of the meal hue: the cards stop merging into one block.
+    val tint = hue.copy(alpha = 0.12f).compositeOver(MaterialTheme.colorScheme.surfaceContainerHighest)
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = tint)) {
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(meal.label), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
-                Text(stringResource(R.string.kcal_n, sum.kcal.kcalText()), style = MaterialTheme.typography.titleSmall)
+                Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).background(hue))
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(meal.label), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.kcal_n, sum.kcal.kcalText()), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }
             list.forEachIndexed { i, e ->
                 if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

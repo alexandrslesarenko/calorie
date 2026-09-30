@@ -44,6 +44,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -364,7 +366,13 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
         Text(stringResource(R.string.meal), style = MaterialTheme.typography.titleSmall)
         FitRow { style ->
             Meal.entries.forEach { m ->
-                FilterChip(selected = meal == m, onClick = { meal = m }, label = { Text(stringResource(m.label), maxLines = 1, style = style) })
+                // Same hue as the meal card on "Today".
+                val selected = CalColors.meal(m).copy(alpha = 0.35f).compositeOver(MaterialTheme.colorScheme.surface)
+                FilterChip(
+                    selected = meal == m, onClick = { meal = m },
+                    label = { Text(stringResource(m.label), maxLines = 1, style = style) },
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = selected),
+                )
             }
         }
         Text(

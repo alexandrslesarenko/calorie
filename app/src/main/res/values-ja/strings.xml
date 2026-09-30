@@ -119,6 +119,8 @@
     <string name="diary_days">日別</string>
     <string name="diary_empty">記録はまだありません。</string>
     <string name="week_average">最近の平均：%1$s kcal（%2$d 日）</string>
+    <string name="week_deficit">この期間の不足：%1$s kcal、脂肪約%2$s kg</string>
+    <string name="week_surplus">この期間の超過：%1$s kcal、脂肪約%2$s kg</string>
     <string name="weight_change">%1$s kg</string>
     <string name="period_days">%1$d 日</string>
     <string name="period_all">すべて</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s、%3$d 分、心拍 %4$d</string>
     <string name="activity_note">消費カロリーは今日の目標に足されません。2週間の平均を通して目標を調整します。</string>
     <string name="diary_burned">活動：%1$s kcal</string>
+    <string name="diary_under">目標より%1$s kcal少ない</string>
+    <string name="diary_over">目標より%1$s kcal多い</string>
+    <string name="diary_left">残り%1$s kcal</string>
     <string name="edit">変更</string>
     <string name="done">完了</string>
 

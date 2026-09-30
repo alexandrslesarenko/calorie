@@ -119,6 +119,8 @@
     <string name="diary_days">날짜별</string>
     <string name="diary_empty">기록이 비어 있습니다.</string>
     <string name="week_average">최근 평균: %1$s kcal (%2$d일)</string>
+    <string name="week_deficit">이 기간 부족: %1$s kcal, 지방 약 %2$s kg</string>
+    <string name="week_surplus">이 기간 초과: %1$s kcal, 지방 약 %2$s kg</string>
     <string name="weight_change">%1$s kg</string>
     <string name="period_days">%1$d일</string>
     <string name="period_all">전체</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s, %3$d분, 심박 %4$d</string>
     <string name="activity_note">소모한 칼로리는 오늘 목표에 더하지 않고, 2주 평균을 통해 목표를 조정합니다.</string>
     <string name="diary_burned">활동: %1$s kcal</string>
+    <string name="diary_under">목표보다 %1$s kcal 적음</string>
+    <string name="diary_over">목표보다 %1$s kcal 초과</string>
+    <string name="diary_left">%1$s kcal 남음</string>
     <string name="edit">변경</string>
     <string name="done">완료</string>
 

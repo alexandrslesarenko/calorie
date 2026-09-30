@@ -119,6 +119,8 @@
     <string name="diary_days">By day</string>
     <string name="diary_empty">The diary is empty.</string>
     <string name="week_average">Average over the last days: %1$s kcal (%2$d d.)</string>
+    <string name="week_deficit">Deficit over these days: %1$s kcal, about %2$s kg of fat</string>
+    <string name="week_surplus">Surplus over these days: %1$s kcal, about %2$s kg of fat</string>
     <string name="weight_change">%1$s kg</string>
     <string name="period_days">%1$d days</string>
     <string name="period_all">All</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s, %3$d min, pulse %4$d</string>
     <string name="activity_note">Burned kcal are not added to today\'s target: they refine it through the two-week average.</string>
     <string name="diary_burned">Activity: %1$s kcal</string>
+    <string name="diary_under">%1$s kcal under target</string>
+    <string name="diary_over">%1$s kcal over target</string>
+    <string name="diary_left">%1$s kcal left</string>
     <string name="edit">Edit</string>
     <string name="done">Done</string>
 

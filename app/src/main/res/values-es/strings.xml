@@ -119,6 +119,8 @@
     <string name="diary_days">Por días</string>
     <string name="diary_empty">El diario está vacío.</string>
     <string name="week_average">Media de los últimos días: %1$s kcal (%2$d d.)</string>
+    <string name="week_deficit">Déficit en estos días: %1$s kcal, unos %2$s kg de grasa</string>
+    <string name="week_surplus">Exceso en estos días: %1$s kcal, unos %2$s kg de grasa</string>
     <string name="weight_change">%1$s kg</string>
     <string name="period_days">%1$d días</string>
     <string name="period_all">Todo</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s, %3$d min, pulso %4$d</string>
     <string name="activity_note">Las kcal quemadas no se suman al objetivo de hoy: lo ajustan mediante la media de dos semanas.</string>
     <string name="diary_burned">Actividad: %1$s kcal</string>
+    <string name="diary_under">%1$s kcal por debajo del objetivo</string>
+    <string name="diary_over">%1$s kcal por encima del objetivo</string>
+    <string name="diary_left">quedan %1$s kcal</string>
     <string name="edit">Cambiar</string>
     <string name="done">Listo</string>
 

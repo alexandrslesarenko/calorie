@@ -119,6 +119,8 @@
     <string name="diary_days">Nach Tagen</string>
     <string name="diary_empty">Das Tagebuch ist leer.</string>
     <string name="week_average">Durchschnitt der letzten Tage: %1$s kcal (%2$d T.)</string>
+    <string name="week_deficit">Defizit in diesen Tagen: %1$s kcal, etwa %2$s kg Fett</string>
+    <string name="week_surplus">Überschuss in diesen Tagen: %1$s kcal, etwa %2$s kg Fett</string>
     <string name="weight_change">%1$s kg</string>
     <string name="period_days">%1$d Tage</string>
     <string name="period_all">Alle</string>
@@ -156,6 +158,9 @@
     <string name="session_line">%1$s-%2$s, %3$d Min., Puls %4$d</string>
     <string name="activity_note">Verbrannte kcal werden nicht zum heutigen Ziel addiert: sie verfeinern es über den Zwei-Wochen-Durchschnitt.</string>
     <string name="diary_burned">Aktivität: %1$s kcal</string>
+    <string name="diary_under">%1$s kcal unter dem Ziel</string>
+    <string name="diary_over">%1$s kcal über dem Ziel</string>
+    <string name="diary_left">noch %1$s kcal</string>
     <string name="edit">Ändern</string>
     <string name="done">Fertig</string>
 
