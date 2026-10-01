@@ -15,7 +15,7 @@ data class ImportResult(val entries: Int, val weights: Int, val dishes: Int, val
 
 /**
  * Diary backup to and from a file the user picks (Storage Access Framework, no permissions).
- * The file holds the diary, weight log, "My dishes" and the profile; the API key, the Claude
+ * The file holds the diary, weight log, day targets, "My dishes" and the profile; the API key, the Claude
  * answer cache, the retry queue and the barcode cache stay out.
  */
 object BackupStore {
@@ -24,7 +24,7 @@ object BackupStore {
 
     private suspend fun snapshot(ctx: Context): BackupData {
         val dao = FoodDb.get(ctx).dao()
-        return BackupData(System.currentTimeMillis(), Prefs(ctx).profile, dao.allEntries(), dao.allWeights(), dao.allDishes())
+        return BackupData(System.currentTimeMillis(), Prefs(ctx).profile, dao.allEntries(), dao.allWeights(), dao.allDishes(), dao.allDayTargets())
     }
 
     suspend fun exportJson(ctx: Context, uri: Uri) {
@@ -63,11 +63,11 @@ object BackupStore {
         val prefs = Prefs(ctx)
         val dao = FoodDb.get(ctx).dao()
         val result = if (replace) {
-            dao.importBackup(true, add.entries, add.weights, add.dishes)
+            dao.importBackup(true, add.entries, add.weights, add.dishes, add.targets)
             ImportResult(add.entries.size, add.weights.size, add.dishes.size, 0, add.profile != null)
         } else {
             val m = Backup.merge(snapshot(ctx), add)
-            dao.importBackup(false, m.entries, m.weights, m.dishes)
+            dao.importBackup(false, m.entries, m.weights, m.dishes, m.targets)
             ImportResult(m.entries.size, m.weights.size, m.dishes.size, m.skippedEntries, add.profile != null && prefs.profile.isEmpty)
         }
         if (result.profile) prefs.profile = add.profile!!

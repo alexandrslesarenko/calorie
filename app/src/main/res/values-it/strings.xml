@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Nessun accesso ai dati di Pulsar. Reinstalla Calorie dopo Pulsar: l\'accesso viene concesso all\'installazione.</string>
     <string name="pulsar_few_days">Dati di Pulsar insufficienti: il livello si misura dopo %1$d giorni dalla prima camminata o allenamento. Fino ad allora vale la scelta manuale.</string>
     <string name="pulsar_calibrated">In %1$d giorni camminate e allenamenti hanno aggiunto in media %2$d kcal al giorno, fattore di attività %3$s.</string>
+    <string name="pulsar_capped">È sopra la scelta manuale, quindi l\'obiettivo usa la scelta manuale finché il trend del peso non lo conferma; le camminate vanno nel deficit.</string>
+    <string name="pulsar_by_weight">Ora l\'obiettivo viene dal trend del peso.</string>
+    <string name="activity_by_weight">Dal trend del peso</string>
+    <string name="weight_trend_on">Consumo dal trend del peso</string>
+    <string name="weight_trend_off">Consumo dal trend del peso (disattivato)</string>
+    <string name="weight_trend_result">In %1$d giorni hai mangiato in media %2$d kcal al giorno e il peso è cambiato di %3$s kg a settimana: consumo %4$d kcal al giorno. Secondo la formula: %5$d kcal.</string>
+    <string name="weight_trend_weighins">Troppe poche pesate: %1$d su %2$d necessarie negli ultimi %3$d giorni. Fino ad allora il consumo viene da Pulsar o dalla scelta manuale.</string>
+    <string name="weight_trend_span">Le pesate coprono %1$d giorni, ne servono %2$d. Fino ad allora il consumo viene da Pulsar o dalla scelta manuale.</string>
+    <string name="weight_trend_diary">Il diario è compilato per %1$d giorni tra le pesate, ne servono %2$d. Fino ad allora il consumo viene da Pulsar o dalla scelta manuale.</string>
+    <string name="weight_trend_help">Consumo dal trend del peso: ciò che hai mangiato più ciò che il peso ha perso (7700 kcal per kg) nelle ultime 4 settimane. Servono un diario completo e una pesata almeno ogni pochi giorni; allora sostituisce Pulsar e la scelta manuale. Nelle prime settimane di dieta parte della perdita è acqua e il consumo risulta alto; i giorni annotati in modo incompleto lo abbassano.</string>
     <string name="mode_walk">Camminata</string>
     <string name="mode_training">Allenamento</string>
     <string name="session_line">%1$s-%2$s, %3$d min, polso %4$d</string>

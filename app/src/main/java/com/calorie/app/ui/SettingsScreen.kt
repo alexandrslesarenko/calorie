@@ -92,6 +92,8 @@ import com.calorie.app.data.Prefs
 import com.calorie.app.data.PulsarStatus
 import com.calorie.app.logic.Burn
 import com.calorie.app.logic.Calibration
+import com.calorie.app.logic.Expenditure
+import com.calorie.app.logic.TrendShort
 import kotlin.math.roundToInt
 import com.calorie.app.data.WeightMark
 import com.calorie.app.logic.Activity
@@ -369,7 +371,7 @@ private fun ProfileSettings(a: MainActivity) {
     val h = height.toIntOrNull()?.takeIf { it in 120..230 }
     val w = parseNumber(weight)?.takeIf { it in 30.0..300.0 }
 
-    SettingsCard(stringResource(R.string.profile_title), help = stringResource(R.string.profile_help)) {
+    SettingsCard(stringResource(R.string.profile_title), help = stringResource(R.string.profile_help) + "\n\n" + stringResource(R.string.weight_trend_help)) {
         if (!editing) {
             AboutLine(stringResource(R.string.sex), sex?.let { stringResource(if (it == Sex.MALE) R.string.sex_male else R.string.sex_female) } ?: "--")
             AboutLine(stringResource(R.string.birth_date), prefs.birthDate?.let { d ->
@@ -378,9 +380,18 @@ private fun ProfileSettings(a: MainActivity) {
             } ?: "--")
             AboutLine(stringResource(R.string.height), prefs.heightCm.takeIf { it > 0 }?.let { stringResource(R.string.height_value, it) } ?: "--")
             AboutLine(stringResource(R.string.weight_title), lastWeight?.let { stringResource(R.string.kg_value, it.kg.gramsText()) } ?: "--")
-            val calib = remember(lastWeight, a.profileVersion, a.pulsar) { a.calibration(lastWeight?.kg) }
-            AboutLine(stringResource(R.string.activity), if (calib != null) stringResource(R.string.activity_by_pulsar) else activityLabel(prefs.activity))
+            val byPulsar = remember(lastWeight, a.profileVersion, a.pulsar) { a.pulsarFactor(lastWeight?.kg) != null }
+            val byWeight = remember(lastWeight, a.profileVersion, a.trendData) { a.trendFactor(lastWeight?.kg) != null }
+            AboutLine(
+                stringResource(R.string.activity),
+                when {
+                    byWeight -> stringResource(R.string.activity_by_weight)
+                    byPulsar -> stringResource(R.string.activity_by_pulsar)
+                    else -> activityLabel(prefs.activity)
+                },
+            )
             OutlinedButton(onClick = { editing = true }) { Text(stringResource(R.string.edit)) }
+            WeightTrendBlock(a, lastWeight?.kg)
             PulsarBlock(a, lastWeight?.kg)
             return@SettingsCard
         }
@@ -453,15 +464,63 @@ private fun PulsarBlock(a: MainActivity, weightKg: Double?) {
             a.profileVersion++
         })
     }
-    val calib = remember(weightKg, a.profileVersion, a.pulsar) { a.calibration(weightKg) }
     val text = when {
         a.pulsar.status == PulsarStatus.NOT_INSTALLED -> stringResource(R.string.pulsar_not_installed)
         a.pulsar.status == PulsarStatus.NO_ACCESS -> stringResource(R.string.pulsar_no_access)
         !on -> null
-        calib != null -> pulsarCalibratedText(calib)
-        else -> stringResource(R.string.pulsar_few_days, Burn.MIN_DAYS)
+        else -> pulsarText(a, weightKg) ?: stringResource(R.string.pulsar_few_days, Burn.MIN_DAYS)
     }
     text?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+}
+
+/**
+ * Expenditure from the weight trend: the switch, and either the estimate next to the formula's
+ * or what is missing for it.
+ */
+@Composable
+private fun WeightTrendBlock(a: MainActivity, weightKg: Double?) {
+    val prefs = a.prefs
+    var on by remember { mutableStateOf(prefs.activityFromWeight) }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(if (on) R.string.weight_trend_on else R.string.weight_trend_off), Modifier.weight(1f))
+        Switch(checked = on, onCheckedChange = {
+            on = it
+            prefs.activityFromWeight = it
+            a.profileVersion++
+        })
+    }
+    weightTrendText(a, weightKg)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+}
+
+/** The weight trend estimate compared with the formula, or what it still needs. */
+@Composable
+private fun weightTrendText(a: MainActivity, weightKg: Double?): String? {
+    val status = remember(weightKg, a.profileVersion, a.trendData) { a.weightTrend(weightKg) } ?: return null
+    val formula = remember(weightKg, a.profileVersion, a.pulsar) { a.body(weightKg)?.let { Goals.bmr(it) * a.formulaFactor(weightKg) } }
+    val t = status.trend
+    return when {
+        t != null -> stringResource(
+            R.string.weight_trend_result, t.days, t.intake.roundToInt(), String.format(Locale.US, "%+.2f", t.kgPerWeek),
+            t.tdee.roundToInt(), formula?.roundToInt() ?: 0,
+        )
+        status.short == TrendShort.WEIGHINS -> stringResource(R.string.weight_trend_weighins, status.have, status.need, Expenditure.WINDOW_DAYS)
+        status.short == TrendShort.SPAN -> stringResource(R.string.weight_trend_span, status.have, status.need)
+        else -> stringResource(R.string.weight_trend_diary, status.have, status.need)
+    }
+}
+
+/** What Pulsar measured and whether it sets the target; null - too few days. */
+@Composable
+private fun pulsarText(a: MainActivity, weightKg: Double?): String? {
+    val calib = remember(weightKg, a.profileVersion, a.pulsar) { a.calibration(weightKg) } ?: return null
+    val byWeight = remember(weightKg, a.profileVersion, a.trendData) { a.trendFactor(weightKg) != null }
+    val note = when {
+        byWeight -> stringResource(R.string.pulsar_by_weight)
+        a.pulsarFactor(weightKg) == null -> stringResource(R.string.pulsar_capped)
+        else -> null
+    }
+    return listOfNotNull(pulsarCalibratedText(calib), note).joinToString(" ")
 }
 
 @Composable
@@ -483,8 +542,8 @@ private fun GoalSettings(a: MainActivity) {
     var pace by remember { mutableStateOf(prefs.pace) }
     var custom by remember { mutableStateOf(prefs.customKcal > 0) }
     var customText by remember { mutableStateOf(prefs.customKcal.takeIf { it > 0 }?.toString() ?: "") }
-    val t = remember(lastWeight, a.profileVersion, a.pulsar) { a.target(lastWeight?.kg) }
-    val calib = remember(lastWeight, a.profileVersion, a.pulsar) { a.calibration(lastWeight?.kg) }
+    val t = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.target(lastWeight?.kg) }
+    val byWeight = remember(lastWeight, a.profileVersion, a.trendData) { a.trendFactor(lastWeight?.kg) != null }
     fun changed() { a.profileVersion++ }
 
     SettingsCard(
@@ -522,7 +581,8 @@ private fun GoalSettings(a: MainActivity) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         // Where the expenditure comes from, so a changed target is not a mystery.
-        calib?.let { Text(pulsarCalibratedText(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        val source = if (byWeight) weightTrendText(a, lastWeight?.kg) else pulsarText(a, lastWeight?.kg)
+        source?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         if (t.kgPerWeek > 0) {
             Text(
                 if (t.weeksToGoal != null) stringResource(R.string.forecast_goal, t.kgPerWeek.shortText(), t.weeksToGoal)

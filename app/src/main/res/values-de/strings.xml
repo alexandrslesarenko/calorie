@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Kein Zugriff auf Pulsar-Daten. Installiere Calorie nach Pulsar neu: der Zugriff wird bei der Installation erteilt.</string>
     <string name="pulsar_few_days">Zu wenige Pulsar-Daten: das Niveau wird gemessen, sobald seit dem ersten Spaziergang oder Training %1$d Tage vergangen sind. Bis dahin gilt die manuelle Wahl.</string>
     <string name="pulsar_calibrated">In %1$d Tagen brachten Spaziergänge und Training im Schnitt %2$d kcal pro Tag, Aktivitätsfaktor %3$s.</string>
+    <string name="pulsar_capped">Das liegt über der manuellen Wahl, daher gilt sie für den Zielwert, bis der Gewichtstrend es bestätigt; Spaziergänge gehen ins Defizit.</string>
+    <string name="pulsar_by_weight">Den Zielwert bestimmt jetzt der Gewichtstrend.</string>
+    <string name="activity_by_weight">Nach Gewichtstrend</string>
+    <string name="weight_trend_on">Verbrauch aus dem Gewichtstrend</string>
+    <string name="weight_trend_off">Verbrauch aus dem Gewichtstrend (aus)</string>
+    <string name="weight_trend_result">In %1$d Tagen hast du im Schnitt %2$d kcal pro Tag gegessen, das Gewicht änderte sich um %3$s kg pro Woche: Verbrauch %4$d kcal pro Tag. Nach der Formel: %5$d kcal.</string>
+    <string name="weight_trend_weighins">Zu wenige Wiegungen: %1$d von %2$d nötigen in den letzten %3$d Tagen. Bis dahin kommt der Verbrauch aus Pulsar oder der manuellen Wahl.</string>
+    <string name="weight_trend_span">Die Wiegungen umfassen %1$d Tage, nötig sind %2$d. Bis dahin kommt der Verbrauch aus Pulsar oder der manuellen Wahl.</string>
+    <string name="weight_trend_diary">Das Tagebuch ist an %1$d Tagen zwischen den Wiegungen ausgefüllt, nötig sind %2$d. Bis dahin kommt der Verbrauch aus Pulsar oder der manuellen Wahl.</string>
+    <string name="weight_trend_help">Verbrauch aus dem Gewichtstrend: Gegessenes plus das, was das Gewicht verloren hat (7700 kcal pro kg), über die letzten 4 Wochen. Dafür braucht es ein vollständiges Tagebuch und mindestens alle paar Tage eine Wiegung; dann ersetzt er Pulsar und die manuelle Wahl. In den ersten Diätwochen ist ein Teil des Verlusts Wasser, der Verbrauch fällt dann zu hoch aus; unvollständig erfasste Tage drücken ihn nach unten.</string>
     <string name="mode_walk">Spaziergang</string>
     <string name="mode_training">Training</string>
     <string name="session_line">%1$s-%2$s, %3$d Min., Puls %4$d</string>

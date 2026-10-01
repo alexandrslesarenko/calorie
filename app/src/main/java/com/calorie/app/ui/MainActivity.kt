@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,8 @@ import com.calorie.app.ai.AiRequest
 import com.calorie.app.ai.Photo
 import com.calorie.app.data.ApiKeyStore
 import com.calorie.app.data.Entry
+import com.calorie.app.data.WeightMark
+import com.calorie.app.data.DayTarget
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.OffApi
@@ -59,18 +62,24 @@ import com.calorie.app.logic.Body
 import com.calorie.app.logic.Keys
 import com.calorie.app.logic.Confidence
 import com.calorie.app.logic.FoodDraft
+import com.calorie.app.logic.Expenditure
 import com.calorie.app.logic.Goals
+import com.calorie.app.logic.TrendStatus
 import com.calorie.app.logic.Target
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import java.time.LocalTime
 import java.util.Locale
 
@@ -134,6 +143,10 @@ class MainActivity : ComponentActivity() {
     /** Walks and workouts from Pulsar for the last two weeks; refreshed on every resume. */
     var pulsar by mutableStateOf(PulsarData(PulsarStatus.NOT_INSTALLED))
 
+    /** Diary and weight log for the weight trend; refreshed when the day changes. */
+    var trendData by mutableStateOf(TrendData(LocalDate.now().toEpochDay(), emptyMap(), emptyList()))
+    private var trendDay by mutableLongStateOf(LocalDate.now().toEpochDay())
+
     /** Requested tab (from the diary - "go to day"); -1 - no request. */
     var tabRequest by mutableIntStateOf(-1)
 
@@ -155,6 +168,7 @@ class MainActivity : ComponentActivity() {
         if (uri != null) loadPhoto(uri) else overlay = Overlay.AddMenu
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
@@ -165,6 +179,20 @@ class MainActivity : ComponentActivity() {
             settingsPage = st.getString(STATE_SETTINGS_PAGE)?.let { n -> SettingsPage.entries.firstOrNull { it.name == n } }
         }
         hasKey = ApiKeyStore.has(this)
+        val dao = FoodDb.get(this).dao()
+        lifecycleScope.launch {
+            snapshotFlow { trendDay }.flatMapLatest { today ->
+                combine(dao.totals(today - Expenditure.WINDOW_DAYS, today - 1), dao.weights()) { totals, weights ->
+                    TrendData(today, totals.associate { it.day to it.kcal }, weights)
+                }
+            }.collect { trendData = it }
+        }
+        // Keep today's target saved: once the day is over it stays the one the day is measured against.
+        lifecycleScope.launch {
+            combine(dao.lastWeight(), snapshotFlow { Triple(profileVersion, pulsar, trendData) }) { w, _ -> w }.collectLatest { w ->
+                target(w?.kg)?.let { dao.putDayTargets(listOf(DayTarget(LocalDate.now().toEpochDay(), it.kcal))) }
+            }
+        }
         setContent {
             val dark = when (themeMode) {
                 Prefs.THEME_LIGHT -> false
@@ -210,6 +238,7 @@ class MainActivity : ComponentActivity() {
             if (day == shownToday) day = today
             shownToday = today
         }
+        trendDay = today
         lifecycleScope.launch { pulsar = withContext(Dispatchers.IO) { PulsarSource.load(this@MainActivity) } }
         // A delayed retry may be held back by Doze: the app is open, so try now if due.
         lifecycleScope.launch { AiQueue.schedule(this@MainActivity) }
@@ -270,10 +299,34 @@ class MainActivity : ComponentActivity() {
         return Burn.calibrate(pulsar.minutes, b, LocalDate.now())
     }
 
+    /** Expenditure from the weight trend or why there is none yet; null - the profile is incomplete. */
+    fun weightTrend(lastWeightKg: Double?): TrendStatus? {
+        val b = body(lastWeightKg) ?: return null
+        return Expenditure.estimate(trendData.intake, trendData.weights, Goals.bmr(b), trendData.today)
+    }
+
+    /** Activity multiplier from the weight trend, if it is switched on and there is enough data. */
+    fun trendFactor(lastWeightKg: Double?): Double? {
+        if (!prefs.activityFromWeight) return null
+        val b = body(lastWeightKg) ?: return null
+        val t = weightTrend(lastWeightKg)?.trend ?: return null
+        return (t.tdee / Goals.bmr(b)).coerceIn(Burn.BASE_FACTOR, Burn.MAX_FACTOR)
+    }
+
+    /**
+     * Pulsar multiplier when it is below the manual level. Above it Pulsar is not trusted until
+     * the weight trend confirms the burn: heart rate formulas tend to overstate walking, and a
+     * higher target eats the deficit. Walks above the manual level then add to the deficit.
+     */
+    fun pulsarFactor(lastWeightKg: Double?): Double? = calibration(lastWeightKg)?.factor?.takeIf { it < prefs.activity.factor }
+
+    /** Multiplier without the weight trend: Pulsar (only to lower it) or the manual level. */
+    fun formulaFactor(lastWeightKg: Double?): Double = pulsarFactor(lastWeightKg) ?: prefs.activity.factor
+
     /** Target from the profile and the latest weight; null - the profile is incomplete. */
     fun target(lastWeightKg: Double?): Target? {
         val body = body(lastWeightKg) ?: return null
-        val factor = calibration(lastWeightKg)?.factor ?: prefs.activity.factor
+        val factor = trendFactor(lastWeightKg) ?: formulaFactor(lastWeightKg)
         val t = Goals.target(body, factor, prefs.pace, prefs.goalKg.takeIf { it > 0 }?.toDouble())
         return if (prefs.customKcal > 0) t.copy(kcal = prefs.customKcal) else t
     }
@@ -456,3 +509,6 @@ class MainActivity : ComponentActivity() {
         overlay = null
     }
 }
+
+/** Input of the weight trend: kcal per full day of the window and the weight log. */
+data class TrendData(val today: Long, val intake: Map<Long, Double>, val weights: List<WeightMark>)

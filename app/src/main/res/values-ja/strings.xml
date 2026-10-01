@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Pulsar のデータにアクセスできません。Pulsar の後に Calorie を再インストールしてください。アクセスはインストール時に付与されます。</string>
     <string name="pulsar_few_days">Pulsar のデータが足りません。最初の散歩またはトレーニングから %1$d 日たつと活動量を測定します。それまでは手動の設定を使います。</string>
     <string name="pulsar_calibrated">%1$d 日間で散歩とトレーニングは1日平均 %2$d kcal、活動係数は %3$s です。</string>
+    <string name="pulsar_capped">手動の設定より高いため、体重の推移で確かめられるまで目標は手動の設定で計算します。散歩の分は不足分に回ります。</string>
+    <string name="pulsar_by_weight">いまは体重の推移から目標を計算しています。</string>
+    <string name="activity_by_weight">体重の推移から</string>
+    <string name="weight_trend_on">体重の推移から消費量を求める</string>
+    <string name="weight_trend_off">体重の推移から消費量を求める（オフ）</string>
+    <string name="weight_trend_result">%1$d 日間の平均摂取は1日 %2$d kcal、体重の変化は週 %3$s kg：消費量は1日 %4$d kcal です。計算式では %5$d kcal。</string>
+    <string name="weight_trend_weighins">体重の記録が足りません：直近 %3$d 日で %2$d 回必要なうち %1$d 回。それまでは Pulsar または手動の設定から消費量を求めます。</string>
+    <string name="weight_trend_span">体重の記録は %1$d 日分で、%2$d 日分必要です。それまでは Pulsar または手動の設定から消費量を求めます。</string>
+    <string name="weight_trend_diary">体重の記録の間で日記がそろっているのは %1$d 日、必要なのは %2$d 日です。それまでは Pulsar または手動の設定から消費量を求めます。</string>
+    <string name="weight_trend_help">体重の推移による消費量：直近4週間に食べた分と、体重として減った分（1 kg あたり 7700 kcal）の合計です。日記をすべて記録し、数日に1回以上体重を量る必要があります。そうすれば Pulsar と手動の設定の代わりに使われます。ダイエットの最初の数週間は減った分の一部が水分なので消費量は高めに出ます。記録漏れのある日は低めにします。</string>
     <string name="mode_walk">散歩</string>
     <string name="mode_training">トレーニング</string>
     <string name="session_line">%1$s-%2$s、%3$d 分、心拍 %4$d</string>

@@ -1,5 +1,6 @@
 package com.calorie.app.logic
 
+import com.calorie.app.data.DayTarget
 import com.calorie.app.data.Dish
 import com.calorie.app.data.Entry
 import com.calorie.app.data.WeightMark
@@ -19,15 +20,29 @@ class BackupTest {
     private fun dish(name: String, favorite: Boolean = false) =
         Dish(Keys.dish(name), name, 150.0, 10.0, 5.0, 15.0, 200.0, 3, 5_000L, favorite)
 
-    private val profile = ProfileData("f", LocalDate.of(1985, 3, 14).toEpochDay(), 168, "light", "normal", true, 62.5, 0, true, true, "dark")
+    private val profile = ProfileData("f", LocalDate.of(1985, 3, 14).toEpochDay(), 168, "light", "normal", true, false, 62.5, 0, true, true, "dark")
 
-    private fun data(entries: List<Entry> = emptyList(), weights: List<WeightMark> = emptyList(), dishes: List<Dish> = emptyList(), p: ProfileData? = null) =
-        BackupData(42L, p, entries, weights, dishes)
+    private fun data(entries: List<Entry> = emptyList(), weights: List<WeightMark> = emptyList(), dishes: List<Dish> = emptyList(), p: ProfileData? = null, targets: List<DayTarget> = emptyList()) =
+        BackupData(42L, p, entries, weights, dishes, targets)
 
     @Test
     fun roundTrip() {
-        val d = data(listOf(entry("Борщ, со сметаной")), listOf(WeightMark(day, 70.3)), listOf(dish("Гречка", true)), profile)
+        val d = data(listOf(entry("Борщ, со сметаной")), listOf(WeightMark(day, 70.3)), listOf(dish("Гречка", true)), profile, listOf(DayTarget(day, 2080)))
         assertEquals(d, Backup.parse(Backup.toJson(d)))
+    }
+
+    @Test
+    fun formatOneHasNoTargets() {
+        val d = Backup.parse("""{"app":"calorie","format":1,"weights":[{"date":"2026-09-30","kg":70}]}""")
+        assertEquals(1, d.weights.size)
+        assertTrue(d.targets.isEmpty())
+    }
+
+    @Test
+    fun mergeKeepsExistingTargets() {
+        val have = data(targets = listOf(DayTarget(day, 2080)))
+        val add = data(targets = listOf(DayTarget(day, 2340), DayTarget(day - 1, 2100)))
+        assertEquals(listOf(DayTarget(day - 1, 2100)), Backup.merge(have, add).targets)
     }
 
     @Test

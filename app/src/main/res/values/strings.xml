@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">No access to Pulsar data. Reinstall Calorie after Pulsar: access is granted at install time.</string>
     <string name="pulsar_few_days">Too little Pulsar data: the level is measured once %1$d days have passed since the first walk or workout. Until then the manual level applies.</string>
     <string name="pulsar_calibrated">Over %1$d days walks and workouts added %2$d kcal a day on average, activity multiplier %3$s.</string>
+    <string name="pulsar_capped">Above the manual level, so the target uses the manual level until the weight trend confirms it; walks go to the deficit.</string>
+    <string name="pulsar_by_weight">The target now comes from the weight trend.</string>
+    <string name="activity_by_weight">By weight trend</string>
+    <string name="weight_trend_on">Expenditure from the weight trend</string>
+    <string name="weight_trend_off">Expenditure from the weight trend (off)</string>
+    <string name="weight_trend_result">Over %1$d days you ate %2$d kcal a day on average and the weight changed by %3$s kg a week: expenditure %4$d kcal a day. By the formula: %5$d kcal.</string>
+    <string name="weight_trend_weighins">Too few weigh-ins: %1$d of %2$d needed in the last %3$d days. Until then the expenditure comes from Pulsar or the manual level.</string>
+    <string name="weight_trend_span">The weigh-ins cover %1$d days, %2$d needed. Until then the expenditure comes from Pulsar or the manual level.</string>
+    <string name="weight_trend_diary">The diary is filled for %1$d days between the weigh-ins, %2$d needed. Until then the expenditure comes from Pulsar or the manual level.</string>
+    <string name="weight_trend_help">Expenditure from the weight trend: what you ate plus what the weight lost (7700 kcal per kg) over the last 4 weeks. It needs a full diary and a weigh-in at least every few days, and then it takes the place of Pulsar and the manual level. In the first weeks of a diet part of the loss is water, so the expenditure comes out high; days logged incompletely make it low.</string>
     <string name="mode_walk">Walk</string>
     <string name="mode_training">Workout</string>
     <string name="session_line">%1$s-%2$s, %3$d min, pulse %4$d</string>

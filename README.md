@@ -17,16 +17,21 @@ The app is in early testing; the name is a working one.
   Claude. Answers are also cached, so sending the same photo or text again is free.
 - If Claude is overloaded or there is no connection, the request is not lost: the app
   resends it on its own and shows the answer on Today, ready to check and add.
-- Diary by meals, balance of each day against the target, deficit or surplus over the
-  last week in kilograms of fat.
+- Diary by meals, balance of each day against the target that day had (a later change of
+  weight or activity does not rewrite the past), deficit or surplus over the last week in
+  kilograms of fat.
 - Weight log.
-- Backup to a file and back: the diary, weight log, "My dishes" and profile as JSON, which can
+- Backup to a file and back: the diary, weight log, daily targets, "My dishes" and profile as JSON, which can
   be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,
   with safety limits: not below 1200 / 1500 kcal and the basal metabolic rate, at most
   1% of body weight per week, maintenance when the goal is reached or BMI is below 18.5.
 - Optional activity from [Pulsar](https://github.com/alexandrslesarenko/pulsar): heart
-  rate on walks and workouts replaces the manual activity level.
+  rate on walks and workouts can lower the manual activity level, but not raise it - walks
+  above it go to the deficit until the weight trend confirms the burn.
+- Expenditure from the weight trend: after two weeks of a full diary and regular weigh-ins
+  the app measures what you actually burn (what you ate plus what the weight lost) and uses
+  it ahead of Pulsar and the manual level; the goal page shows it next to the formula.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
   Japanese, Korean, Chinese (Simplified). Claude answers in the app language.
 

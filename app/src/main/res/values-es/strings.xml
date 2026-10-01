@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Sin acceso a los datos de Pulsar. Reinstala Calorie después de Pulsar: el acceso se concede al instalar.</string>
     <string name="pulsar_few_days">Pocos datos de Pulsar: el nivel se mide cuando pasen %1$d días desde el primer paseo o entrenamiento. Hasta entonces se usa la elección manual.</string>
     <string name="pulsar_calibrated">En %1$d días, paseos y entrenamientos sumaron de media %2$d kcal al día, factor de actividad %3$s.</string>
+    <string name="pulsar_capped">Supera la elección manual, así que el objetivo usa la elección manual hasta que la tendencia del peso lo confirme; los paseos van al déficit.</string>
+    <string name="pulsar_by_weight">Ahora el objetivo viene de la tendencia del peso.</string>
+    <string name="activity_by_weight">Según la tendencia del peso</string>
+    <string name="weight_trend_on">Gasto según la tendencia del peso</string>
+    <string name="weight_trend_off">Gasto según la tendencia del peso (desactivado)</string>
+    <string name="weight_trend_result">En %1$d días comiste de media %2$d kcal al día y el peso cambió %3$s kg por semana: gasto %4$d kcal al día. Según la fórmula: %5$d kcal.</string>
+    <string name="weight_trend_weighins">Pocas pesadas: %1$d de las %2$d necesarias en los últimos %3$d días. Hasta entonces el gasto viene de Pulsar o de la elección manual.</string>
+    <string name="weight_trend_span">Las pesadas abarcan %1$d días, se necesitan %2$d. Hasta entonces el gasto viene de Pulsar o de la elección manual.</string>
+    <string name="weight_trend_diary">El diario está completo en %1$d días entre pesadas, se necesitan %2$d. Hasta entonces el gasto viene de Pulsar o de la elección manual.</string>
+    <string name="weight_trend_help">Gasto según la tendencia del peso: lo que comiste más lo que perdió el peso (7700 kcal por kg) en las últimas 4 semanas. Necesita un diario completo y pesarse al menos cada pocos días; entonces sustituye a Pulsar y a la elección manual. En las primeras semanas de dieta parte de la pérdida es agua y el gasto sale alto; los días anotados a medias lo bajan.</string>
     <string name="mode_walk">Paseo</string>
     <string name="mode_training">Entrenamiento</string>
     <string name="session_line">%1$s-%2$s, %3$d min, pulso %4$d</string>

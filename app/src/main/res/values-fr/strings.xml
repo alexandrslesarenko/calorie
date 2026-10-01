@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Pas d\'accès aux données de Pulsar. Réinstallez Calorie après Pulsar : l\'accès est accordé à l\'installation.</string>
     <string name="pulsar_few_days">Trop peu de données Pulsar : le niveau est mesuré %1$d jours après la première marche ou séance. D\'ici là, le choix manuel s\'applique.</string>
     <string name="pulsar_calibrated">Sur %1$d jours, marches et séances ont ajouté en moyenne %2$d kcal par jour, coefficient d\'activité %3$s.</string>
+    <string name="pulsar_capped">C\'est au-dessus du choix manuel, donc l\'objectif suit le choix manuel jusqu\'à ce que la tendance du poids le confirme ; les marches vont au déficit.</string>
+    <string name="pulsar_by_weight">L\'objectif vient maintenant de la tendance du poids.</string>
+    <string name="activity_by_weight">Selon la tendance du poids</string>
+    <string name="weight_trend_on">Dépense selon la tendance du poids</string>
+    <string name="weight_trend_off">Dépense selon la tendance du poids (désactivé)</string>
+    <string name="weight_trend_result">Sur %1$d jours, vous avez mangé en moyenne %2$d kcal par jour et le poids a varié de %3$s kg par semaine : dépense %4$d kcal par jour. Selon la formule : %5$d kcal.</string>
+    <string name="weight_trend_weighins">Trop peu de pesées : %1$d sur %2$d nécessaires ces %3$d derniers jours. D\'ici là, la dépense vient de Pulsar ou du choix manuel.</string>
+    <string name="weight_trend_span">Les pesées couvrent %1$d jours, il en faut %2$d. D\'ici là, la dépense vient de Pulsar ou du choix manuel.</string>
+    <string name="weight_trend_diary">Le journal est rempli pour %1$d jours entre les pesées, il en faut %2$d. D\'ici là, la dépense vient de Pulsar ou du choix manuel.</string>
+    <string name="weight_trend_help">Dépense selon la tendance du poids : ce que vous avez mangé plus ce que le poids a perdu (7700 kcal par kg) sur les 4 dernières semaines. Il faut un journal complet et une pesée au moins tous les quelques jours ; elle remplace alors Pulsar et le choix manuel. Les premières semaines d\'un régime, une partie de la perte est de l\'eau et la dépense ressort trop haute ; des jours notés incomplètement la font baisser.</string>
     <string name="mode_walk">Marche</string>
     <string name="mode_training">Séance</string>
     <string name="session_line">%1$s-%2$s, %3$d min, pouls %4$d</string>

@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Нет доступа к данным Pulsar. Переустановите Calorie после Pulsar: доступ выдаётся при установке.</string>
     <string name="pulsar_few_days">Мало данных Pulsar: уровень измеряется, когда с первой прогулки или тренировки пройдёт %1$d дней. До тех пор действует ручной выбор.</string>
     <string name="pulsar_calibrated">За %1$d дн. прогулки и тренировки добавили в среднем %2$d ккал в день, коэффициент активности %3$s.</string>
+    <string name="pulsar_capped">Это выше ручного уровня, поэтому норма считается по ручному, пока тренд веса это не подтвердит; прогулки идут в дефицит.</string>
+    <string name="pulsar_by_weight">Сейчас норму задаёт тренд веса.</string>
+    <string name="activity_by_weight">По тренду веса</string>
+    <string name="weight_trend_on">Расход по тренду веса</string>
+    <string name="weight_trend_off">Расход по тренду веса (выключено)</string>
+    <string name="weight_trend_result">За %1$d дн. в среднем съедено %2$d ккал в день, вес менялся на %3$s кг в неделю: расход %4$d ккал в день. По формуле: %5$d ккал.</string>
+    <string name="weight_trend_weighins">Мало взвешиваний: %1$d из %2$d нужных за последние %3$d дней. До тех пор расход берётся из Pulsar или ручного уровня.</string>
+    <string name="weight_trend_span">Взвешивания охватывают %1$d дн., нужно %2$d. До тех пор расход берётся из Pulsar или ручного уровня.</string>
+    <string name="weight_trend_diary">Дневник заполнен за %1$d дн. между взвешиваниями, нужно %2$d. До тех пор расход берётся из Pulsar или ручного уровня.</string>
+    <string name="weight_trend_help">Расход по тренду веса: съеденное плюс то, что ушло с весом (7700 ккал на кг), за последние 4 недели. Нужны полный дневник и взвешивание хотя бы раз в несколько дней, тогда он заменяет Pulsar и ручной уровень. В первые недели диеты часть потери - вода, и расход выходит завышенным; не до конца записанные дни его занижают.</string>
     <string name="mode_walk">Прогулка</string>
     <string name="mode_training">Тренировка</string>
     <string name="session_line">%1$s-%2$s, %3$d мин, пульс %4$d</string>

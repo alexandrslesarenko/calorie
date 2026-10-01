@@ -61,6 +61,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("activity_from_pulsar", true)
         set(v) = sp.edit().putBoolean("activity_from_pulsar", v).apply()
 
+    /** Expenditure from the weight trend ahead of Pulsar and the manual level, when there is enough data. */
+    var activityFromWeight: Boolean
+        get() = sp.getBoolean("activity_from_weight", true)
+        set(v) = sp.edit().putBoolean("activity_from_weight", v).apply()
+
     /** Target weight, kg; 0 - not set (then just lose weight at the chosen pace). */
     var goalKg: Float
         get() = sp.getFloat("goal_kg", 0f)
@@ -111,7 +116,7 @@ class Prefs(context: Context) {
     /** Profile and goal for a backup file. */
     var profile: ProfileData
         get() = ProfileData(
-            sex?.key, birthDate?.toEpochDay(), heightCm, activity.key, pace.key, activityFromPulsar,
+            sex?.key, birthDate?.toEpochDay(), heightCm, activity.key, pace.key, activityFromPulsar, activityFromWeight,
             goalKg.toDouble(), customKcal, goalSeen, disclaimerAccepted, theme,
         )
         set(p) {
@@ -122,6 +127,7 @@ class Prefs(context: Context) {
             Activity.byKey(p.activity)?.let { activity = it }
             Pace.byKey(p.pace)?.let { pace = it }
             activityFromPulsar = p.activityFromPulsar
+            activityFromWeight = p.activityFromWeight
             goalKg = p.goalKg.toFloat()
             customKcal = p.customKcal
             goalSeen = p.goalSeen

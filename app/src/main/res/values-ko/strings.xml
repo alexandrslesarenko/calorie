@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">Pulsar 데이터에 접근할 수 없습니다. Pulsar 다음에 Calorie를 다시 설치하세요. 접근 권한은 설치할 때 부여됩니다.</string>
     <string name="pulsar_few_days">Pulsar 데이터가 부족합니다. 첫 산책이나 운동 후 %1$d일이 지나면 활동량을 측정합니다. 그때까지는 직접 선택한 값을 씁니다.</string>
     <string name="pulsar_calibrated">%1$d일 동안 산책과 운동으로 하루 평균 %2$d kcal, 활동 계수 %3$s입니다.</string>
+    <string name="pulsar_capped">직접 선택한 값보다 높아서, 체중 추세로 확인될 때까지 목표는 직접 선택한 값으로 계산합니다. 산책은 적자로 돌아갑니다.</string>
+    <string name="pulsar_by_weight">지금은 체중 추세로 목표를 계산합니다.</string>
+    <string name="activity_by_weight">체중 추세 기준</string>
+    <string name="weight_trend_on">체중 추세로 소비량 계산</string>
+    <string name="weight_trend_off">체중 추세로 소비량 계산 (꺼짐)</string>
+    <string name="weight_trend_result">%1$d일 동안 하루 평균 %2$d kcal를 먹었고 체중은 주당 %3$s kg 변했습니다: 소비량은 하루 %4$d kcal입니다. 공식으로는 %5$d kcal.</string>
+    <string name="weight_trend_weighins">체중 기록이 부족합니다: 최근 %3$d일 동안 필요한 %2$d회 중 %1$d회. 그때까지는 Pulsar나 직접 선택한 값으로 소비량을 계산합니다.</string>
+    <string name="weight_trend_span">체중 기록이 %1$d일에 걸쳐 있고 %2$d일이 필요합니다. 그때까지는 Pulsar나 직접 선택한 값으로 소비량을 계산합니다.</string>
+    <string name="weight_trend_diary">체중 기록 사이에 일지가 채워진 날은 %1$d일, 필요한 날은 %2$d일입니다. 그때까지는 Pulsar나 직접 선택한 값으로 소비량을 계산합니다.</string>
+    <string name="weight_trend_help">체중 추세로 본 소비량: 최근 4주 동안 먹은 양에 체중으로 줄어든 양(1 kg당 7700 kcal)을 더한 값입니다. 일지를 빠짐없이 쓰고 며칠에 한 번 이상 체중을 재야 하며, 그러면 Pulsar와 직접 선택한 값을 대신합니다. 다이어트 첫 몇 주는 줄어든 양의 일부가 수분이라 소비량이 높게 나오고, 덜 기록한 날은 낮게 만듭니다.</string>
     <string name="mode_walk">산책</string>
     <string name="mode_training">운동</string>
     <string name="session_line">%1$s-%2$s, %3$d분, 심박 %4$d</string>

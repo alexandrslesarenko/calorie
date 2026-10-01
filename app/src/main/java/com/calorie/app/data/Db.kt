@@ -51,6 +51,14 @@ data class Entry(
 @Entity(tableName = "weight")
 data class WeightMark(@PrimaryKey val day: Long, val kg: Double)
 
+/**
+ * Daily kcal target as it was on that day. The target follows weight, age and the Pulsar
+ * average, so a past day measured against today's target would change its balance after
+ * the fact. Today's row is rewritten while the day lasts; the last value stays.
+ */
+@Entity(tableName = "day_target")
+data class DayTarget(@PrimaryKey val day: Long, val kcal: Int)
+
 /** Product found by barcode: no second network trip. */
 @Entity(tableName = "product")
 data class CachedProduct(
@@ -236,6 +244,15 @@ interface FoodDao {
     @Query("SELECT * FROM dish ORDER BY name")
     suspend fun allDishes(): List<Dish>
 
+    @Query("SELECT * FROM day_target ORDER BY day")
+    suspend fun allDayTargets(): List<DayTarget>
+
+    @Query("SELECT * FROM day_target ORDER BY day")
+    fun dayTargets(): Flow<List<DayTarget>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putDayTargets(t: List<DayTarget>)
+
     @Query("SELECT COUNT(*) FROM entry")
     fun entryCount(): Flow<Int>
 
@@ -254,17 +271,22 @@ interface FoodDao {
     @Query("DELETE FROM dish")
     suspend fun clearDishes()
 
+    @Query("DELETE FROM day_target")
+    suspend fun clearDayTargets()
+
     /** Import in one transaction: a broken file must not leave half a diary. */
     @Transaction
-    suspend fun importBackup(replace: Boolean, entries: List<Entry>, weights: List<WeightMark>, dishes: List<Dish>) {
+    suspend fun importBackup(replace: Boolean, entries: List<Entry>, weights: List<WeightMark>, dishes: List<Dish>, targets: List<DayTarget>) {
         if (replace) {
             clearEntries()
             clearWeights()
             clearDishes()
+            clearDayTargets()
         }
         insert(entries)
         putWeights(weights)
         putDishes(dishes)
+        putDayTargets(targets)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -287,8 +309,8 @@ interface FoodDao {
 }
 
 @Database(
-    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class, Pending::class],
-    version = 2,
+    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class, Pending::class, DayTarget::class],
+    version = 3,
     exportSchema = false,
 )
 abstract class FoodDb : RoomDatabase() {
@@ -304,6 +326,16 @@ abstract class FoodDb : RoomDatabase() {
             }
         }
 
+        /** v3: the target of each day. SQL copied from the generated FoodDb_Impl. */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(DAY_TARGET_SQL)
+            }
+        }
+
+        private const val DAY_TARGET_SQL =
+            "CREATE TABLE IF NOT EXISTS `day_target` (`day` INTEGER NOT NULL, `kcal` INTEGER NOT NULL, PRIMARY KEY(`day`))"
+
         private const val PENDING_SQL = "CREATE TABLE IF NOT EXISTS `pending` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
             "`day` INTEGER NOT NULL, `meal` TEXT NOT NULL, `source` TEXT NOT NULL, `text` TEXT NOT NULL, " +
             "`language` TEXT NOT NULL, `cacheKey` TEXT NOT NULL, `useCache` INTEGER NOT NULL, `state` TEXT NOT NULL, " +
@@ -313,7 +345,7 @@ abstract class FoodDb : RoomDatabase() {
         // Migrations are written by hand: any schema change - bump version and add a Migration.
         fun get(context: Context): FoodDb = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, FoodDb::class.java, "food.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build().also { instance = it }
         }
     }

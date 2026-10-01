@@ -153,6 +153,16 @@
     <string name="pulsar_no_access">无法访问 Pulsar 数据。请在 Pulsar 之后重新安装 Calorie：访问权限在安装时授予。</string>
     <string name="pulsar_few_days">Pulsar 数据不足：从第一次散步或训练起满 %1$d 天后开始测量活动量，在此之前使用手动选择。</string>
     <string name="pulsar_calibrated">%1$d 天内散步和训练平均每天增加 %2$d 千卡，活动系数 %3$s。</string>
+    <string name="pulsar_capped">高于手动选择，因此在体重趋势确认之前，目标按手动选择计算；散步的消耗计入缺口。</string>
+    <string name="pulsar_by_weight">目前目标按体重趋势计算。</string>
+    <string name="activity_by_weight">按体重趋势</string>
+    <string name="weight_trend_on">按体重趋势计算消耗</string>
+    <string name="weight_trend_off">按体重趋势计算消耗（已关闭）</string>
+    <string name="weight_trend_result">%1$d 天内平均每天摄入 %2$d 千卡，体重每周变化 %3$s 千克：消耗为每天 %4$d 千卡。按公式：%5$d 千卡。</string>
+    <string name="weight_trend_weighins">称重次数不足：最近 %3$d 天需要 %2$d 次，现有 %1$d 次。在此之前按 Pulsar 或手动选择计算消耗。</string>
+    <string name="weight_trend_span">称重记录跨度 %1$d 天，需要 %2$d 天。在此之前按 Pulsar 或手动选择计算消耗。</string>
+    <string name="weight_trend_diary">两次称重之间日记完整的天数为 %1$d 天，需要 %2$d 天。在此之前按 Pulsar 或手动选择计算消耗。</string>
+    <string name="weight_trend_help">按体重趋势计算的消耗：最近 4 周吃下的加上体重减少的部分（每千克 7700 千卡）。需要完整的日记，并且至少每隔几天称一次体重，这样它会取代 Pulsar 和手动选择。节食的头几周，减少的部分有一些是水分，消耗会偏高；记录不全的日子会让它偏低。</string>
     <string name="mode_walk">散步</string>
     <string name="mode_training">训练</string>
     <string name="session_line">%1$s-%2$s，%3$d 分钟，心率 %4$d</string>

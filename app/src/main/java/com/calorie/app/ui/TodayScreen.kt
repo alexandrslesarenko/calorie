@@ -69,6 +69,7 @@ import com.calorie.app.logic.Burn
 import java.time.Instant
 import java.time.ZoneId
 import com.calorie.app.data.WeightMark
+import com.calorie.app.logic.Goals
 import com.calorie.app.logic.Limit
 import com.calorie.app.logic.Nutrients
 import com.calorie.app.logic.Target
@@ -88,7 +89,10 @@ fun TodayScreen(a: MainActivity) {
     val dao = remember { FoodDb.get(ctx).dao() }
     val entries by remember(a.day) { dao.entries(a.day) }.collectAsState(emptyList())
     val lastWeight by remember { dao.lastWeight() }.collectAsState(null)
-    val target = remember(lastWeight, a.profileVersion, a.pulsar) { a.target(lastWeight?.kg) }
+    val current = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.target(lastWeight?.kg) }
+    // A past day keeps the kcal target it had; the rest (protein, limits) is today's.
+    val saved by remember { dao.dayTargets() }.collectAsState(emptyList())
+    val target = current?.let { t -> t.copy(kcal = Goals.targetOn(a.day, LocalDate.now().toEpochDay(), t.kcal, saved) ?: t.kcal) }
     val eaten = entries.map { it.nutrients }.sum()
     var weightDialog by remember { mutableStateOf(false) }
 

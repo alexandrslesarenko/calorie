@@ -1,5 +1,6 @@
 package com.calorie.app.logic
 
+import com.calorie.app.data.DayTarget
 import com.calorie.app.data.Dish
 import com.calorie.app.data.Entry
 import com.calorie.app.data.WeightMark
@@ -22,6 +23,7 @@ data class ProfileData(
     val activity: String,
     val pace: String,
     val activityFromPulsar: Boolean,
+    val activityFromWeight: Boolean,
     val goalKg: Double,
     val customKcal: Int,
     val goalSeen: Boolean,
@@ -38,6 +40,8 @@ data class BackupData(
     val entries: List<Entry>,
     val weights: List<WeightMark>,
     val dishes: List<Dish>,
+    /** Target of each past day (format 2); without it old days are measured against today's. */
+    val targets: List<DayTarget> = emptyList(),
 )
 
 enum class BackupError {
@@ -55,6 +59,7 @@ data class BackupMerge(
     val weights: List<WeightMark>,
     /** New dishes and existing ones that become favorites. */
     val dishes: List<Dish>,
+    val targets: List<DayTarget>,
     val skippedEntries: Int,
 )
 
@@ -66,7 +71,7 @@ data class BackupMerge(
  */
 object Backup {
     const val APP = "calorie"
-    const val FORMAT = 1
+    const val FORMAT = 2
     /** Byte order mark: Excel needs it to read UTF-8, and a file edited on Windows may start with it. */
     private const val BOM = 0xFEFF.toChar()
 
@@ -85,6 +90,7 @@ object Backup {
                     .put("activity", p.activity)
                     .put("pace", p.pace)
                     .put("activityFromPulsar", p.activityFromPulsar)
+                    .put("activityFromWeight", p.activityFromWeight)
                     .put("goalKg", p.goalKg)
                     .put("customKcal", p.customKcal)
                     .put("goalSeen", p.goalSeen)
@@ -119,6 +125,9 @@ object Backup {
                 .put("uses", x.uses)
                 .put("lastUsed", x.lastUsed)
                 .put("favorite", x.favorite)
+        }))
+        root.put("targets", JSONArray(d.targets.map { t ->
+            JSONObject().put("date", LocalDate.ofEpochDay(t.day).toString()).put("kcal", t.kcal)
         }))
         return root.toString(1)
     }
@@ -174,6 +183,11 @@ object Backup {
                 favorite = o.optBoolean("favorite", false),
             )
         }.distinctBy { it.id }
+        val targets = objects(root, "targets").mapNotNull { o ->
+            val day = date(o, "date") ?: return@mapNotNull null
+            val kcal = o.optInt("kcal", 0).takeIf { it > 0 } ?: return@mapNotNull null
+            DayTarget(day, kcal)
+        }.distinctBy { it.day }
         val profile = root.optJSONObject("profile")?.let { p ->
             ProfileData(
                 sex = p.optString("sex").takeIf { it.isNotEmpty() && !p.isNull("sex") },
@@ -182,6 +196,7 @@ object Backup {
                 activity = p.optString("activity"),
                 pace = p.optString("pace"),
                 activityFromPulsar = p.optBoolean("activityFromPulsar", true),
+                activityFromWeight = p.optBoolean("activityFromWeight", true),
                 goalKg = p.optDouble("goalKg", 0.0).takeIf { !it.isNaN() && it > 0 } ?: 0.0,
                 customKcal = p.optInt("customKcal", 0).coerceAtLeast(0),
                 goalSeen = p.optBoolean("goalSeen", false),
@@ -189,14 +204,14 @@ object Backup {
                 theme = p.optString("theme"),
             )
         }
-        return BackupData(root.optLong("exported", 0), profile, entries, weights, dishes)
+        return BackupData(root.optLong("exported", 0), profile, entries, weights, dishes, targets)
     }
 
     /**
      * Records of the backup that are not there yet. An entry is the same when day, meal, name
      * and grams match; counted, so two identical yogurts in one meal both survive a merge.
-     * Weight of an existing day and an existing dish are kept as they are (a dish only gains
-     * the favorite mark).
+     * Weight and target of an existing day and an existing dish are kept as they are (a dish
+     * only gains the favorite mark).
      */
     fun merge(have: BackupData, add: BackupData): BackupMerge {
         val left = have.entries.groupingBy(::entryKey).eachCount().toMutableMap()
@@ -207,6 +222,7 @@ object Backup {
             n == 0
         }
         val days = have.weights.map { it.day }.toSet()
+        val targetDays = have.targets.map { it.day }.toSet()
         val dishes = have.dishes.associateBy { it.id }
         return BackupMerge(
             entries = entries,
@@ -219,6 +235,7 @@ object Backup {
                     else -> null
                 }
             },
+            targets = add.targets.filter { it.day !in targetDays },
             skippedEntries = add.entries.size - entries.size,
         )
     }

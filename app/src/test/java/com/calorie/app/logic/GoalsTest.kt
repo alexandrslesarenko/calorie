@@ -1,5 +1,6 @@
 package com.calorie.app.logic
 
+import com.calorie.app.data.DayTarget
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -83,5 +84,18 @@ class GoalsTest {
         val leap = LocalDate.of(1988, 2, 29)
         assertEquals(37, Goals.age(leap, LocalDate.of(2026, 2, 28)))
         assertEquals(38, Goals.age(leap, LocalDate.of(2026, 3, 1)))
+    }
+
+    @Test
+    fun pastDayKeepsItsTarget() {
+        val saved = listOf(DayTarget(10, 2080), DayTarget(12, 2340))
+        // Today and later: the current target, whatever was saved.
+        assertEquals(2330, Goals.targetOn(12, 12, 2330, saved))
+        assertEquals(2080, Goals.targetOn(10, 12, 2330, saved))
+        // A day without its own row takes the last one before it.
+        assertEquals(2080, Goals.targetOn(11, 12, 2330, saved))
+        // Before anything was saved: the current one.
+        assertEquals(2330, Goals.targetOn(9, 12, 2330, saved))
+        assertNull(Goals.targetOn(9, 12, null, saved))
     }
 }

@@ -1,5 +1,6 @@
 package com.calorie.app.logic
 
+import com.calorie.app.data.DayTarget
 import java.time.LocalDate
 import java.time.Period
 import kotlin.math.max
@@ -127,6 +128,15 @@ object Goals {
         val weeks = if (goalKg != null && rate > 0) ((b.weightKg - goalKg) / rate).let { kotlin.math.ceil(it).toInt() } else null
         return Target(round10(kcal), bmr.roundToInt(), tdee.roundToInt(), rate, limit, protein, weeks)
     }
+
+    /**
+     * Target to measure a day against. Today and later - the current one. A past day - the one
+     * saved on it; a day without one (logged afterwards, or from before targets were saved)
+     * takes the last one saved before it, and failing that the current one.
+     * saved - sorted by day.
+     */
+    fun targetOn(day: Long, today: Long, current: Int?, saved: List<DayTarget>): Int? =
+        if (day >= today) current else saved.lastOrNull { it.day <= day }?.kcal ?: current
 
     /** Full years on the given day. */
     fun age(birth: LocalDate, today: LocalDate = LocalDate.now()): Int = Period.between(birth, today).years

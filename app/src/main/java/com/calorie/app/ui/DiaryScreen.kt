@@ -61,7 +61,10 @@ fun DiaryScreen(a: MainActivity) {
     val today = LocalDate.now().toEpochDay()
     val totals by remember(today) { dao.totals(today - DIARY_DAYS, today) }.collectAsState(emptyList())
     val weights by remember { dao.weights() }.collectAsState(emptyList())
-    val target = remember(weights.lastOrNull(), a.profileVersion, a.pulsar) { a.target(weights.lastOrNull()?.kg) }
+    val target = remember(weights.lastOrNull(), a.profileVersion, a.pulsar, a.trendData) { a.target(weights.lastOrNull()?.kg) }
+    // Each day against its own target: today's would rewrite the balance of the past.
+    val saved by remember { dao.dayTargets() }.collectAsState(emptyList())
+    fun targetOn(day: Long) = Goals.targetOn(day, today, target?.kcal, saved)
     // Burned kcal per day from Pulsar, for information next to what was eaten.
     val burned = remember(weights.lastOrNull(), a.profileVersion, a.pulsar) {
         val b = a.body(weights.lastOrNull()?.kg)
@@ -84,7 +87,7 @@ fun DiaryScreen(a: MainActivity) {
                     )
                     if (target != null) {
                         // What the days add up to: the sum is what moves the scale.
-                        val balance = week.sumOf { target.kcal - it.kcal }
+                        val balance = week.sumOf { (targetOn(it.day) ?: target.kcal) - it.kcal }
                         val kg = kotlin.math.abs(balance) / Goals.KCAL_PER_KG
                         Text(
                             stringResource(
@@ -103,7 +106,7 @@ fun DiaryScreen(a: MainActivity) {
                 Text(stringResource(R.string.diary_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        items(totals, key = { it.day }) { t -> DayRow(t, target?.kcal, burned[t.day], t.day == today) { a.day = t.day; a.tabRequest = 0 } }
+        items(totals, key = { it.day }) { t -> DayRow(t, targetOn(t.day), burned[t.day], t.day == today) { a.day = t.day; a.tabRequest = 0 } }
     }
 }
 
