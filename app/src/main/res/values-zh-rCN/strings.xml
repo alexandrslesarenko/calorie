@@ -220,10 +220,15 @@
     <string name="studio_desc">密钥、用量和限额在 Google 网站上管理。</string>
     <string name="studio_help">页面在内置浏览器标签页中打开，用你的 Google 账号登录。用量页面显示每日免费额度已用了多少。</string>
     <string name="studio_usage">用量和限额</string>
-    <string name="spend_help_gemini">应用根据每次回答的令牌数（含思考）自行统计。在免费层级中 Gemini 不收费；第二个数字是同样的请求在付费层级的费用（Gemini 3.5 Flash-Lite：每百万输入令牌 30 美分，每百万输出令牌 2.50 美元）。Google 按太平洋时间午夜起算每日限额；准确用量见 AI Studio 的用量页面。</string>
+    <string name="spend_help_gemini">由应用根据每次回答的令牌（包括思考）按付费套餐价格计算（Gemini 3.5 Flash-Lite：每百万输入令牌 30 美分，每百万输出令牌 2.50 美元）。免费套餐下 Google 不收费，金额即本应花费的费用。Google 从太平洋时间午夜开始计算每日限额；准确用量见 AI Studio 的 Usage 页面。</string>
     <string name="spend_today_google">今天（按 Google 的日期）</string>
     <string name="spend_cost_free">免费层级费用</string>
     <string name="spend_cost_paid">付费层级则为</string>
+    <string name="tier_title">套餐</string>
+    <string name="tier_free">免费</string>
+    <string name="tier_paid">付费</string>
+    <string name="tier_help">Google 不会告诉应用密钥属于哪种套餐，请在此选择。在 AI Studio 中为项目关联结算后，密钥即为付费：请求按付费价格计费，Google 也不会用发送的内容改进其产品。费用计数器始终按付费价格累计；此选项只改变金额的显示方式和隐私提示。</string>
+    <string name="privacy_note_gemini_paid">照片或文字会发送到 Google（Gemini）进行识别。照片的位置和其他元数据会在发送前删除。</string>
     <string name="answered_by_fallback">由于 %2$s 不可用，由 %1$s 回答。</string>
     <string name="answered_by_quota">由于 %2$s 的每日免费额度已用完，由 %1$s 回答。</string>
     <string name="err_model_gone">%1$s 不可用，其他识别模型也没有密钥。请在设置中选择识别模型。</string>

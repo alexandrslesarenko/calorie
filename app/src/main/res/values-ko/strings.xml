@@ -220,10 +220,15 @@
     <string name="studio_desc">키, 사용량, 한도는 Google 사이트에서 관리합니다.</string>
     <string name="studio_help">페이지는 앱 안의 브라우저 탭에서 열리며 Google 계정으로 로그인합니다. 사용량 페이지에서 일일 무료 한도를 얼마나 썼는지 볼 수 있습니다.</string>
     <string name="studio_usage">사용량과 한도</string>
-    <string name="spend_help_gemini">각 답변의 토큰 수(생각 포함)로 앱이 직접 셉니다. 무료 등급에서 Gemini는 비용이 없습니다. 두 번째 금액은 같은 요청을 유료 등급에서 썼을 때의 비용입니다(Gemini 3.5 Flash-Lite: 입력 토큰 100만 개당 30센트, 출력 100만 개당 2.50달러). Google은 일일 한도를 태평양 시간 자정부터 셉니다. 정확한 사용량은 AI Studio의 사용량 페이지에 있습니다.</string>
+    <string name="spend_help_gemini">앱이 각 응답의 토큰(생각 포함)을 유료 요금제 가격으로 직접 계산합니다(Gemini 3.5 Flash-Lite: 입력 100만 토큰당 30센트, 출력 100만 토큰당 2.50달러). 무료 요금제에서는 Google이 청구하지 않으며, 금액은 들었을 비용으로 표시됩니다. Google은 일일 한도를 태평양 시간 자정부터 셉니다. 정확한 사용량은 AI Studio의 Usage 페이지에 있습니다.</string>
     <string name="spend_today_google">오늘(Google 기준 날짜)</string>
     <string name="spend_cost_free">무료 등급 비용</string>
     <string name="spend_cost_paid">유료 등급이라면</string>
+    <string name="tier_title">요금제</string>
+    <string name="tier_free">무료</string>
+    <string name="tier_paid">유료</string>
+    <string name="tier_help">Google은 키의 요금제를 앱에 알려 주지 않으므로 여기에서 선택하세요. AI Studio 프로젝트에 결제가 연결되면 키는 유료가 됩니다. 그러면 요청은 유료 가격으로 청구되고, Google은 보낸 내용을 제품 개선에 사용하지 않습니다. 비용 카운터는 어느 경우든 유료 가격으로 합산하며, 이 선택은 금액 표시와 개인정보 안내만 바꿉니다.</string>
+    <string name="privacy_note_gemini_paid">사진이나 텍스트는 인식을 위해 Google(Gemini)로 전송됩니다. 위치 정보와 기타 사진 메타데이터는 전송 전에 삭제됩니다.</string>
     <string name="answered_by_fallback">%2$s 모델을 사용할 수 없어 %1$s 모델이 답했습니다.</string>
     <string name="answered_by_quota">%2$s의 일일 무료 한도가 소진되어 %1$s 모델이 답했습니다.</string>
     <string name="err_model_gone">%1$s 모델을 사용할 수 없고 다른 인식 모델에는 키가 없습니다. 설정에서 인식 모델을 선택하세요.</string>

@@ -111,6 +111,15 @@ class Prefs(context: Context) {
 
     fun setKeyStatus(p: Provider, v: String) = if (p == Provider.GEMINI) geminiKeyStatus = v else keyStatus = v
 
+    /**
+     * Whether the Gemini key is on the paid tier (billing linked to its project). Google does not
+     * tell the tier to the key, so the user sets it; it changes only how the cost is shown and
+     * whether the privacy note warns about the free tier.
+     */
+    var geminiPaid: Boolean
+        get() = sp.getBoolean("gemini_paid", false)
+        set(v) = sp.edit().putBoolean("gemini_paid", v).apply()
+
     /** Recognizer asked first; the others are asked only when it is gone. */
     var recognizer: Recognizer
         get() = Recognizer.byKey(sp.getString("recognizer", null))

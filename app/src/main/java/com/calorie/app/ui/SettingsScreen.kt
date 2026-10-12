@@ -651,16 +651,35 @@ private fun ClaudeSettings(a: MainActivity) {
             CompactButton(onClick = { a.openConsole(GEMINI_USAGE_URL) }) { Text(stringResource(R.string.studio_usage), maxLines = 1, style = style) }
         }
     }
-    SpendCard(a, Provider.GEMINI)
+    // Shared: the spending card shows the cost by the tier chosen here.
+    var paid by remember { mutableStateOf(a.prefs.geminiPaid) }
+    TierCard(paid) { paid = it; a.prefs.geminiPaid = it }
+    SpendCard(a, Provider.GEMINI, paid)
+}
+
+/** Free or paid Gemini tier: the API does not say which, so the user tells the app. */
+@Composable
+private fun TierCard(paid: Boolean, onChange: (Boolean) -> Unit) {
+    SettingsCard(stringResource(R.string.tier_title), help = stringResource(R.string.tier_help), secondary = true) {
+        FitRow { style ->
+            listOf(false to R.string.tier_free, true to R.string.tier_paid).forEach { (v, label) ->
+                FilterChip(
+                    selected = paid == v,
+                    onClick = { onChange(v) },
+                    label = { Text(stringResource(label), maxLines = 1, style = style) },
+                )
+            }
+        }
+    }
 }
 
 /**
  * What the app spent with one provider. A regular key cannot read the balance or usage, so the
- * app counts it itself from the usage in answers. Gemini: what the free tier would cost on the
- * paid one, and today's requests against Google's daily limit.
+ * app counts it itself from the usage in answers. Gemini: today's requests against Google's
+ * daily limit, and on the free tier (paid = false) what the requests would cost on the paid one.
  */
 @Composable
-private fun SpendCard(a: MainActivity, p: Provider) {
+private fun SpendCard(a: MainActivity, p: Provider, paid: Boolean = true) {
     val prefs = a.prefs
     var tick by remember { mutableIntStateOf(0) }
     val u = remember(tick) { prefs.usage(p) }
@@ -674,7 +693,7 @@ private fun SpendCard(a: MainActivity, p: Provider) {
             AboutLine(stringResource(R.string.spend_requests, since ?: "--"), u.requests.toString())
             if (gemini) AboutLine(stringResource(R.string.spend_today_google), u.today.toString())
             AboutLine(stringResource(R.string.spend_tokens), stringResource(R.string.spend_tokens_value, u.input, u.output))
-            if (gemini) {
+            if (gemini && !paid) {
                 AboutLine(stringResource(R.string.spend_cost_free), "$0")
                 AboutLine(stringResource(R.string.spend_cost_paid), "$" + String.format(Locale.US, "%.3f", usd))
             } else {
@@ -730,7 +749,7 @@ private fun RecognizerCard(a: MainActivity, keys: AiKeys) {
             )
         }
         if (chosen.provider == Provider.GEMINI) {
-            Text(stringResource(R.string.privacy_note_gemini), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(if (a.prefs.geminiPaid) R.string.privacy_note_gemini_paid else R.string.privacy_note_gemini), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -220,10 +220,15 @@
     <string name="studio_desc">Schlüssel, Nutzung und Limits werden auf der Google-Website verwaltet.</string>
     <string name="studio_help">Die Seiten öffnen sich in einem eingebauten Browser-Tab; du meldest dich mit deinem Google-Konto an. Die Nutzungsseite zeigt, wie viel vom täglichen Gratislimit verbraucht ist.</string>
     <string name="studio_usage">Nutzung und Limits</string>
-    <string name="spend_help_gemini">Von der App aus den Tokens jeder Antwort gezählt, Denken eingeschlossen. Im kostenlosen Tarif kostet Gemini nichts; die zweite Zahl zeigt, was dieselben Anfragen im bezahlten Tarif kosten würden (Gemini 3.5 Flash-Lite: 30 Cent pro Million Eingabe-Tokens und 2,50 Dollar pro Million Ausgabe-Tokens). Google zählt sein Tageslimit ab Mitternacht pazifischer Zeit; die genaue Nutzung steht auf der Nutzungsseite in AI Studio.</string>
+    <string name="spend_help_gemini">Von der App selbst aus den Tokens jeder Antwort gezählt, einschließlich Denken, zu den Preisen des bezahlten Tarifs (Gemini 3.5 Flash-Lite: 30 Cent pro Million Eingabe-Tokens und 2,50 Dollar pro Million Ausgabe-Tokens). Im kostenlosen Tarif berechnet Google nichts, die Summe zeigt, was es kosten würde. Google zählt das Tageslimit ab Mitternacht pazifischer Zeit; die genaue Nutzung steht auf der Nutzungsseite in AI Studio.</string>
     <string name="spend_today_google">Heute, nach Googles Tag</string>
     <string name="spend_cost_free">Kosten im kostenlosen Tarif</string>
     <string name="spend_cost_paid">Im bezahlten Tarif wären es</string>
+    <string name="tier_title">Tarif</string>
+    <string name="tier_free">Kostenlos</string>
+    <string name="tier_paid">Kostenpflichtig</string>
+    <string name="tier_help">Google teilt der App nicht mit, in welchem Tarif der Schlüssel ist, deshalb hier auswählen. Kostenpflichtig wird ein Schlüssel, wenn seinem Projekt in AI Studio eine Zahlungsmethode zugeordnet ist: Anfragen werden dann zu den bezahlten Preisen berechnet, und Google nutzt das Gesendete nicht zur Verbesserung seiner Produkte. Der Ausgabenzähler summiert in jedem Fall die bezahlten Preise; die Auswahl ändert nur die Anzeige der Summe und den Datenschutzhinweis.</string>
+    <string name="privacy_note_gemini_paid">Das Foto oder der Text wird zur Erkennung an Google (Gemini) gesendet. Standort und andere Fotometadaten werden vorher entfernt.</string>
     <string name="answered_by_fallback">Geantwortet hat %1$s, weil %2$s nicht verfügbar ist.</string>
     <string name="answered_by_quota">Geantwortet hat %1$s, weil das tägliche Gratislimit von %2$s aufgebraucht ist.</string>
     <string name="err_model_gone">%1$s ist nicht verfügbar, und kein anderer Erkenner hat einen Schlüssel. Wähle einen Erkenner in den Einstellungen.</string>

@@ -220,10 +220,15 @@
     <string name="studio_desc">Keys, usage and limits are managed on the Google website.</string>
     <string name="studio_help">The pages open in a built-in browser tab; you sign in with your Google account. The Usage page shows how much of the free daily limit is used.</string>
     <string name="studio_usage">Usage and limits</string>
-    <string name="spend_help_gemini">Counted by the app from the tokens in each answer, thinking included. On the free tier Gemini costs nothing; the second figure is what the same requests would cost on the paid tier (Gemini 3.5 Flash-Lite: 30 cents per million input tokens and 2.50 dollars per million output tokens). Google counts its daily limit from midnight Pacific time; the exact usage is on the Usage page in AI Studio.</string>
+    <string name="spend_help_gemini">Counted by the app from the tokens in each answer, thinking included, at the paid tier prices (Gemini 3.5 Flash-Lite: 30 cents per million input tokens and 2.50 dollars per million output tokens). On the free tier Google charges nothing, and the sum is shown as what it would cost. Google counts its daily limit from midnight Pacific time; the exact usage is on the Usage page in AI Studio.</string>
     <string name="spend_today_google">Today, by Google\'s day</string>
     <string name="spend_cost_free">Cost on the free tier</string>
     <string name="spend_cost_paid">On the paid tier it would be</string>
+    <string name="tier_title">Tier</string>
+    <string name="tier_free">Free tier</string>
+    <string name="tier_paid">Paid tier</string>
+    <string name="tier_help">Google does not tell the app which tier the key is on, so choose it here. A key becomes paid when billing is linked to its project in AI Studio: requests are then charged at the paid prices, and Google does not use what is sent to improve its products. The spending counter adds up paid prices either way; this choice only changes how the sum is shown and the privacy note.</string>
+    <string name="privacy_note_gemini_paid">The photo or text is sent to Google (Gemini) for recognition. Location and other photo metadata are removed before sending.</string>
     <string name="answered_by_fallback">Answered by %1$s, because %2$s is not available.</string>
     <string name="answered_by_quota">Answered by %1$s, because the daily free limit of %2$s is used up.</string>
     <string name="err_model_gone">%1$s is not available, and no other recognizer has a key. Choose a recognizer in settings.</string>

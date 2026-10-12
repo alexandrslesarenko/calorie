@@ -220,10 +220,15 @@
     <string name="studio_desc">キー、使用量、上限は Google のサイトで管理します。</string>
     <string name="studio_help">ページはアプリ内のブラウザタブで開き、Google アカウントでログインします。使用量のページで、1日の無料上限をどれだけ使ったかを確認できます。</string>
     <string name="studio_usage">使用量と上限</string>
-    <string name="spend_help_gemini">各回答のトークン数（思考を含む）からアプリが数えています。無料枠では Gemini は無料です。2つ目の金額は、同じリクエストを有料枠で使った場合の料金です（Gemini 3.5 Flash-Lite：入力100万トークンあたり30セント、出力100万トークンあたり2.50ドル）。Google は1日の上限を太平洋時間の午前0時から数えます。正確な使用量は AI Studio の使用量ページで確認できます。</string>
+    <string name="spend_help_gemini">アプリが各回答のトークン（思考を含む）から有料プランの料金で集計します（Gemini 3.5 Flash-Lite：入力 100 万トークンあたり 30 セント、出力 100 万トークンあたり 2.50 ドル）。無料プランでは Google は請求せず、金額は「かかったはずの費用」として表示されます。Google は 1 日の上限を太平洋時間の午前 0 時から数えます。正確な使用量は AI Studio の Usage ページで確認できます。</string>
     <string name="spend_today_google">今日（Google の日付）</string>
     <string name="spend_cost_free">無料枠での料金</string>
     <string name="spend_cost_paid">有料枠なら</string>
+    <string name="tier_title">プラン</string>
+    <string name="tier_free">無料</string>
+    <string name="tier_paid">有料</string>
+    <string name="tier_help">Google はキーのプランをアプリに知らせないため、ここで選んでください。AI Studio のプロジェクトに支払い方法をリンクするとキーは有料になり、リクエストは有料料金で請求され、送信内容は Google の製品改善に使われません。費用カウンターはどちらの場合も有料料金で集計します。この選択で変わるのは金額の表示とプライバシーの注意書きだけです。</string>
+    <string name="privacy_note_gemini_paid">写真またはテキストは認識のために Google（Gemini）へ送信されます。位置情報などの写真メタデータは送信前に削除されます。</string>
     <string name="answered_by_fallback">%2$sが利用できないため、%1$sが回答しました。</string>
     <string name="answered_by_quota">%2$sの1日の無料上限に達したため、%1$sが回答しました。</string>
     <string name="err_model_gone">%1$sは利用できず、ほかの認識モデルにはキーがありません。設定で認識モデルを選んでください。</string>

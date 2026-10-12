@@ -220,10 +220,15 @@
     <string name="studio_desc">Chiavi, utilizzo e limiti si gestiscono sul sito di Google.</string>
     <string name="studio_help">Le pagine si aprono in una scheda del browser integrata; accedi con il tuo account Google. La pagina di utilizzo mostra quanto del limite gratuito giornaliero è già stato usato.</string>
     <string name="studio_usage">Utilizzo e limiti</string>
-    <string name="spend_help_gemini">Conteggiato dall\'app in base ai token di ogni risposta, ragionamento compreso. Con il piano gratuito Gemini non costa nulla; la seconda cifra è quanto costerebbero le stesse richieste con il piano a pagamento (Gemini 3.5 Flash-Lite: 30 centesimi per milione di token in ingresso e 2,50 dollari per milione in uscita). Google conta il limite giornaliero dalla mezzanotte, ora del Pacifico; l\'utilizzo esatto è nella pagina di utilizzo di AI Studio.</string>
+    <string name="spend_help_gemini">Conteggiato dall\'app dai token di ogni risposta, ragionamento compreso, ai prezzi del piano a pagamento (Gemini 3.5 Flash-Lite: 30 centesimi per milione di token in ingresso e 2,50 dollari per milione in uscita). Con il piano gratuito Google non addebita nulla, e la somma mostra quanto costerebbe. Google conta il limite giornaliero dalla mezzanotte del Pacifico; l\'uso esatto è nella pagina Usage di AI Studio.</string>
     <string name="spend_today_google">Oggi, secondo il giorno di Google</string>
     <string name="spend_cost_free">Costo con il piano gratuito</string>
     <string name="spend_cost_paid">Con il piano a pagamento sarebbe</string>
+    <string name="tier_title">Piano</string>
+    <string name="tier_free">Gratuito</string>
+    <string name="tier_paid">A pagamento</string>
+    <string name="tier_help">Google non comunica all\'app il piano della chiave, quindi sceglilo qui. Una chiave diventa a pagamento quando al suo progetto in AI Studio è collegata la fatturazione: le richieste sono allora addebitate ai prezzi a pagamento e Google non usa ciò che viene inviato per migliorare i suoi prodotti. Il contatore somma comunque i prezzi a pagamento; questa scelta cambia solo come è mostrata la somma e la nota sulla privacy.</string>
+    <string name="privacy_note_gemini_paid">La foto o il testo viene inviato a Google (Gemini) per il riconoscimento. Posizione e altri metadati della foto vengono rimossi prima dell\'invio.</string>
     <string name="answered_by_fallback">Ha risposto %1$s, perché %2$s non è disponibile.</string>
     <string name="answered_by_quota">Ha risposto %1$s, perché il limite gratuito giornaliero di %2$s è esaurito.</string>
     <string name="err_model_gone">%1$s non è disponibile e nessun altro riconoscitore ha una chiave. Scegli un riconoscitore nelle impostazioni.</string>

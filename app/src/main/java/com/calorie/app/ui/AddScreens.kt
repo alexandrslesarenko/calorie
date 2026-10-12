@@ -289,13 +289,20 @@ private fun TextInput(a: MainActivity, o: Overlay.TextInput) {
 /**
  * Where the photo or text goes. Gemini is named whenever it may answer - chosen or as a fallback
  * after the Claude models are gone - since on its free tier Google may use what is sent.
+ * On the paid tier it does not, and the note says only where the request goes.
  */
 @Composable
 private fun PrivacyNote(a: MainActivity) {
     val ctx = LocalContext.current
     val gemini = remember { AiKeys.load(ctx).let { keys -> Recognizer.order(a.prefs.recognizer) { keys.has(it) }.any { it.provider == Provider.GEMINI } } }
     Text(
-        stringResource(if (gemini) R.string.privacy_note_gemini else R.string.privacy_note),
+        stringResource(
+            when {
+                !gemini -> R.string.privacy_note
+                a.prefs.geminiPaid -> R.string.privacy_note_gemini_paid
+                else -> R.string.privacy_note_gemini
+            }
+        ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

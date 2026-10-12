@@ -220,10 +220,15 @@
     <string name="studio_desc">Les clés, l\'utilisation et les limites se gèrent sur le site de Google.</string>
     <string name="studio_help">Les pages s\'ouvrent dans un onglet de navigateur intégré ; vous vous connectez avec votre compte Google. La page d\'utilisation montre la part de la limite gratuite quotidienne déjà consommée.</string>
     <string name="studio_usage">Utilisation et limites</string>
-    <string name="spend_help_gemini">Compté par l\'application d\'après les jetons de chaque réponse, réflexion comprise. Avec l\'offre gratuite, Gemini ne coûte rien ; le second montant indique ce que coûteraient les mêmes requêtes avec l\'offre payante (Gemini 3.5 Flash-Lite : 30 cents par million de jetons en entrée et 2,50 dollars par million en sortie). Google compte sa limite quotidienne à partir de minuit, heure du Pacifique ; l\'utilisation exacte est sur la page d\'utilisation d\'AI Studio.</string>
+    <string name="spend_help_gemini">Compté par l\'application à partir des jetons de chaque réponse, réflexion comprise, aux prix de l\'offre payante (Gemini 3.5 Flash-Lite : 30 cents par million de jetons en entrée et 2,50 dollars par million en sortie). Avec l\'offre gratuite Google ne facture rien, et la somme montre ce que cela coûterait. Google compte sa limite quotidienne à partir de minuit heure du Pacifique ; l\'usage exact est sur la page Usage d\'AI Studio.</string>
     <string name="spend_today_google">Aujourd\'hui, selon le jour de Google</string>
     <string name="spend_cost_free">Coût avec l\'offre gratuite</string>
     <string name="spend_cost_paid">Avec l\'offre payante, ce serait</string>
+    <string name="tier_title">Offre</string>
+    <string name="tier_free">Gratuite</string>
+    <string name="tier_paid">Payante</string>
+    <string name="tier_help">Google n\'indique pas à l\'application l\'offre de la clé, choisissez-la ici. Une clé devient payante quand la facturation est liée à son projet dans AI Studio : les requêtes sont alors facturées aux prix payants, et Google n\'utilise pas ce qui est envoyé pour améliorer ses produits. Le compteur additionne les prix payants dans tous les cas ; ce choix ne change que l\'affichage de la somme et la note de confidentialité.</string>
+    <string name="privacy_note_gemini_paid">La photo ou le texte est envoyé à Google (Gemini) pour la reconnaissance. La position et les autres métadonnées de la photo sont supprimées avant l\'envoi.</string>
     <string name="answered_by_fallback">Réponse de %1$s, car %2$s n\'est pas disponible.</string>
     <string name="answered_by_quota">Réponse de %1$s, car la limite gratuite quotidienne de %2$s est épuisée.</string>
     <string name="err_model_gone">%1$s n\'est pas disponible et aucun autre outil de reconnaissance n\'a de clé. Choisissez-en un dans les réglages.</string>
