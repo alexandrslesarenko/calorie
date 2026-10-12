@@ -194,7 +194,7 @@
     <string name="custom_kcal">自分の目標（kcal）</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">写真と文章は Claude Haiku 4.5 モデルが認識します。料金は Claude のサブスクリプションとは別に、Claude Console で使った分だけ支払います。写真1枚あたり約0.4セントです。\n\n1. Claude Console にログインします（下のボタン）。\n2. Billing で残高をチャージします。\n3. API keys でキーを作成してコピーします。\n4. ここに貼り付けて\"保存\"を押します。\n\nキーはこの端末にのみ暗号化して保存され、クラウドバックアップにはコピーされません。</string>
+    <string name="claude_help">写真と文章は Claude Haiku 5.5 モデルが認識します。料金は Claude のサブスクリプションとは別に、Claude Console で使った分だけ支払います。写真1枚あたり約0.05セントです。\n\n1. Claude Console にログインします（下のボタン）。\n2. Billing で残高をチャージします。\n3. API keys でキーを作成してコピーします。\n4. ここに貼り付けて\"保存\"を押します。\n\nキーはこの端末にのみ暗号化して保存され、クラウドバックアップにはコピーされません。</string>
     <string name="tile_claude_none">キーなし</string>
     <string name="tile_claude_ok">キー設定済み</string>
     <string name="tile_claude_bad">キーが拒否された</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">チャージ</string>
     <string name="console_usage">利用状況</string>
     <string name="spend_title">アプリの利用額</string>
-    <string name="spend_help">各回答のトークン数と Claude Haiku 4.5 の料金（入力100万トークンあたり1ドル、出力100万トークンあたり5ドル）からの推定です。正確な金額は Console の Usage ページで確認できます。</string>
+    <string name="spend_help">各回答のトークン数と Claude Haiku 5.5 の料金（入力100万トークンあたり0.1ドル、出力100万トークンあたり0.5ドル）からの推定です。正確な金額は Console の Usage ページで確認できます。</string>
     <string name="spend_none">まだリクエストはありません。</string>
     <string name="spend_requests">%1$s 以降のリクエスト</string>
     <string name="spend_tokens">トークン 入力 / 出力</string>

@@ -38,7 +38,7 @@ class ClaudeFoodTest {
 
     private fun message(input: String, stop: String = "tool_use") = json(
         200,
-        """{"id":"msg_1","type":"message","role":"assistant","model":"claude-haiku-4-5",
+        """{"id":"msg_1","type":"message","role":"assistant","model":"claude-haiku-5-5",
             "content":[{"type":"tool_use","id":"toolu_1","name":"report_food","input":$input}],
             "stop_reason":"$stop","stop_sequence":null,"usage":{"input_tokens":1520,"output_tokens":180}}""",
     )
@@ -79,7 +79,7 @@ class ClaudeFoodTest {
         assertEquals("sk-ant-test", req.getHeader("x-api-key"))
         val body = JSONObject(req.body.readUtf8())
         assertEquals(ClaudeFood.MODEL, body.getString("model"))
-        // On Haiku 4.5 effort returns 400, and thinking is incompatible with a forced tool.
+        // A forced tool call skips thinking on Haiku 5.5 anyway, so neither thinking nor effort is sent.
         assertFalse(body.has("thinking"))
         assertFalse(body.has("output_config"))
         assertEquals("tool", body.getJSONObject("tool_choice").getString("type"))
@@ -143,12 +143,12 @@ class ClaudeFoodTest {
     @Test
     fun checkKeyUsesModelsEndpoint() {
         server.enqueue(
-            json(200, """{"type":"model","id":"claude-haiku-4-5","display_name":"Claude Haiku 4.5","created_at":"2025-10-15T00:00:00Z"}""")
+            json(200, """{"type":"model","id":"claude-haiku-5-5","display_name":"Claude Haiku 5.5","created_at":"2025-10-15T00:00:00Z"}""")
         )
         ai.checkKey()
         val req = server.takeRequest()
         assertEquals("GET", req.method)
-        assertEquals("/v1/models/claude-haiku-4-5", req.path)
+        assertEquals("/v1/models/claude-haiku-5-5", req.path)
     }
 
     @Test

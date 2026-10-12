@@ -55,11 +55,21 @@ object AiParser {
     }?.takeIf { !it.isNaN() && it >= 0 }
 }
 
-/** Claude Haiku 4.5 prices, dollars per million tokens. */
+/**
+ * Claude Haiku 5.5 prices (prompts up to 100K tokens, ours are a few thousand) in nano-dollars
+ * per token: whole numbers, so the spending counter adds up without rounding.
+ */
 object Pricing {
-    const val INPUT_PER_M = 1.0
-    const val OUTPUT_PER_M = 5.0
+    const val INPUT_NANO = 100L
+    const val OUTPUT_NANO = 500L
+    /** Haiku 4.5 prices: spending counted before the switch keeps its real cost. */
+    const val LEGACY_INPUT_NANO = 1000L
+    const val LEGACY_OUTPUT_NANO = 5000L
 
-    fun usd(inputTokens: Long, outputTokens: Long): Double =
-        inputTokens * INPUT_PER_M / 1_000_000 + outputTokens * OUTPUT_PER_M / 1_000_000
+    fun nanoUsd(inputTokens: Long, outputTokens: Long): Long = inputTokens * INPUT_NANO + outputTokens * OUTPUT_NANO
+
+    fun legacyNanoUsd(inputTokens: Long, outputTokens: Long): Long =
+        inputTokens * LEGACY_INPUT_NANO + outputTokens * LEGACY_OUTPUT_NANO
+
+    fun usd(nano: Long): Double = nano / 1e9
 }

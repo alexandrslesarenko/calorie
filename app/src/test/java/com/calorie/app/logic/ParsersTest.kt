@@ -82,7 +82,9 @@ class ParsersTest {
 
     @Test
     fun price() {
-        assertEquals(0.0035, Pricing.usd(1500, 400), 1e-9)
+        assertEquals(350_000L, Pricing.nanoUsd(1500, 400))
+        assertEquals(0.00035, Pricing.usd(Pricing.nanoUsd(1500, 400)), 1e-12)
+        assertEquals(3_500_000L, Pricing.legacyNanoUsd(1500, 400))
     }
 
     @Test

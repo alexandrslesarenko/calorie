@@ -3,7 +3,7 @@
 # Calorie
 
 An Android calorie counter aimed at weight loss. It recognizes food on a photo or in a
-text description with Claude Haiku 4.5, finds packaged products by barcode in Open Food
+text description with Claude Haiku 5.5, finds packaged products by barcode in Open Food
 Facts, keeps a food diary and a weight log, and computes a daily calorie target for your
 goal.
 
@@ -39,7 +39,7 @@ The app is in early testing; the name is a working one.
 
 Recognition by photo and description needs your own Claude API key from
 [platform.claude.com](https://platform.claude.com). It is paid per use, separately from
-Claude subscriptions: about 0.4 cents per photo with Claude Haiku 4.5. The app counts the
+Claude subscriptions: about 0.05 cents per photo with Claude Haiku 5.5. The app counts the
 spending itself from the token usage in the answers. Barcodes, the diary, "My dishes"
 and cached answers work without a key.
 

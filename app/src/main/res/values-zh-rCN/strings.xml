@@ -194,7 +194,7 @@
     <string name="custom_kcal">自定义目标（千卡）</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">照片和文字由 Claude Haiku 4.5 模型识别。费用通过 Claude Console 按用量支付，与 Claude 订阅分开：每张照片约 0.4 美分。\n\n1. 登录 Claude Console（下方按钮）。\n2. 在 Billing 中充值。\n3. 在 API keys 中创建密钥并复制。\n4. 粘贴到这里并点\"保存\"。\n\n密钥只加密保存在这部手机上，不会复制到云备份。</string>
+    <string name="claude_help">照片和文字由 Claude Haiku 5.5 模型识别。费用通过 Claude Console 按用量支付，与 Claude 订阅分开：每张照片约 0.05 美分。\n\n1. 登录 Claude Console（下方按钮）。\n2. 在 Billing 中充值。\n3. 在 API keys 中创建密钥并复制。\n4. 粘贴到这里并点\"保存\"。\n\n密钥只加密保存在这部手机上，不会复制到云备份。</string>
     <string name="tile_claude_none">无密钥</string>
     <string name="tile_claude_ok">已设置密钥</string>
     <string name="tile_claude_bad">密钥被拒绝</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">充值</string>
     <string name="console_usage">用量</string>
     <string name="spend_title">应用花费</string>
-    <string name="spend_help">根据每次回答的令牌数，按 Claude Haiku 4.5 价格估算：每百万输入令牌 1 美元，每百万输出令牌 5 美元。准确金额见 Console 的 Usage 页面。</string>
+    <string name="spend_help">根据每次回答的令牌数，按 Claude Haiku 5.5 价格估算：每百万输入令牌 0.1 美元，每百万输出令牌 0.5 美元。准确金额见 Console 的 Usage 页面。</string>
     <string name="spend_none">还没有请求。</string>
     <string name="spend_requests">自 %1$s 起的请求</string>
     <string name="spend_tokens">令牌 输入 / 输出</string>

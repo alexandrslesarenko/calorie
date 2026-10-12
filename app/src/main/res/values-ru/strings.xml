@@ -194,7 +194,7 @@
     <string name="custom_kcal">Своя норма, ккал</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">Фото и текст распознаёт модель Claude Haiku 4.5. Она оплачивается по факту использования через Claude Console, отдельно от подписок Claude: около 0.4 цента за фото.\n\n1. Войдите в Claude Console (кнопка ниже).\n2. Пополните баланс в разделе Billing.\n3. Создайте ключ в разделе API keys и скопируйте его.\n4. Вставьте его сюда и нажмите \"Сохранить\".\n\nКлюч хранится только на этом телефоне в зашифрованном виде и не попадает в облачную копию.</string>
+    <string name="claude_help">Фото и текст распознаёт модель Claude Haiku 5.5. Она оплачивается по факту использования через Claude Console, отдельно от подписок Claude: около 0.05 цента за фото.\n\n1. Войдите в Claude Console (кнопка ниже).\n2. Пополните баланс в разделе Billing.\n3. Создайте ключ в разделе API keys и скопируйте его.\n4. Вставьте его сюда и нажмите \"Сохранить\".\n\nКлюч хранится только на этом телефоне в зашифрованном виде и не попадает в облачную копию.</string>
     <string name="tile_claude_none">Нет ключа</string>
     <string name="tile_claude_ok">Ключ задан</string>
     <string name="tile_claude_bad">Ключ не принят</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">Пополнить</string>
     <string name="console_usage">Расход</string>
     <string name="spend_title">Расходы приложения</string>
-    <string name="spend_help">Оценка по токенам из каждого ответа по ценам Claude Haiku 4.5: 1 доллар за миллион входных токенов и 5 долларов за миллион выходных. Точная сумма - на странице Usage в Console.</string>
+    <string name="spend_help">Оценка по токенам из каждого ответа по ценам Claude Haiku 5.5: 10 центов за миллион входных токенов и 50 центов за миллион выходных. Точная сумма - на странице Usage в Console.</string>
     <string name="spend_none">Запросов ещё не было.</string>
     <string name="spend_requests">Запросов с %1$s</string>
     <string name="spend_tokens">Токены вход / выход</string>

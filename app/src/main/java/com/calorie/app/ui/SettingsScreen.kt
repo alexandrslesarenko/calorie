@@ -709,7 +709,7 @@ private fun ClaudeSettings(a: MainActivity) {
     }
 
     // A regular key cannot read the balance, so count it ourselves from the usage in answers.
-    val usd = remember(usageTick) { Pricing.usd(prefs.aiInputTokens, prefs.aiOutputTokens) }
+    val usd = remember(usageTick) { Pricing.usd(prefs.aiNanoUsd) }
     val since = remember(usageTick) {
         prefs.usageSince.takeIf { it > 0 }?.let { SimpleDateFormat(dayMonthPattern(), Locale.getDefault()).format(Date(it)) }
     }

@@ -54,7 +54,7 @@ data class AiUsage(val inputTokens: Long, val outputTokens: Long)
 data class AiResponse(val result: AiResult, val usage: AiUsage, val json: String)
 
 /**
- * Food recognition with Claude Haiku 4.5. The answer comes as a report_food tool call
+ * Food recognition with Claude Haiku 5.5. The answer comes as a report_food tool call
  * with a schema: the model has to fill it in (tool_choice forces this tool), so there is no
  * free text to parse. Blocking calls - background threads only.
  *
@@ -62,7 +62,7 @@ data class AiResponse(val result: AiResult, val usage: AiUsage, val json: String
  */
 class ClaudeFood(apiKey: String, baseUrl: String? = null) : AutoCloseable {
     companion object {
-        const val MODEL = "claude-haiku-4-5"
+        const val MODEL = "claude-haiku-5-5"
         const val TOOL = "report_food"
         /** A list of several dishes with macros fits with room to spare. */
         const val MAX_TOKENS = 2048L

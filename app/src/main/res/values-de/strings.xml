@@ -194,7 +194,7 @@
     <string name="custom_kcal">Eigenes Ziel, kcal</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">Fotos und Text erkennt das Modell Claude Haiku 4.5. Es wird nach Nutzung über die Claude Console bezahlt, getrennt von Claude-Abos: etwa 0,4 Cent pro Foto.\n\n1. Melde dich in der Claude Console an (Knopf unten).\n2. Lade das Guthaben unter Billing auf.\n3. Erstelle unter API keys einen Schlüssel und kopiere ihn.\n4. Füge ihn hier ein und tippe auf Speichern.\n\nDer Schlüssel wird nur auf diesem Telefon verschlüsselt gespeichert und nicht in die Cloud-Sicherung kopiert.</string>
+    <string name="claude_help">Fotos und Text erkennt das Modell Claude Haiku 5.5. Es wird nach Nutzung über die Claude Console bezahlt, getrennt von Claude-Abos: etwa 0,05 Cent pro Foto.\n\n1. Melde dich in der Claude Console an (Knopf unten).\n2. Lade das Guthaben unter Billing auf.\n3. Erstelle unter API keys einen Schlüssel und kopiere ihn.\n4. Füge ihn hier ein und tippe auf Speichern.\n\nDer Schlüssel wird nur auf diesem Telefon verschlüsselt gespeichert und nicht in die Cloud-Sicherung kopiert.</string>
     <string name="tile_claude_none">Kein Schlüssel</string>
     <string name="tile_claude_ok">Schlüssel gesetzt</string>
     <string name="tile_claude_bad">Schlüssel abgelehnt</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">Aufladen</string>
     <string name="console_usage">Verbrauch</string>
     <string name="spend_title">Ausgaben der App</string>
-    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zu den Preisen von Claude Haiku 4.5: 1 Dollar pro Million Eingabe-Tokens und 5 Dollar pro Million Ausgabe-Tokens. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
+    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zu den Preisen von Claude Haiku 5.5: 10 Cent pro Million Eingabe-Tokens und 50 Cent pro Million Ausgabe-Tokens. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
     <string name="spend_none">Noch keine Anfragen.</string>
     <string name="spend_requests">Anfragen seit %1$s</string>
     <string name="spend_tokens">Tokens ein / aus</string>

@@ -194,7 +194,7 @@
     <string name="custom_kcal">직접 정한 목표, kcal</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">사진과 글은 Claude Haiku 4.5 모델이 인식합니다. 요금은 Claude 구독과 별도로 Claude Console에서 사용한 만큼 냅니다. 사진 한 장에 약 0.4센트입니다.\n\n1. Claude Console에 로그인합니다(아래 버튼).\n2. Billing에서 잔액을 충전합니다.\n3. API keys에서 키를 만들고 복사합니다.\n4. 여기에 붙여 넣고 저장을 누릅니다.\n\n키는 이 휴대폰에만 암호화되어 저장되며 클라우드 백업에 복사되지 않습니다.</string>
+    <string name="claude_help">사진과 글은 Claude Haiku 5.5 모델이 인식합니다. 요금은 Claude 구독과 별도로 Claude Console에서 사용한 만큼 냅니다. 사진 한 장에 약 0.05센트입니다.\n\n1. Claude Console에 로그인합니다(아래 버튼).\n2. Billing에서 잔액을 충전합니다.\n3. API keys에서 키를 만들고 복사합니다.\n4. 여기에 붙여 넣고 저장을 누릅니다.\n\n키는 이 휴대폰에만 암호화되어 저장되며 클라우드 백업에 복사되지 않습니다.</string>
     <string name="tile_claude_none">키 없음</string>
     <string name="tile_claude_ok">키 설정됨</string>
     <string name="tile_claude_bad">키 거부됨</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">충전</string>
     <string name="console_usage">사용량</string>
     <string name="spend_title">앱 사용액</string>
-    <string name="spend_help">각 답변의 토큰 수와 Claude Haiku 4.5 가격(입력 토큰 100만 개당 1달러, 출력 100만 개당 5달러)으로 추정합니다. 정확한 금액은 Console의 Usage 페이지에 있습니다.</string>
+    <string name="spend_help">각 답변의 토큰 수와 Claude Haiku 5.5 가격(입력 토큰 100만 개당 0.1달러, 출력 100만 개당 0.5달러)으로 추정합니다. 정확한 금액은 Console의 Usage 페이지에 있습니다.</string>
     <string name="spend_none">아직 요청이 없습니다.</string>
     <string name="spend_requests">%1$s 이후 요청</string>
     <string name="spend_tokens">토큰 입력 / 출력</string>

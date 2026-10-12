@@ -3,6 +3,7 @@ package com.calorie.app.data
 import android.content.Context
 import com.calorie.app.logic.Activity
 import com.calorie.app.logic.Pace
+import com.calorie.app.logic.Pricing
 import com.calorie.app.logic.ProfileData
 import com.calorie.app.logic.Sex
 import java.time.LocalDate
@@ -104,10 +105,20 @@ class Prefs(context: Context) {
     val aiOutputTokens: Long get() = sp.getLong("ai_out", 0)
     val usageSince: Long get() = sp.getLong("usage_since", 0)
 
+    /**
+     * Spending in nano-dollars, added at the price of the model that answered: the price changes
+     * with the model, so tokens alone would reprice the past. Counters from before it existed
+     * were all Haiku 4.5.
+     */
+    val aiNanoUsd: Long
+        get() = if (sp.contains("ai_nano_usd")) sp.getLong("ai_nano_usd", 0)
+        else Pricing.legacyNanoUsd(aiInputTokens, aiOutputTokens)
+
     fun addUsage(input: Long, output: Long) {
         val e = sp.edit()
         if (usageSince == 0L) e.putLong("usage_since", System.currentTimeMillis())
         e.putInt("ai_requests", aiRequests + 1)
+            .putLong("ai_nano_usd", aiNanoUsd + Pricing.nanoUsd(input, output))
             .putLong("ai_in", aiInputTokens + input)
             .putLong("ai_out", aiOutputTokens + output)
             .apply()
@@ -136,7 +147,7 @@ class Prefs(context: Context) {
         }
 
     fun resetUsage() {
-        sp.edit().remove("ai_requests").remove("ai_in").remove("ai_out")
+        sp.edit().remove("ai_requests").remove("ai_in").remove("ai_out").putLong("ai_nano_usd", 0)
             .putLong("usage_since", System.currentTimeMillis()).apply()
     }
 }

@@ -194,7 +194,7 @@
     <string name="custom_kcal">Own target, kcal</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">Photos and text are recognized by the Claude Haiku 4.5 model. It is paid per use through Claude Console, separately from Claude subscriptions: about 0.4 cents per photo.\n\n1. Sign in to Claude Console (button below).\n2. Top up the balance in Billing.\n3. Create a key in API keys and copy it.\n4. Paste it here and press Save.\n\nThe key is stored on this phone only, encrypted, and is not copied to the cloud backup.</string>
+    <string name="claude_help">Photos and text are recognized by the Claude Haiku 5.5 model. It is paid per use through Claude Console, separately from Claude subscriptions: about 0.05 cents per photo.\n\n1. Sign in to Claude Console (button below).\n2. Top up the balance in Billing.\n3. Create a key in API keys and copy it.\n4. Paste it here and press Save.\n\nThe key is stored on this phone only, encrypted, and is not copied to the cloud backup.</string>
     <string name="tile_claude_none">No key</string>
     <string name="tile_claude_ok">Key set</string>
     <string name="tile_claude_bad">Key rejected</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">Top up</string>
     <string name="console_usage">Usage</string>
     <string name="spend_title">App spending</string>
-    <string name="spend_help">Estimated from the tokens in each answer at Claude Haiku 4.5 prices: 1 dollar per million input tokens and 5 dollars per million output tokens. The exact amount is on the Usage page in Console.</string>
+    <string name="spend_help">Estimated from the tokens in each answer at Claude Haiku 5.5 prices: 10 cents per million input tokens and 50 cents per million output tokens. The exact amount is on the Usage page in Console.</string>
     <string name="spend_none">No requests yet.</string>
     <string name="spend_requests">Requests since %1$s</string>
     <string name="spend_tokens">Tokens in / out</string>

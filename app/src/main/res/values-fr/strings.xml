@@ -194,7 +194,7 @@
     <string name="custom_kcal">Objectif perso, kcal</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">Les photos et le texte sont reconnus par le modèle Claude Haiku 4.5. Il est payé à l\'usage via Claude Console, séparément des abonnements Claude : environ 0,4 centime par photo.\n\n1. Connectez-vous à Claude Console (bouton ci-dessous).\n2. Rechargez le solde dans Billing.\n3. Créez une clé dans API keys et copiez-la.\n4. Collez-la ici et appuyez sur Enregistrer.\n\nLa clé est stockée chiffrée uniquement sur ce téléphone et n\'est pas copiée dans la sauvegarde cloud.</string>
+    <string name="claude_help">Les photos et le texte sont reconnus par le modèle Claude Haiku 5.5. Il est payé à l\'usage via Claude Console, séparément des abonnements Claude : environ 0,05 centime par photo.\n\n1. Connectez-vous à Claude Console (bouton ci-dessous).\n2. Rechargez le solde dans Billing.\n3. Créez une clé dans API keys et copiez-la.\n4. Collez-la ici et appuyez sur Enregistrer.\n\nLa clé est stockée chiffrée uniquement sur ce téléphone et n\'est pas copiée dans la sauvegarde cloud.</string>
     <string name="tile_claude_none">Pas de clé</string>
     <string name="tile_claude_ok">Clé définie</string>
     <string name="tile_claude_bad">Clé refusée</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">Recharger</string>
     <string name="console_usage">Dépenses</string>
     <string name="spend_title">Dépenses de l\'app</string>
-    <string name="spend_help">Estimation d\'après les jetons de chaque réponse aux tarifs de Claude Haiku 4.5 : 1 dollar par million de jetons en entrée et 5 dollars par million en sortie. Le montant exact est sur la page Usage de la Console.</string>
+    <string name="spend_help">Estimation d\'après les jetons de chaque réponse aux tarifs de Claude Haiku 5.5 : 0,10 dollar par million de jetons en entrée et 0,50 dollar par million en sortie. Le montant exact est sur la page Usage de la Console.</string>
     <string name="spend_none">Aucune requête pour le moment.</string>
     <string name="spend_requests">Requêtes depuis le %1$s</string>
     <string name="spend_tokens">Jetons entrée / sortie</string>

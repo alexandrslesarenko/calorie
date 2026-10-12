@@ -194,7 +194,7 @@
     <string name="custom_kcal">Objetivo propio, kcal</string>
 
     <string name="claude_title">Claude</string>
-    <string name="claude_help">Las fotos y el texto los reconoce el modelo Claude Haiku 4.5. Se paga por uso a través de Claude Console, aparte de las suscripciones de Claude: unos 0,4 céntimos por foto.\n\n1. Entra en Claude Console (botón de abajo).\n2. Recarga el saldo en Billing.\n3. Crea una clave en API keys y cópiala.\n4. Pégala aquí y pulsa Guardar.\n\nLa clave se guarda cifrada solo en este teléfono y no se copia a la copia de seguridad en la nube.</string>
+    <string name="claude_help">Las fotos y el texto los reconoce el modelo Claude Haiku 5.5. Se paga por uso a través de Claude Console, aparte de las suscripciones de Claude: unos 0,05 céntimos por foto.\n\n1. Entra en Claude Console (botón de abajo).\n2. Recarga el saldo en Billing.\n3. Crea una clave en API keys y cópiala.\n4. Pégala aquí y pulsa Guardar.\n\nLa clave se guarda cifrada solo en este teléfono y no se copia a la copia de seguridad en la nube.</string>
     <string name="tile_claude_none">Sin clave</string>
     <string name="tile_claude_ok">Clave configurada</string>
     <string name="tile_claude_bad">Clave rechazada</string>
@@ -217,7 +217,7 @@
     <string name="console_billing">Recargar</string>
     <string name="console_usage">Consumo</string>
     <string name="spend_title">Gasto de la app</string>
-    <string name="spend_help">Estimado con los tokens de cada respuesta a los precios de Claude Haiku 4.5: 1 dólar por millón de tokens de entrada y 5 dólares por millón de salida. La cantidad exacta está en la página Usage de la Console.</string>
+    <string name="spend_help">Estimado con los tokens de cada respuesta a los precios de Claude Haiku 5.5: 0,10 dólares por millón de tokens de entrada y 0,50 dólares por millón de salida. La cantidad exacta está en la página Usage de la Console.</string>
     <string name="spend_none">Aún no hay solicitudes.</string>
     <string name="spend_requests">Solicitudes desde %1$s</string>
     <string name="spend_tokens">Tokens entrada / salida</string>
