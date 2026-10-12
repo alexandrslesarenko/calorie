@@ -103,10 +103,14 @@ object FoodPrompt {
         - If a nutrition label is visible, use its values and scale them to the portion.
         - Use the user's hint (portion size, cooking method) when given; it overrides your visual estimate.
         - Split a meal into separate items when their calories differ a lot (for example steak, fries, salad), but keep a dish that is eaten as one thing as one item (for example borscht with sour cream).
+        - Name each item the way a person writes it in a food diary: 1-3 words, at most 25 characters (12 for Chinese, Japanese and Korean). Leave brand, cooking method, ingredients and portion size out of the name unless they change what the dish is; put anything important into note.
         - confidence: high when the food and portion are clear, low when you are guessing.
         - If there is no food, return an empty items list and explain briefly in note.
         $answer Write item names and the note in $language.
     """.trimIndent()
+
+    /** Schema description of an item name. The name has to fit the one-line field on the confirm screen. */
+    const val NAME = "Short dish name, 1-3 words, at most 25 characters"
 
     fun photoText(hint: String?) = if (hint.isNullOrBlank()) "What food is on this photo?" else "What food is on this photo? My hint: $hint"
 
@@ -148,7 +152,7 @@ class ClaudeFood(apiKey: String, baseUrl: String? = null, private val model: Str
                                         "items" to mapOf(
                                             "type" to "object",
                                             "properties" to mapOf(
-                                                "name" to mapOf("type" to "string", "description" to "Short dish name"),
+                                                "name" to mapOf("type" to "string", "description" to FoodPrompt.NAME),
                                                 "grams" to num("Estimated portion weight, g"),
                                                 "kcal" to num("Energy of the whole portion, kcal"),
                                                 "protein_g" to num("Protein in the portion, g"),

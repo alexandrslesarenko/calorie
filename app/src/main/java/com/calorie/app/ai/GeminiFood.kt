@@ -50,7 +50,7 @@ class GeminiFood(
                                 .put(
                                     "properties",
                                     JSONObject()
-                                        .put("name", JSONObject().put("type", "STRING").put("description", "Short dish name"))
+                                        .put("name", JSONObject().put("type", "STRING").put("description", FoodPrompt.NAME))
                                         .put("grams", num("Estimated portion weight, g"))
                                         .put("kcal", num("Energy of the whole portion, kcal"))
                                         .put("protein_g", num("Protein in the portion, g"))
