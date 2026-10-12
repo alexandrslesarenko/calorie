@@ -66,11 +66,11 @@
     <string name="dish_favorite">즐겨찾기</string>
     <string name="dish_delete_title">음식을 삭제할까요?</string>
     <string name="dish_delete_text">%1$s 항목이 \"내 음식\"에서 삭제됩니다. 기록은 그대로 남습니다.</string>
-    <string name="from_cache">같은 사진이나 글에 대해 저장된 답변입니다. Claude에 요청하지 않았습니다.</string>
+    <string name="from_cache">같은 사진이나 글에 대해 저장된 답입니다. 새 요청은 없습니다.</string>
     <string name="ask_again">다시 묻기</string>
     <string name="label_hint">이것은 영양 성분표입니다. 100 g당 값을 읽고, 1회 분량은 100 g으로 해 주세요</string>
     <string name="recent_line">%1$s g - %2$s kcal</string>
-    <string name="need_key">사진과 글을 인식하려면 Claude API 키가 필요합니다.</string>
+    <string name="need_key">사진과 글을 인식하려면 API 키(Claude 또는 Gemini)가 필요합니다.</string>
     <string name="need_key_btn">키 설정</string>
     <string name="text_placeholder">예: 사워크림을 넣은 보르시 한 그릇, 호밀빵 두 조각, 설탕 넣은 차</string>
     <string name="recognize">인식</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">300 g, 버터에 볶음</string>
     <string name="privacy_note">사진이나 글은 인식을 위해 Anthropic(Claude)으로 전송됩니다. 위치 등 사진의 메타데이터는 전송 전에 삭제됩니다.</string>
     <string name="busy_photo">사진 준비 중...</string>
-    <string name="busy_ai">Claude가 음식을 보는 중...</string>
+    <string name="busy_ai">%1$s 모델이 음식을 보고 있습니다...</string>
     <string name="busy_barcode">제품 찾는 중...</string>
 
     <string name="review_title">확인 후 추가</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">라벨 촬영</string>
     <string name="scan_failed">스캐너 오류: %1$s</string>
     <string name="photo_unreadable">사진을 읽을 수 없습니다.</string>
-    <string name="ai_nothing">Claude가 음식을 찾지 못했습니다.</string>
+    <string name="ai_nothing">여기에서 음식을 찾지 못했습니다.</string>
 
     <string name="failed_title">실패했습니다</string>
     <string name="err_bad_key">Claude가 API 키를 받아들이지 않았습니다. 설정에서 확인하세요.</string>
     <string name="err_no_credit">Claude Console 잔액이 없습니다. 충전한 뒤 다시 시도하세요.</string>
     <string name="err_rate_limit">요청이 너무 많습니다. 1분 뒤 다시 시도하세요.</string>
-    <string name="err_overloaded">Claude가 지금 혼잡합니다. 1분 뒤 다시 시도하세요.</string>
+    <string name="err_overloaded">인식 서비스가 지금 과부하 상태입니다. 1분 후 다시 시도하세요.</string>
     <string name="err_network">연결이 없습니다. 인터넷을 확인하고 다시 시도하세요.</string>
-    <string name="err_bad_answer">Claude가 예상과 다르게 답했습니다. 다시 시도하거나 힌트를 추가하세요.</string>
+    <string name="err_bad_answer">예상과 다른 형식으로 답이 왔습니다. 다시 시도하거나 힌트를 추가하세요.</string>
 
     <string name="diary_days">날짜별</string>
     <string name="diary_empty">기록이 비어 있습니다.</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">직접 정한 목표 (꺼짐)</string>
     <string name="custom_kcal">직접 정한 목표, kcal</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">API 키</string>
     <string name="claude_help">사진과 글은 Claude Haiku 5.5 모델이 인식합니다. 요금은 Claude 구독과 별도로 Claude Console에서 사용한 만큼 냅니다. 사진 한 장에 약 0.05센트입니다.\n\n1. Claude Console에 로그인합니다(아래 버튼).\n2. Billing에서 잔액을 충전합니다.\n3. API keys에서 키를 만들고 복사합니다.\n4. 여기에 붙여 넣고 저장을 누릅니다.\n\n키는 이 휴대폰에만 암호화되어 저장되며 클라우드 백업에 복사되지 않습니다.</string>
     <string name="tile_claude_none">키 없음</string>
-    <string name="tile_claude_ok">키 설정됨</string>
     <string name="tile_claude_bad">키 거부됨</string>
     <string name="key_none">API 키가 없어 사진과 글 인식이 꺼져 있습니다.</string>
     <string name="key_checking">키 확인 중...</string>
     <string name="key_ok">키 %1$s이(가) 작동합니다.</string>
     <string name="key_bad">키 %1$s이(가) 거부되었습니다.</string>
     <string name="key_unchecked">키 %1$s은(는) 아직 확인하지 않았습니다.</string>
-    <string name="key_rejected">Claude가 키를 받아들이지 않았습니다. 키를 전부 복사했는지, Console에서 취소하지 않았는지 확인하세요.</string>
+    <string name="key_rejected">키가 받아들여지지 않았습니다. 전체가 복사되었는지, 취소되지 않았는지 확인하세요.</string>
     <string name="key_field">API 키</string>
     <string name="key_format">Claude 키는 sk-ant-로 시작합니다</string>
     <string name="paste">붙여넣기</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">충전</string>
     <string name="console_usage">사용량</string>
     <string name="spend_title">앱 사용액</string>
-    <string name="spend_help">각 답변의 토큰 수와 Claude Haiku 5.5 가격(입력 토큰 100만 개당 0.1달러, 출력 100만 개당 0.5달러)으로 추정합니다. 정확한 금액은 Console의 Usage 페이지에 있습니다.</string>
+    <string name="spend_help">각 답변의 토큰 수와 답한 모델의 가격으로 추정합니다(Claude Haiku 5.5: 입력 토큰 100만 개당 10센트, 출력 100만 개당 50센트, Claude Haiku 4.5: 1달러와 5달러). 정확한 금액은 Console의 Usage 페이지에 있습니다.</string>
+    <string name="studio_desc">키, 사용량, 한도는 Google 사이트에서 관리합니다.</string>
+    <string name="studio_help">페이지는 앱 안의 브라우저 탭에서 열리며 Google 계정으로 로그인합니다. 사용량 페이지에서 일일 무료 한도를 얼마나 썼는지 볼 수 있습니다.</string>
+    <string name="studio_usage">사용량과 한도</string>
+    <string name="spend_help_gemini">각 답변의 토큰 수(생각 포함)로 앱이 직접 셉니다. 무료 등급에서 Gemini는 비용이 없습니다. 두 번째 금액은 같은 요청을 유료 등급에서 썼을 때의 비용입니다(Gemini 3.5 Flash-Lite: 입력 토큰 100만 개당 30센트, 출력 100만 개당 2.50달러). Google은 일일 한도를 태평양 시간 자정부터 셉니다. 정확한 사용량은 AI Studio의 사용량 페이지에 있습니다.</string>
+    <string name="spend_today_google">오늘(Google 기준 날짜)</string>
+    <string name="spend_cost_free">무료 등급 비용</string>
+    <string name="spend_cost_paid">유료 등급이라면</string>
+    <string name="answered_by_fallback">%2$s 모델을 사용할 수 없어 %1$s 모델이 답했습니다.</string>
+    <string name="answered_by_quota">%2$s의 일일 무료 한도가 소진되어 %1$s 모델이 답했습니다.</string>
+    <string name="err_model_gone">%1$s 모델을 사용할 수 없고 다른 인식 모델에는 키가 없습니다. 설정에서 인식 모델을 선택하세요.</string>
+    <string name="err_quota_day">%1$s의 일일 무료 한도가 소진되었고 다른 인식 모델에는 키가 없습니다. 요청은 나중에 다시 보냅니다.</string>
+    <string name="err_bad_key_gemini">Gemini가 API 키를 받아들이지 않았습니다. 설정에서 확인하세요.</string>
+    <string name="privacy_note_gemini">사진이나 글은 인식을 위해 Google(Gemini)로 전송됩니다. 무료 등급에서는 Google이 이를 제품 개선에 사용할 수 있습니다. 위치 등 사진 메타데이터는 전송 전에 삭제됩니다.</string>
+    <string name="recognizer_title">인식</string>
+    <string name="recognizer_help">사진과 글을 인식하는 모델입니다. 선택한 모델이 지원 종료되면 키가 있는 다음 모델이 대신 답하고, 확인 화면에 그렇게 표시됩니다. Gemini는 Google AI Studio의 별도 키가 필요합니다. 무료 등급은 비용이 없지만 Google이 전송된 내용을 사용할 수 있습니다.</string>
+    <string name="recognizer_gone">%1$s 모델이 %2$s에 \"찾을 수 없음\"으로 응답했습니다. 그동안 키가 있는 다음 모델이 답합니다.</string>
+    <string name="recognizer_no_key">키 없음</string>
+    <string name="recognizer_choose">인식 모델 선택</string>
+    <string name="gemini_help">선택 사항: 예비 또는 무료 인식 모델입니다.\n\n1. Google AI Studio를 열고(아래 버튼) Google 계정으로 로그인합니다.\n2. API 키를 만들고 복사합니다.\n3. 키 추가를 누르고 붙여 넣은 뒤 저장을 누릅니다.\n\n무료 등급에는 카드가 필요 없습니다. 무료 등급에서는 Google이 전송된 사진과 글을 제품 개선에 사용할 수 있습니다. 키는 이 휴대폰에만 암호화되어 저장됩니다.</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">키 추가</string>
     <string name="spend_none">아직 요청이 없습니다.</string>
     <string name="spend_requests">%1$s 이후 요청</string>
     <string name="spend_tokens">토큰 입력 / 출력</string>
@@ -239,17 +259,18 @@
     <string name="delete">삭제</string>
     <string name="help_toggle">설명</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">다시 시도</string>
-    <string name="pending_title">Claude 요청</string>
-    <string name="pending_wait_title">Claude 응답 대기 중</string>
-    <string name="pending_reason_overloaded">Claude가 지금 과부하 상태입니다.</string>
+    <string name="pending_title">인식 요청</string>
+    <string name="pending_wait_title">답을 기다리는 중</string>
+    <string name="pending_reason_overloaded">인식 서비스가 지금 과부하 상태입니다.</string>
+    <string name="pending_reason_quota">일일 무료 한도가 소진되었습니다.</string>
     <string name="pending_reason_rate">요청이 너무 많습니다.</string>
     <string name="pending_reason_network">연결이 없습니다.</string>
     <string name="pending_next">%1$d번째 시도가 실패했습니다. 다음 시도까지 %2$s</string>
     <string name="pending_soon">곧 다시 시도합니다</string>
     <string name="pending_explain">요청이 저장되었습니다. 앱이 자동으로 다시 보내고 확인할 결과를 보여 줍니다. 이 화면을 닫아도 요청은 \"오늘\"에 남아 있습니다.</string>
-    <string name="pending_gave_up">Claude가 몇 시간째 응답하지 않습니다. 다시 시도하거나 요청을 삭제하세요.</string>
+    <string name="pending_gave_up">몇 시간째 답이 없습니다. 다시 시도하거나 요청을 삭제하세요.</string>
     <string name="pending_retry_now">지금 다시 시도</string>
     <string name="pending_delete">요청 삭제</string>
     <string name="pending_at">다음 시도: %1$s</string>

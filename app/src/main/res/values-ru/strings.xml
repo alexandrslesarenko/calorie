@@ -66,11 +66,11 @@
     <string name="dish_favorite">Избранное</string>
     <string name="dish_delete_title">Удалить блюдо?</string>
     <string name="dish_delete_text">%1$s пропадёт из \"Моих блюд\". Записи в дневнике останутся.</string>
-    <string name="from_cache">Сохранённый ответ на тот же снимок или текст, без запроса к Claude.</string>
+    <string name="from_cache">Сохранённый ответ на тот же снимок или текст, без нового запроса.</string>
     <string name="ask_again">Спросить заново</string>
     <string name="label_hint">Это этикетка с пищевой ценностью: возьми значения на 100 г, порция 100 г</string>
     <string name="recent_line">%1$s г - %2$s ккал</string>
-    <string name="need_key">Для распознавания фото и текста нужен API-ключ Claude.</string>
+    <string name="need_key">Для распознавания фото и текста нужен ключ API: Claude или Gemini.</string>
     <string name="need_key_btn">Настроить ключ</string>
     <string name="text_placeholder">Например: тарелка борща со сметаной, два куска ржаного хлеба, чай с сахаром</string>
     <string name="recognize">Распознать</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">Порция 300 г, жарено на масле</string>
     <string name="privacy_note">Фото или текст отправляются в Anthropic (Claude) для распознавания. Геометка и другие данные снимка удаляются перед отправкой.</string>
     <string name="busy_photo">Готовлю фото...</string>
-    <string name="busy_ai">Claude рассматривает еду...</string>
+    <string name="busy_ai">%1$s рассматривает еду...</string>
     <string name="busy_barcode">Ищу продукт...</string>
 
     <string name="review_title">Проверьте и добавьте</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">Фото этикетки</string>
     <string name="scan_failed">Сканер не сработал: %1$s</string>
     <string name="photo_unreadable">Не удалось прочитать фото.</string>
-    <string name="ai_nothing">Claude не нашёл здесь еды.</string>
+    <string name="ai_nothing">Еды здесь не нашлось.</string>
 
     <string name="failed_title">Не получилось</string>
     <string name="err_bad_key">Claude не принял API-ключ. Проверьте его в настройках.</string>
     <string name="err_no_credit">На счёте Claude Console закончились деньги. Пополните баланс и повторите.</string>
     <string name="err_rate_limit">Слишком много запросов подряд. Подождите минуту и повторите.</string>
-    <string name="err_overloaded">Claude сейчас перегружен. Повторите через минуту.</string>
+    <string name="err_overloaded">Сервис распознавания сейчас перегружен. Повторите через минуту.</string>
     <string name="err_network">Нет связи. Проверьте интернет и повторите.</string>
-    <string name="err_bad_answer">Claude ответил не так, как ожидалось. Повторите или добавьте подсказку.</string>
+    <string name="err_bad_answer">Ответ пришёл в неожиданном виде. Повторите или добавьте подсказку.</string>
 
     <string name="diary_days">По дням</string>
     <string name="diary_empty">Дневник пока пуст.</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">Своя норма (выключена)</string>
     <string name="custom_kcal">Своя норма, ккал</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">Ключ API</string>
     <string name="claude_help">Фото и текст распознаёт модель Claude Haiku 5.5. Она оплачивается по факту использования через Claude Console, отдельно от подписок Claude: около 0.05 цента за фото.\n\n1. Войдите в Claude Console (кнопка ниже).\n2. Пополните баланс в разделе Billing.\n3. Создайте ключ в разделе API keys и скопируйте его.\n4. Вставьте его сюда и нажмите \"Сохранить\".\n\nКлюч хранится только на этом телефоне в зашифрованном виде и не попадает в облачную копию.</string>
     <string name="tile_claude_none">Нет ключа</string>
-    <string name="tile_claude_ok">Ключ задан</string>
     <string name="tile_claude_bad">Ключ не принят</string>
     <string name="key_none">Нет API-ключа: распознавание фото и текста выключено.</string>
     <string name="key_checking">Проверяю ключ...</string>
     <string name="key_ok">Ключ %1$s работает.</string>
     <string name="key_bad">Ключ %1$s не принят.</string>
     <string name="key_unchecked">Ключ %1$s ещё не проверен.</string>
-    <string name="key_rejected">Claude не принял ключ. Проверьте, что он скопирован целиком и не отозван в Console.</string>
+    <string name="key_rejected">Ключ не принят. Проверьте, что он скопирован целиком и не отозван.</string>
     <string name="key_field">API-ключ</string>
     <string name="key_format">Ключи Claude начинаются с sk-ant-</string>
     <string name="paste">Вставить</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">Пополнить</string>
     <string name="console_usage">Расход</string>
     <string name="spend_title">Расходы приложения</string>
-    <string name="spend_help">Оценка по токенам из каждого ответа по ценам Claude Haiku 5.5: 10 центов за миллион входных токенов и 50 центов за миллион выходных. Точная сумма - на странице Usage в Console.</string>
+    <string name="spend_help">Оценка по токенам из каждого ответа по цене модели, которая ответила. Claude Haiku 5.5 стоит 10 центов за миллион входных токенов и 50 центов за миллион выходных, Claude Haiku 4.5 стоит 1 и 5 долларов. Точная сумма - на странице Usage в Console.</string>
+    <string name="studio_desc">Ключи, использование и лимиты - на сайте Google.</string>
+    <string name="studio_help">Страницы открываются во встроенной вкладке браузера, вход - под вашим аккаунтом Google. На странице использования видно, сколько дневного бесплатного лимита уже потрачено.</string>
+    <string name="studio_usage">Использование и лимиты</string>
+    <string name="spend_help_gemini">Приложение считает само по токенам из каждого ответа, вместе с размышлениями. На бесплатном тарифе Gemini ничего не стоит; вторая сумма - сколько те же запросы стоили бы на платном (Gemini 3.5 Flash-Lite: 30 центов за миллион входных токенов и 2.50 доллара за миллион выходных). Дневной лимит Google считает от полуночи по тихоокеанскому времени; точный расход - на странице использования в AI Studio.</string>
+    <string name="spend_today_google">Сегодня, по суткам Google</string>
+    <string name="spend_cost_free">Стоимость на бесплатном тарифе</string>
+    <string name="spend_cost_paid">На платном тарифе было бы</string>
+    <string name="answered_by_fallback">Ответила модель %1$s, потому что %2$s недоступна.</string>
+    <string name="answered_by_quota">Ответила модель %1$s, потому что у %2$s кончился дневной бесплатный лимит.</string>
+    <string name="err_model_gone">Модель %1$s недоступна, а у других распознавателей нет ключа. Выберите распознаватель в настройках.</string>
+    <string name="err_quota_day">У %1$s кончился дневной бесплатный лимит, а у других распознавателей нет ключа. Запрос будет отправлен позже.</string>
+    <string name="err_bad_key_gemini">Gemini не принял ключ API. Проверьте его в настройках.</string>
+    <string name="privacy_note_gemini">Фото или текст уходят на распознавание в Google (Gemini). На бесплатном тарифе Google может использовать их для улучшения своих продуктов. Геометка и другие метаданные фото удаляются перед отправкой.</string>
+    <string name="recognizer_title">Распознавание</string>
+    <string name="recognizer_help">Какая модель распознаёт фото и текст. Если выбранную модель сняли с обслуживания, ответит следующая, у которой есть ключ, и экран подтверждения об этом скажет. Для Gemini нужен свой ключ из Google AI Studio: бесплатный тариф ничего не стоит, но Google может использовать отправленное.</string>
+    <string name="recognizer_gone">Модель %1$s ответила \"не найдена\" %2$s. Пока так, отвечает следующая с ключом.</string>
+    <string name="recognizer_no_key">нет ключа</string>
+    <string name="recognizer_choose">Выбрать распознаватель</string>
+    <string name="gemini_help">Необязательно: запасной или бесплатный распознаватель.\n\n1. Откройте Google AI Studio (кнопка ниже) и войдите аккаунтом Google.\n2. Создайте ключ API и скопируйте его.\n3. Нажмите \"Добавить ключ\", вставьте его и нажмите \"Сохранить\".\n\nБесплатный тариф не требует карты. На нём Google может использовать отправленные фото и текст для улучшения своих продуктов. Ключ хранится только на этом телефоне в зашифрованном виде.</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">Добавить ключ</string>
     <string name="spend_none">Запросов ещё не было.</string>
     <string name="spend_requests">Запросов с %1$s</string>
     <string name="spend_tokens">Токены вход / выход</string>
@@ -239,17 +259,18 @@
     <string name="delete">Удалить</string>
     <string name="help_toggle">Пояснение</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">Повторить</string>
-    <string name="pending_title">Запросы к Claude</string>
-    <string name="pending_wait_title">Жду ответа Claude</string>
-    <string name="pending_reason_overloaded">Claude сейчас перегружен.</string>
+    <string name="pending_title">Запросы на распознавание</string>
+    <string name="pending_wait_title">Жду ответа</string>
+    <string name="pending_reason_overloaded">Сервис распознавания сейчас перегружен.</string>
+    <string name="pending_reason_quota">Дневной бесплатный лимит исчерпан.</string>
     <string name="pending_reason_rate">Слишком много запросов подряд.</string>
     <string name="pending_reason_network">Нет связи.</string>
     <string name="pending_next">Неудачных попыток: %1$d. Следующая через %2$s</string>
     <string name="pending_soon">Следующая попытка скоро</string>
     <string name="pending_explain">Запрос сохранён: приложение само отправит его ещё раз и покажет результат для проверки. Экран можно закрыть, запрос останется на вкладке \"Сегодня\".</string>
-    <string name="pending_gave_up">Claude не отвечает уже несколько часов. Повторите или удалите запрос.</string>
+    <string name="pending_gave_up">Ответа нет уже несколько часов. Повторите или удалите запрос.</string>
     <string name="pending_retry_now">Повторить сейчас</string>
     <string name="pending_delete">Удалить запрос</string>
     <string name="pending_at">Следующая попытка в %1$s</string>

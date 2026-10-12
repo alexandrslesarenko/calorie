@@ -66,11 +66,11 @@
     <string name="dish_favorite">Preferito</string>
     <string name="dish_delete_title">Eliminare il piatto?</string>
     <string name="dish_delete_text">%1$s sarà rimosso da \"I miei piatti\". Le voci del diario restano.</string>
-    <string name="from_cache">Risposta salvata per la stessa foto o lo stesso testo, senza richiesta a Claude.</string>
+    <string name="from_cache">Risposta salvata per la stessa foto o lo stesso testo, senza nuova richiesta.</string>
     <string name="ask_again">Chiedi di nuovo</string>
     <string name="label_hint">Questa è un\'etichetta nutrizionale: leggi i valori per 100 g, porzione 100 g</string>
     <string name="recent_line">%1$s g - %2$s kcal</string>
-    <string name="need_key">Per riconoscere foto e testo serve una chiave API di Claude.</string>
+    <string name="need_key">Per riconoscere foto e testo serve una chiave API: Claude o Gemini.</string>
     <string name="need_key_btn">Configura la chiave</string>
     <string name="text_placeholder">Ad esempio: un piatto di borsch con panna acida, due fette di pane di segale, tè con zucchero</string>
     <string name="recognize">Riconosci</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">Porzione da 300 g, fritto nel burro</string>
     <string name="privacy_note">La foto o il testo viene inviato ad Anthropic (Claude) per il riconoscimento. La posizione e gli altri metadati della foto vengono rimossi prima dell\'invio.</string>
     <string name="busy_photo">Preparo la foto...</string>
-    <string name="busy_ai">Claude sta guardando il cibo...</string>
+    <string name="busy_ai">%1$s sta guardando il cibo...</string>
     <string name="busy_barcode">Cerco il prodotto...</string>
 
     <string name="review_title">Controlla e aggiungi</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">Foto dell\'etichetta</string>
     <string name="scan_failed">Scanner non riuscito: %1$s</string>
     <string name="photo_unreadable">Impossibile leggere la foto.</string>
-    <string name="ai_nothing">Claude non ha trovato cibo qui.</string>
+    <string name="ai_nothing">Qui non è stato trovato cibo.</string>
 
     <string name="failed_title">Non è riuscito</string>
     <string name="err_bad_key">Claude non ha accettato la chiave API. Controllala nelle impostazioni.</string>
     <string name="err_no_credit">Il credito di Claude Console è esaurito. Ricaricalo e riprova.</string>
     <string name="err_rate_limit">Troppe richieste di seguito. Aspetta un minuto e riprova.</string>
-    <string name="err_overloaded">Claude è sovraccarico in questo momento. Riprova tra un minuto.</string>
+    <string name="err_overloaded">Il servizio di riconoscimento è sovraccarico. Riprova tra un minuto.</string>
     <string name="err_network">Nessuna connessione. Controlla internet e riprova.</string>
-    <string name="err_bad_answer">Claude ha risposto in modo inatteso. Riprova o aggiungi un suggerimento.</string>
+    <string name="err_bad_answer">La risposta è arrivata in una forma inattesa. Riprova o aggiungi un suggerimento.</string>
 
     <string name="diary_days">Per giorno</string>
     <string name="diary_empty">Il diario è vuoto.</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">Obiettivo personale (disattivato)</string>
     <string name="custom_kcal">Obiettivo personale, kcal</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">Chiave API</string>
     <string name="claude_help">Foto e testo sono riconosciuti dal modello Claude Haiku 5.5. Si paga a consumo tramite Claude Console, separatamente dagli abbonamenti Claude: circa 0,05 centesimi per foto.\n\n1. Accedi a Claude Console (pulsante qui sotto).\n2. Ricarica il credito in Billing.\n3. Crea una chiave in API keys e copiala.\n4. Incollala qui e premi Salva.\n\nLa chiave è salvata cifrata solo su questo telefono e non viene copiata nel backup sul cloud.</string>
     <string name="tile_claude_none">Nessuna chiave</string>
-    <string name="tile_claude_ok">Chiave impostata</string>
     <string name="tile_claude_bad">Chiave rifiutata</string>
     <string name="key_none">Nessuna chiave API: il riconoscimento di foto e testo è disattivato.</string>
     <string name="key_checking">Verifico la chiave...</string>
     <string name="key_ok">La chiave %1$s funziona.</string>
     <string name="key_bad">La chiave %1$s è stata rifiutata.</string>
     <string name="key_unchecked">La chiave %1$s non è ancora verificata.</string>
-    <string name="key_rejected">Claude non ha accettato la chiave. Controlla che sia stata copiata per intero e non sia stata revocata nella Console.</string>
+    <string name="key_rejected">La chiave non è stata accettata. Controlla che sia stata copiata per intero e non sia stata revocata.</string>
     <string name="key_field">Chiave API</string>
     <string name="key_format">Le chiavi di Claude iniziano con sk-ant-</string>
     <string name="paste">Incolla</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">Ricarica</string>
     <string name="console_usage">Consumi</string>
     <string name="spend_title">Spese dell\'app</string>
-    <string name="spend_help">Stima in base ai token di ogni risposta ai prezzi di Claude Haiku 5.5: 0,10 dollari per milione di token in ingresso e 0,50 dollari per milione in uscita. La cifra esatta è nella pagina Usage della Console.</string>
+    <string name="spend_help">Stima in base ai token di ogni risposta al prezzo del modello che ha risposto. Claude Haiku 5.5 costa 10 centesimi per milione di token in ingresso e 50 centesimi per milione in uscita, Claude Haiku 4.5 costa 1 e 5 dollari. La cifra esatta è nella pagina Usage della Console.</string>
+    <string name="studio_desc">Chiavi, utilizzo e limiti si gestiscono sul sito di Google.</string>
+    <string name="studio_help">Le pagine si aprono in una scheda del browser integrata; accedi con il tuo account Google. La pagina di utilizzo mostra quanto del limite gratuito giornaliero è già stato usato.</string>
+    <string name="studio_usage">Utilizzo e limiti</string>
+    <string name="spend_help_gemini">Conteggiato dall\'app in base ai token di ogni risposta, ragionamento compreso. Con il piano gratuito Gemini non costa nulla; la seconda cifra è quanto costerebbero le stesse richieste con il piano a pagamento (Gemini 3.5 Flash-Lite: 30 centesimi per milione di token in ingresso e 2,50 dollari per milione in uscita). Google conta il limite giornaliero dalla mezzanotte, ora del Pacifico; l\'utilizzo esatto è nella pagina di utilizzo di AI Studio.</string>
+    <string name="spend_today_google">Oggi, secondo il giorno di Google</string>
+    <string name="spend_cost_free">Costo con il piano gratuito</string>
+    <string name="spend_cost_paid">Con il piano a pagamento sarebbe</string>
+    <string name="answered_by_fallback">Ha risposto %1$s, perché %2$s non è disponibile.</string>
+    <string name="answered_by_quota">Ha risposto %1$s, perché il limite gratuito giornaliero di %2$s è esaurito.</string>
+    <string name="err_model_gone">%1$s non è disponibile e nessun altro riconoscitore ha una chiave. Scegli un riconoscitore nelle impostazioni.</string>
+    <string name="err_quota_day">Il limite gratuito giornaliero di %1$s è esaurito e nessun altro riconoscitore ha una chiave. La richiesta verrà inviata più tardi.</string>
+    <string name="err_bad_key_gemini">Gemini non ha accettato la chiave API. Controllala nelle impostazioni.</string>
+    <string name="privacy_note_gemini">La foto o il testo viene inviato a Google (Gemini) per il riconoscimento. Con il piano gratuito Google può usarli per migliorare i suoi prodotti. La posizione e gli altri metadati della foto vengono rimossi prima dell\'invio.</string>
+    <string name="recognizer_title">Riconoscimento</string>
+    <string name="recognizer_help">Quale modello riconosce foto e testo. Se il modello scelto viene ritirato, risponde il successivo con una chiave, e la schermata di verifica lo dice. Gemini richiede una chiave propria da Google AI Studio: il piano gratuito non costa nulla, ma Google può usare ciò che viene inviato.</string>
+    <string name="recognizer_gone">%1$s ha risposto \"non trovato\" il %2$s. Nel frattempo risponde il successivo con una chiave.</string>
+    <string name="recognizer_no_key">nessuna chiave</string>
+    <string name="recognizer_choose">Scegli il riconoscitore</string>
+    <string name="gemini_help">Facoltativo: un riconoscitore di riserva o gratuito.\n\n1. Apri Google AI Studio (pulsante qui sotto) e accedi con un account Google.\n2. Crea una chiave API e copiala.\n3. Premi Aggiungi chiave, incollala e premi Salva.\n\nIl piano gratuito non richiede una carta. Con esso Google può usare le foto e i testi inviati per migliorare i suoi prodotti. La chiave è salvata cifrata solo su questo telefono.</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">Aggiungi chiave</string>
     <string name="spend_none">Ancora nessuna richiesta.</string>
     <string name="spend_requests">Richieste dal %1$s</string>
     <string name="spend_tokens">Token ingresso / uscita</string>
@@ -239,17 +259,18 @@
     <string name="delete">Elimina</string>
     <string name="help_toggle">Spiegazione</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">Riprova</string>
-    <string name="pending_title">Richieste a Claude</string>
-    <string name="pending_wait_title">In attesa di Claude</string>
-    <string name="pending_reason_overloaded">Claude è sovraccarico in questo momento.</string>
+    <string name="pending_title">Richieste di riconoscimento</string>
+    <string name="pending_wait_title">In attesa della risposta</string>
+    <string name="pending_reason_overloaded">Il servizio di riconoscimento è sovraccarico.</string>
+    <string name="pending_reason_quota">Il limite gratuito giornaliero è esaurito.</string>
     <string name="pending_reason_rate">Troppe richieste di seguito.</string>
     <string name="pending_reason_network">Nessuna connessione.</string>
     <string name="pending_next">Il tentativo %1$d non è riuscito. Prossimo tra %2$s</string>
     <string name="pending_soon">Prossimo tentativo a breve</string>
     <string name="pending_explain">La richiesta è salvata: l\'app la reinvierà da sola e mostrerà il risultato da controllare. Puoi chiudere questa schermata, la richiesta resta in \"Oggi\".</string>
-    <string name="pending_gave_up">Claude non risponde da diverse ore. Riprova o elimina la richiesta.</string>
+    <string name="pending_gave_up">Nessuna risposta da diverse ore. Riprova o elimina la richiesta.</string>
     <string name="pending_retry_now">Riprova ora</string>
     <string name="pending_delete">Elimina richiesta</string>
     <string name="pending_at">Prossimo tentativo alle %1$s</string>

@@ -4,9 +4,12 @@ import android.content.Context
 import com.calorie.app.logic.Activity
 import com.calorie.app.logic.Pace
 import com.calorie.app.logic.Pricing
+import com.calorie.app.logic.Provider
+import com.calorie.app.logic.Recognizer
 import com.calorie.app.logic.ProfileData
 import com.calorie.app.logic.Sex
 import java.time.LocalDate
+import java.time.ZoneId
 
 class Prefs(context: Context) {
     companion object {
@@ -94,33 +97,70 @@ class Prefs(context: Context) {
         get() = sp.getString("theme", THEME_SYSTEM) ?: THEME_SYSTEM
         set(v) = sp.edit().putString("theme", v).apply()
 
-    /** Result of the last key check: KEY_OK / KEY_BAD / KEY_UNKNOWN. */
+    /** Result of the last Claude key check: KEY_OK / KEY_BAD / KEY_UNKNOWN. */
     var keyStatus: String
         get() = sp.getString("key_status", KEY_UNKNOWN) ?: KEY_UNKNOWN
         set(v) = sp.edit().putString("key_status", v).apply()
 
-    /** Claude spending counter since usageSince: requests and tokens. */
-    val aiRequests: Int get() = sp.getInt("ai_requests", 0)
-    val aiInputTokens: Long get() = sp.getLong("ai_in", 0)
-    val aiOutputTokens: Long get() = sp.getLong("ai_out", 0)
-    val usageSince: Long get() = sp.getLong("usage_since", 0)
+    /** The same for the Gemini key. */
+    var geminiKeyStatus: String
+        get() = sp.getString("gemini_key_status", KEY_UNKNOWN) ?: KEY_UNKNOWN
+        set(v) = sp.edit().putString("gemini_key_status", v).apply()
+
+    fun keyStatus(p: Provider) = if (p == Provider.GEMINI) geminiKeyStatus else keyStatus
+
+    fun setKeyStatus(p: Provider, v: String) = if (p == Provider.GEMINI) geminiKeyStatus = v else keyStatus = v
+
+    /** Recognizer asked first; the others are asked only when it is gone. */
+    var recognizer: Recognizer
+        get() = Recognizer.byKey(sp.getString("recognizer", null))
+        set(v) = sp.edit().putString("recognizer", v.key).apply()
 
     /**
-     * Spending in nano-dollars, added at the price of the model that answered: the price changes
-     * with the model, so tokens alone would reprice the past. Counters from before it existed
-     * were all Haiku 4.5.
+     * When a recognizer last answered "model not found", 0 - never. Only shown in settings:
+     * every request still tries the chosen one first, so a stray 404 does not lock it out.
      */
-    val aiNanoUsd: Long
-        get() = if (sp.contains("ai_nano_usd")) sp.getLong("ai_nano_usd", 0)
-        else Pricing.legacyNanoUsd(aiInputTokens, aiOutputTokens)
+    fun goneAt(r: Recognizer): Long = sp.getLong("gone_" + r.key, 0)
 
-    fun addUsage(input: Long, output: Long) {
+    fun setGone(r: Recognizer, at: Long) = sp.edit().putLong("gone_" + r.key, at).apply()
+
+    /**
+     * Spending counter of one provider since `since`. nanoUsd is added at the price of the
+     * model that answered (prices change with the model, so tokens alone would reprice the
+     * past); for Gemini it is what the requests would cost on the paid tier. today - requests
+     * since Google's midnight (Pacific time): its free daily limit counts by that day.
+     */
+    class Usage(val requests: Int, val input: Long, val output: Long, val nanoUsd: Long, val since: Long, val today: Int)
+
+    /** Claude keeps its keys from before Gemini, so the old counter goes on. */
+    private fun usageKey(p: Provider, name: String) = when (p) {
+        Provider.CLAUDE -> if (name == "since") "usage_since" else "ai_$name"
+        Provider.GEMINI -> "gem_$name"
+    }
+
+    private fun googleDay(): Long = LocalDate.now(ZoneId.of("America/Los_Angeles")).toEpochDay()
+
+    fun usage(p: Provider): Usage {
+        val input = sp.getLong(usageKey(p, "in"), 0)
+        val output = sp.getLong(usageKey(p, "out"), 0)
+        val nanoKey = usageKey(p, "nano_usd")
+        // Counters from before nano-dollars were all Haiku 4.5.
+        val nano = if (sp.contains(nanoKey) || p != Provider.CLAUDE) sp.getLong(nanoKey, 0) else Pricing.legacyNanoUsd(input, output)
+        val today = if (sp.getLong(usageKey(p, "day"), -1) == googleDay()) sp.getInt(usageKey(p, "today"), 0) else 0
+        return Usage(sp.getInt(usageKey(p, "requests"), 0), input, output, nano, sp.getLong(usageKey(p, "since"), 0), today)
+    }
+
+    fun addUsage(input: Long, output: Long, r: Recognizer = Recognizer.DEFAULT) {
+        val p = r.provider
+        val u = usage(p)
         val e = sp.edit()
-        if (usageSince == 0L) e.putLong("usage_since", System.currentTimeMillis())
-        e.putInt("ai_requests", aiRequests + 1)
-            .putLong("ai_nano_usd", aiNanoUsd + Pricing.nanoUsd(input, output))
-            .putLong("ai_in", aiInputTokens + input)
-            .putLong("ai_out", aiOutputTokens + output)
+        if (u.since == 0L) e.putLong(usageKey(p, "since"), System.currentTimeMillis())
+        e.putInt(usageKey(p, "requests"), u.requests + 1)
+            .putLong(usageKey(p, "nano_usd"), u.nanoUsd + Pricing.nanoUsd(input, output, r))
+            .putLong(usageKey(p, "in"), u.input + input)
+            .putLong(usageKey(p, "out"), u.output + output)
+            .putLong(usageKey(p, "day"), googleDay())
+            .putInt(usageKey(p, "today"), u.today + 1)
             .apply()
     }
 
@@ -146,8 +186,9 @@ class Prefs(context: Context) {
             if (p.theme in listOf(THEME_SYSTEM, THEME_LIGHT, THEME_DARK)) theme = p.theme
         }
 
-    fun resetUsage() {
-        sp.edit().remove("ai_requests").remove("ai_in").remove("ai_out").putLong("ai_nano_usd", 0)
-            .putLong("usage_since", System.currentTimeMillis()).apply()
+    /** The daily count stays: it is what Google's limit sees, not the user's tally. */
+    fun resetUsage(p: Provider) {
+        sp.edit().remove(usageKey(p, "requests")).remove(usageKey(p, "in")).remove(usageKey(p, "out"))
+            .putLong(usageKey(p, "nano_usd"), 0).putLong(usageKey(p, "since"), System.currentTimeMillis()).apply()
     }
 }

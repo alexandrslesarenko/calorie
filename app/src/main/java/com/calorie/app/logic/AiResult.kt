@@ -56,20 +56,15 @@ object AiParser {
 }
 
 /**
- * Claude Haiku 5.5 prices (prompts up to 100K tokens, ours are a few thousand) in nano-dollars
- * per token: whole numbers, so the spending counter adds up without rounding.
+ * Spending in nano-dollars per token (prices of each Recognizer; Claude prompts here are a few
+ * thousand tokens, under the 100K price step): whole numbers, so the counter adds up without rounding.
  */
 object Pricing {
-    const val INPUT_NANO = 100L
-    const val OUTPUT_NANO = 500L
-    /** Haiku 4.5 prices: spending counted before the switch keeps its real cost. */
-    const val LEGACY_INPUT_NANO = 1000L
-    const val LEGACY_OUTPUT_NANO = 5000L
+    fun nanoUsd(inputTokens: Long, outputTokens: Long, r: Recognizer = Recognizer.DEFAULT): Long =
+        inputTokens * r.inputNano + outputTokens * r.outputNano
 
-    fun nanoUsd(inputTokens: Long, outputTokens: Long): Long = inputTokens * INPUT_NANO + outputTokens * OUTPUT_NANO
-
-    fun legacyNanoUsd(inputTokens: Long, outputTokens: Long): Long =
-        inputTokens * LEGACY_INPUT_NANO + outputTokens * LEGACY_OUTPUT_NANO
+    /** Counters from before per-model prices were all Haiku 4.5. */
+    fun legacyNanoUsd(inputTokens: Long, outputTokens: Long): Long = nanoUsd(inputTokens, outputTokens, Recognizer.HAIKU_4_5)
 
     fun usd(nano: Long): Double = nano / 1e9
 }

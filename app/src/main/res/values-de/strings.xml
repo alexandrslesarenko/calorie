@@ -66,11 +66,11 @@
     <string name="dish_favorite">Favorit</string>
     <string name="dish_delete_title">Gericht löschen?</string>
     <string name="dish_delete_text">%1$s wird aus \"Meine Gerichte\" entfernt. Tagebucheinträge bleiben.</string>
-    <string name="from_cache">Gespeicherte Antwort für dasselbe Foto oder denselben Text, ohne Anfrage an Claude.</string>
+    <string name="from_cache">Gespeicherte Antwort zum selben Foto oder Text, ohne neue Anfrage.</string>
     <string name="ask_again">Neu fragen</string>
     <string name="label_hint">Das ist ein Nährwertetikett: lies die Werte pro 100 g ab, Portion 100 g</string>
     <string name="recent_line">%1$s g - %2$s kcal</string>
-    <string name="need_key">Für die Erkennung von Fotos und Text wird ein Claude-API-Schlüssel benötigt.</string>
+    <string name="need_key">Für die Erkennung von Fotos und Text wird ein API-Schlüssel gebraucht: Claude oder Gemini.</string>
     <string name="need_key_btn">Schlüssel einrichten</string>
     <string name="text_placeholder">Zum Beispiel: ein Teller Borschtsch mit Schmand, zwei Scheiben Roggenbrot, Tee mit Zucker</string>
     <string name="recognize">Erkennen</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">Portion 300 g, in Butter gebraten</string>
     <string name="privacy_note">Das Foto oder der Text wird zur Erkennung an Anthropic (Claude) gesendet. Standort und andere Fotodaten werden vorher entfernt.</string>
     <string name="busy_photo">Foto wird vorbereitet...</string>
-    <string name="busy_ai">Claude schaut sich das Essen an...</string>
+    <string name="busy_ai">%1$s sieht sich das Essen an...</string>
     <string name="busy_barcode">Produkt wird gesucht...</string>
 
     <string name="review_title">Prüfen und hinzufügen</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">Etikett fotografieren</string>
     <string name="scan_failed">Scanner fehlgeschlagen: %1$s</string>
     <string name="photo_unreadable">Das Foto konnte nicht gelesen werden.</string>
-    <string name="ai_nothing">Claude hat hier kein Essen gefunden.</string>
+    <string name="ai_nothing">Hier wurde kein Essen gefunden.</string>
 
     <string name="failed_title">Hat nicht geklappt</string>
     <string name="err_bad_key">Claude hat den API-Schlüssel nicht akzeptiert. Prüfe ihn in den Einstellungen.</string>
     <string name="err_no_credit">Das Guthaben in der Claude Console ist leer. Lade es auf und versuche es erneut.</string>
     <string name="err_rate_limit">Zu viele Anfragen hintereinander. Warte eine Minute und versuche es erneut.</string>
-    <string name="err_overloaded">Claude ist gerade überlastet. Versuche es in einer Minute erneut.</string>
+    <string name="err_overloaded">Der Erkennungsdienst ist gerade überlastet. Versuche es in einer Minute erneut.</string>
     <string name="err_network">Keine Verbindung. Prüfe das Internet und versuche es erneut.</string>
-    <string name="err_bad_answer">Claude hat unerwartet geantwortet. Versuche es erneut oder füge einen Hinweis hinzu.</string>
+    <string name="err_bad_answer">Die Antwort kam in unerwarteter Form. Versuche es erneut oder füge einen Hinweis hinzu.</string>
 
     <string name="diary_days">Nach Tagen</string>
     <string name="diary_empty">Das Tagebuch ist leer.</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">Eigenes Ziel (aus)</string>
     <string name="custom_kcal">Eigenes Ziel, kcal</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">API-Schlüssel</string>
     <string name="claude_help">Fotos und Text erkennt das Modell Claude Haiku 5.5. Es wird nach Nutzung über die Claude Console bezahlt, getrennt von Claude-Abos: etwa 0,05 Cent pro Foto.\n\n1. Melde dich in der Claude Console an (Knopf unten).\n2. Lade das Guthaben unter Billing auf.\n3. Erstelle unter API keys einen Schlüssel und kopiere ihn.\n4. Füge ihn hier ein und tippe auf Speichern.\n\nDer Schlüssel wird nur auf diesem Telefon verschlüsselt gespeichert und nicht in die Cloud-Sicherung kopiert.</string>
     <string name="tile_claude_none">Kein Schlüssel</string>
-    <string name="tile_claude_ok">Schlüssel gesetzt</string>
     <string name="tile_claude_bad">Schlüssel abgelehnt</string>
     <string name="key_none">Kein API-Schlüssel: Foto- und Texterkennung sind aus.</string>
     <string name="key_checking">Schlüssel wird geprüft...</string>
     <string name="key_ok">Schlüssel %1$s funktioniert.</string>
     <string name="key_bad">Schlüssel %1$s wurde abgelehnt.</string>
     <string name="key_unchecked">Schlüssel %1$s ist noch nicht geprüft.</string>
-    <string name="key_rejected">Claude hat den Schlüssel nicht akzeptiert. Prüfe, ob er vollständig kopiert und in der Console nicht widerrufen wurde.</string>
+    <string name="key_rejected">Der Schlüssel wurde nicht angenommen. Prüfe, ob er vollständig kopiert und nicht widerrufen wurde.</string>
     <string name="key_field">API-Schlüssel</string>
     <string name="key_format">Claude-Schlüssel beginnen mit sk-ant-</string>
     <string name="paste">Einfügen</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">Aufladen</string>
     <string name="console_usage">Verbrauch</string>
     <string name="spend_title">Ausgaben der App</string>
-    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zu den Preisen von Claude Haiku 5.5: 10 Cent pro Million Eingabe-Tokens und 50 Cent pro Million Ausgabe-Tokens. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
+    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zum Preis des Modells, das geantwortet hat. Claude Haiku 5.5 kostet 10 Cent pro Million Eingabe-Tokens und 50 Cent pro Million Ausgabe-Tokens, Claude Haiku 4.5 kostet 1 und 5 Dollar. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
+    <string name="studio_desc">Schlüssel, Nutzung und Limits werden auf der Google-Website verwaltet.</string>
+    <string name="studio_help">Die Seiten öffnen sich in einem eingebauten Browser-Tab; du meldest dich mit deinem Google-Konto an. Die Nutzungsseite zeigt, wie viel vom täglichen Gratislimit verbraucht ist.</string>
+    <string name="studio_usage">Nutzung und Limits</string>
+    <string name="spend_help_gemini">Von der App aus den Tokens jeder Antwort gezählt, Denken eingeschlossen. Im kostenlosen Tarif kostet Gemini nichts; die zweite Zahl zeigt, was dieselben Anfragen im bezahlten Tarif kosten würden (Gemini 3.5 Flash-Lite: 30 Cent pro Million Eingabe-Tokens und 2,50 Dollar pro Million Ausgabe-Tokens). Google zählt sein Tageslimit ab Mitternacht pazifischer Zeit; die genaue Nutzung steht auf der Nutzungsseite in AI Studio.</string>
+    <string name="spend_today_google">Heute, nach Googles Tag</string>
+    <string name="spend_cost_free">Kosten im kostenlosen Tarif</string>
+    <string name="spend_cost_paid">Im bezahlten Tarif wären es</string>
+    <string name="answered_by_fallback">Geantwortet hat %1$s, weil %2$s nicht verfügbar ist.</string>
+    <string name="answered_by_quota">Geantwortet hat %1$s, weil das tägliche Gratislimit von %2$s aufgebraucht ist.</string>
+    <string name="err_model_gone">%1$s ist nicht verfügbar, und kein anderer Erkenner hat einen Schlüssel. Wähle einen Erkenner in den Einstellungen.</string>
+    <string name="err_quota_day">Das tägliche Gratislimit von %1$s ist aufgebraucht, und kein anderer Erkenner hat einen Schlüssel. Die Anfrage wird später erneut gesendet.</string>
+    <string name="err_bad_key_gemini">Gemini hat den API-Schlüssel nicht angenommen. Prüfe ihn in den Einstellungen.</string>
+    <string name="privacy_note_gemini">Das Foto oder der Text wird zur Erkennung an Google (Gemini) gesendet. Im kostenlosen Tarif darf Google sie zur Verbesserung seiner Produkte nutzen. Standort und andere Fotometadaten werden vor dem Senden entfernt.</string>
+    <string name="recognizer_title">Erkennung</string>
+    <string name="recognizer_help">Welches Modell Fotos und Text erkennt. Wird das gewählte Modell eingestellt, antwortet das nächste mit Schlüssel, und der Prüfbildschirm sagt es. Gemini braucht einen eigenen Schlüssel aus Google AI Studio: Der kostenlose Tarif kostet nichts, aber Google darf das Gesendete nutzen.</string>
+    <string name="recognizer_gone">%1$s antwortete am %2$s mit \"nicht gefunden\". Bis dahin antwortet das nächste mit Schlüssel.</string>
+    <string name="recognizer_no_key">kein Schlüssel</string>
+    <string name="recognizer_choose">Erkenner wählen</string>
+    <string name="gemini_help">Optional: ein Ersatz- oder kostenloser Erkenner.\n\n1. Öffne Google AI Studio (Knopf unten) und melde dich mit einem Google-Konto an.\n2. Erstelle einen API-Schlüssel und kopiere ihn.\n3. Tippe auf Schlüssel hinzufügen, füge ihn ein und tippe auf Speichern.\n\nDer kostenlose Tarif braucht keine Karte. Darin darf Google gesendete Fotos und Texte zur Verbesserung seiner Produkte nutzen. Der Schlüssel wird nur auf diesem Telefon verschlüsselt gespeichert.</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">Schlüssel hinzufügen</string>
     <string name="spend_none">Noch keine Anfragen.</string>
     <string name="spend_requests">Anfragen seit %1$s</string>
     <string name="spend_tokens">Tokens ein / aus</string>
@@ -239,17 +259,18 @@
     <string name="delete">Löschen</string>
     <string name="help_toggle">Erklärung</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">Erneut versuchen</string>
-    <string name="pending_title">Anfragen an Claude</string>
-    <string name="pending_wait_title">Warte auf Claude</string>
-    <string name="pending_reason_overloaded">Claude ist gerade überlastet.</string>
+    <string name="pending_title">Erkennungsanfragen</string>
+    <string name="pending_wait_title">Warte auf die Antwort</string>
+    <string name="pending_reason_overloaded">Der Erkennungsdienst ist gerade überlastet.</string>
+    <string name="pending_reason_quota">Das tägliche Gratislimit ist aufgebraucht.</string>
     <string name="pending_reason_rate">Zu viele Anfragen hintereinander.</string>
     <string name="pending_reason_network">Keine Verbindung.</string>
     <string name="pending_next">Versuch %1$d hat nicht geklappt. Nächster in %2$s</string>
     <string name="pending_soon">Nächster Versuch gleich</string>
     <string name="pending_explain">Die Anfrage ist gespeichert: Die App sendet sie selbst erneut und zeigt das Ergebnis zur Prüfung. Du kannst diesen Bildschirm schließen, die Anfrage bleibt unter \"Heute\".</string>
-    <string name="pending_gave_up">Claude antwortet seit mehreren Stunden nicht. Versuche es erneut oder lösche die Anfrage.</string>
+    <string name="pending_gave_up">Seit mehreren Stunden keine Antwort. Versuche es erneut oder lösche die Anfrage.</string>
     <string name="pending_retry_now">Jetzt wiederholen</string>
     <string name="pending_delete">Anfrage löschen</string>
     <string name="pending_at">Nächster Versuch um %1$s</string>

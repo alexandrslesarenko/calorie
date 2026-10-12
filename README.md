@@ -50,10 +50,21 @@ and cached answers work without a key.
 The key is encrypted with a key from the Android Keystore and excluded from cloud
 backup.
 
+### Choosing the recognizer
+
+Settings - Recognition: Claude Haiku 5.5 (default), Claude Haiku 4.5 or Gemini 3.5
+Flash-Lite. If the chosen model is retired, the next one with a key answers instead and
+the review screen says so; a busy service is waited for, not swapped.
+
+Gemini is optional and needs its own key from
+[Google AI Studio](https://aistudio.google.com/apikey). Its free tier costs nothing, but on
+it Google may use what is sent to improve its products.
+
 ## Privacy
 
-- Photos and descriptions are sent to the Claude API. Photos are re-encoded before
-  sending, so EXIF data and geotags do not leave the phone.
+- Photos and descriptions are sent to the Claude API, or to the Gemini API if it is
+  chosen or answers as a fallback (on its free tier Google may use them). Photos are
+  re-encoded before sending, so EXIF data and geotags do not leave the phone.
 - Barcodes are sent to Open Food Facts (no account or key).
 - The diary, weight log and profile stay on the phone.
 

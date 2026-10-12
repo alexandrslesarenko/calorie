@@ -66,11 +66,11 @@
     <string name="dish_favorite">Favorite</string>
     <string name="dish_delete_title">Delete dish?</string>
     <string name="dish_delete_text">%1$s will be removed from My dishes. Diary entries stay.</string>
-    <string name="from_cache">Saved answer for the same photo or text, no request to Claude.</string>
+    <string name="from_cache">Saved answer for the same photo or text, no new request.</string>
     <string name="ask_again">Ask again</string>
     <string name="label_hint">This is a nutrition label: read the values per 100 g, portion 100 g</string>
     <string name="recent_line">%1$s g - %2$s kcal</string>
-    <string name="need_key">Photo and text recognition need a Claude API key.</string>
+    <string name="need_key">Photo and text recognition need an API key: Claude or Gemini.</string>
     <string name="need_key_btn">Set up the key</string>
     <string name="text_placeholder">For example: a bowl of borscht with sour cream, two slices of rye bread, tea with sugar</string>
     <string name="recognize">Recognize</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">Portion 300 g, fried in butter</string>
     <string name="privacy_note">The photo or text is sent to Anthropic (Claude) for recognition. Location and other photo metadata are removed before sending.</string>
     <string name="busy_photo">Preparing the photo...</string>
-    <string name="busy_ai">Claude is looking at the food...</string>
+    <string name="busy_ai">%1$s is looking at the food...</string>
     <string name="busy_barcode">Looking up the product...</string>
 
     <string name="review_title">Check and add</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">Photo of label</string>
     <string name="scan_failed">Scanner failed: %1$s</string>
     <string name="photo_unreadable">Could not read the photo.</string>
-    <string name="ai_nothing">Claude found no food here.</string>
+    <string name="ai_nothing">No food found here.</string>
 
     <string name="failed_title">Did not work</string>
     <string name="err_bad_key">Claude did not accept the API key. Check it in settings.</string>
     <string name="err_no_credit">The Claude Console balance is empty. Top it up and try again.</string>
     <string name="err_rate_limit">Too many requests in a row. Wait a minute and try again.</string>
-    <string name="err_overloaded">Claude is overloaded right now. Try again in a minute.</string>
+    <string name="err_overloaded">The recognition service is overloaded right now. Try again in a minute.</string>
     <string name="err_network">No connection. Check the internet and try again.</string>
-    <string name="err_bad_answer">Claude answered in an unexpected way. Try again or add a hint.</string>
+    <string name="err_bad_answer">The answer came in an unexpected form. Try again or add a hint.</string>
 
     <string name="diary_days">By day</string>
     <string name="diary_empty">The diary is empty.</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">Own target (off)</string>
     <string name="custom_kcal">Own target, kcal</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">API key</string>
     <string name="claude_help">Photos and text are recognized by the Claude Haiku 5.5 model. It is paid per use through Claude Console, separately from Claude subscriptions: about 0.05 cents per photo.\n\n1. Sign in to Claude Console (button below).\n2. Top up the balance in Billing.\n3. Create a key in API keys and copy it.\n4. Paste it here and press Save.\n\nThe key is stored on this phone only, encrypted, and is not copied to the cloud backup.</string>
     <string name="tile_claude_none">No key</string>
-    <string name="tile_claude_ok">Key set</string>
     <string name="tile_claude_bad">Key rejected</string>
     <string name="key_none">No API key: photo and text recognition are off.</string>
     <string name="key_checking">Checking the key...</string>
     <string name="key_ok">Key %1$s works.</string>
     <string name="key_bad">Key %1$s was rejected.</string>
     <string name="key_unchecked">Key %1$s is not checked yet.</string>
-    <string name="key_rejected">Claude did not accept the key. Check that it was copied in full and has not been revoked in Console.</string>
+    <string name="key_rejected">The key was not accepted. Check that it was copied in full and has not been revoked.</string>
     <string name="key_field">API key</string>
     <string name="key_format">Claude keys start with sk-ant-</string>
     <string name="paste">Paste</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">Top up</string>
     <string name="console_usage">Usage</string>
     <string name="spend_title">App spending</string>
-    <string name="spend_help">Estimated from the tokens in each answer at Claude Haiku 5.5 prices: 10 cents per million input tokens and 50 cents per million output tokens. The exact amount is on the Usage page in Console.</string>
+    <string name="spend_help">Estimated from the tokens in each answer at the price of the model that answered. Claude Haiku 5.5 costs 10 cents per million input tokens and 50 cents per million output tokens, Claude Haiku 4.5 costs 1 and 5 dollars. The exact amount is on the Usage page in Console.</string>
+    <string name="studio_desc">Keys, usage and limits are managed on the Google website.</string>
+    <string name="studio_help">The pages open in a built-in browser tab; you sign in with your Google account. The Usage page shows how much of the free daily limit is used.</string>
+    <string name="studio_usage">Usage and limits</string>
+    <string name="spend_help_gemini">Counted by the app from the tokens in each answer, thinking included. On the free tier Gemini costs nothing; the second figure is what the same requests would cost on the paid tier (Gemini 3.5 Flash-Lite: 30 cents per million input tokens and 2.50 dollars per million output tokens). Google counts its daily limit from midnight Pacific time; the exact usage is on the Usage page in AI Studio.</string>
+    <string name="spend_today_google">Today, by Google\'s day</string>
+    <string name="spend_cost_free">Cost on the free tier</string>
+    <string name="spend_cost_paid">On the paid tier it would be</string>
+    <string name="answered_by_fallback">Answered by %1$s, because %2$s is not available.</string>
+    <string name="answered_by_quota">Answered by %1$s, because the daily free limit of %2$s is used up.</string>
+    <string name="err_model_gone">%1$s is not available, and no other recognizer has a key. Choose a recognizer in settings.</string>
+    <string name="err_quota_day">The daily free limit of %1$s is used up, and no other recognizer has a key. The request will be sent again later.</string>
+    <string name="err_bad_key_gemini">Gemini did not accept the API key. Check it in settings.</string>
+    <string name="privacy_note_gemini">The photo or text is sent to Google (Gemini) for recognition. On the free tier Google may use it to improve its products. Location and other photo metadata are removed before sending.</string>
+    <string name="recognizer_title">Recognition</string>
+    <string name="recognizer_help">Which model recognizes photos and text. If the chosen model is retired, the next one with a key answers instead, and the review screen says so. Gemini needs its own key from Google AI Studio: the free tier costs nothing, but Google may use what is sent.</string>
+    <string name="recognizer_gone">%1$s answered \"not found\" on %2$s. Until it is back, the next one with a key answers.</string>
+    <string name="recognizer_no_key">no key</string>
+    <string name="recognizer_choose">Choose a recognizer</string>
+    <string name="gemini_help">Optional: a fallback or free recognizer.\n\n1. Open Google AI Studio (button below) and sign in with a Google account.\n2. Create an API key and copy it.\n3. Press Add key, paste it and press Save.\n\nThe free tier needs no card. On it Google may use the photos and text sent to improve its products. The key is stored on this phone only, encrypted.</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">Add key</string>
     <string name="spend_none">No requests yet.</string>
     <string name="spend_requests">Requests since %1$s</string>
     <string name="spend_tokens">Tokens in / out</string>
@@ -239,17 +259,18 @@
     <string name="delete">Delete</string>
     <string name="help_toggle">Explanation</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">Try again</string>
-    <string name="pending_title">Claude requests</string>
-    <string name="pending_wait_title">Waiting for Claude</string>
-    <string name="pending_reason_overloaded">Claude is overloaded right now.</string>
+    <string name="pending_title">Recognition requests</string>
+    <string name="pending_wait_title">Waiting for the answer</string>
+    <string name="pending_reason_overloaded">The recognition service is overloaded right now.</string>
+    <string name="pending_reason_quota">The daily free limit is used up.</string>
     <string name="pending_reason_rate">Too many requests in a row.</string>
     <string name="pending_reason_network">No connection.</string>
     <string name="pending_next">Failed attempts: %1$d. Next one in %2$s</string>
     <string name="pending_soon">Next attempt soon</string>
     <string name="pending_explain">The request is saved: the app will resend it on its own and show the result for you to check. You can close this screen, the request stays on Today.</string>
-    <string name="pending_gave_up">Claude has not answered for several hours. Try again or delete the request.</string>
+    <string name="pending_gave_up">No answer for several hours. Try again or delete the request.</string>
     <string name="pending_retry_now">Retry now</string>
     <string name="pending_delete">Delete request</string>
     <string name="pending_at">Next attempt at %1$s</string>

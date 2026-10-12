@@ -158,6 +158,23 @@ class ClaudeFoodTest {
     }
 
     @Test
+    fun retiredModelIsGone() {
+        server.enqueue(error(404, "not_found_error", "model: claude-haiku-4-5"))
+        expectFailure(AiFailure.MODEL_GONE) { ai.recognizeText("суп", "English") }
+        server.enqueue(error(404, "not_found_error", "model: claude-haiku-4-5"))
+        expectFailure(AiFailure.MODEL_GONE) { ai.checkKey() }
+    }
+
+    @Test
+    fun otherModelIsSent() {
+        ClaudeFood("sk-ant-test", server.url("/").toString().trimEnd('/'), model = "claude-haiku-4-5").use { old ->
+            server.enqueue(message("""{"items":[]}"""))
+            old.recognizeText("суп", "English")
+        }
+        assertEquals("claude-haiku-4-5", JSONObject(server.takeRequest().body.readUtf8()).getString("model"))
+    }
+
+    @Test
     fun networkFailure() {
         server.shutdown()
         expectFailure(AiFailure.NETWORK) { ai.recognizeText("суп", "English") }

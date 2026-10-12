@@ -85,6 +85,8 @@ class ParsersTest {
         assertEquals(350_000L, Pricing.nanoUsd(1500, 400))
         assertEquals(0.00035, Pricing.usd(Pricing.nanoUsd(1500, 400)), 1e-12)
         assertEquals(3_500_000L, Pricing.legacyNanoUsd(1500, 400))
+        assertEquals(3_500_000L, Pricing.nanoUsd(1500, 400, Recognizer.HAIKU_4_5))
+        assertEquals(1_450_000L, Pricing.nanoUsd(1500, 400, Recognizer.GEMINI_LITE))
     }
 
     @Test

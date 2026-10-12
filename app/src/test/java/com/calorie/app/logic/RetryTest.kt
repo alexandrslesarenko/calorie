@@ -30,7 +30,8 @@ class RetryTest {
     @Test
     fun onlyTemporaryFailuresAreRetried() {
         assertEquals(
-            setOf(AiFailure.RATE_LIMIT, AiFailure.OVERLOADED, AiFailure.NETWORK),
+            // A used up daily quota waits in the queue when no other recognizer can answer.
+            setOf(AiFailure.RATE_LIMIT, AiFailure.OVERLOADED, AiFailure.NETWORK, AiFailure.QUOTA_DAY),
             AiFailure.entries.filter { it.retryable }.toSet(),
         )
     }

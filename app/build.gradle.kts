@@ -69,6 +69,8 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.2")
     // Claude API (food recognition from photos and text).
     implementation("com.anthropic:anthropic-java:2.66.0")
+    // Gemini over plain REST; the same OkHttp the Claude SDK already brings.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     // Claude Console pages in an in-app browser tab.
     implementation("androidx.browser:browser:1.8.0")
     // Google barcode scanner: ready-made UI, no camera permission.

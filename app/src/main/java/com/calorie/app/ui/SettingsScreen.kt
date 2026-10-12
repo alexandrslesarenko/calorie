@@ -62,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,8 +81,11 @@ import androidx.compose.ui.unit.dp
 import com.calorie.app.R
 import com.calorie.app.ai.AiException
 import com.calorie.app.ai.AiFailure
-import com.calorie.app.ai.ClaudeFood
+import com.calorie.app.ai.FoodRecognizer
+import com.calorie.app.data.AiKeys
 import com.calorie.app.data.ApiKeyStore
+import com.calorie.app.logic.Provider
+import com.calorie.app.logic.Recognizer
 import com.calorie.app.data.BackupStore
 import com.calorie.app.data.Meal
 import com.calorie.app.logic.BackupData
@@ -129,7 +133,7 @@ private val APP_LANGUAGES = listOf(
 enum class SettingsPage(@StringRes val title: Int, @DrawableRes val icon: Int, val color: Color) {
     PROFILE(R.string.profile_title, R.drawable.ic_set_person, Color(0xFF26A69A)),
     GOAL(R.string.goal_title, R.drawable.ic_set_flag, Color(0xFF3BA55C)),
-    CLAUDE(R.string.claude_title, R.drawable.ic_set_key, Color(0xFFD97757)),
+    CLAUDE(R.string.recognizer_title, R.drawable.ic_set_key, Color(0xFFD97757)),
     THEME(R.string.theme_title, R.drawable.ic_set_palette, Color(0xFF00A5B8)),
     LANGUAGE(R.string.lang_title, R.drawable.ic_set_language, Color(0xFF5C6BC0)),
     /** Not a page: the tile opens the "My dishes" screen. */
@@ -207,13 +211,11 @@ private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?, entryC
         else stringResource(R.string.tile_profile, Goals.age(prefs.birthDate!!), prefs.heightCm, weight.gramsText())
     }
     SettingsPage.GOAL -> a.target(weight)?.let { stringResource(R.string.tile_goal, it.kcal) } ?: stringResource(R.string.tile_goal_empty)
-    SettingsPage.CLAUDE -> stringResource(
-        when {
-            !a.hasKey -> R.string.tile_claude_none
-            a.prefs.keyStatus == Prefs.KEY_BAD -> R.string.tile_claude_bad
-            else -> R.string.tile_claude_ok
-        }
-    )
+    SettingsPage.CLAUDE -> when {
+        !a.hasKey -> stringResource(R.string.tile_claude_none)
+        a.prefs.keyStatus(a.prefs.recognizer.provider) == Prefs.KEY_BAD -> stringResource(R.string.tile_claude_bad)
+        else -> a.prefs.recognizer.label
+    }
     SettingsPage.THEME -> stringResource(themeLabel(a.themeMode))
     SettingsPage.LANGUAGE -> APP_LANGUAGES.firstOrNull { it.first == currentAppLanguage() }?.second ?: systemLanguageLabel()
     SettingsPage.DATA -> stringResource(R.string.tile_data, entryCount)
@@ -612,97 +614,23 @@ private fun GoalSettings(a: MainActivity) {
     }
 }
 
+/** Google page where a Gemini API key is created. */
+private const val GEMINI_KEYS_URL = "https://aistudio.google.com/apikey"
+/** Usage and rate limits of the project; Google's own short link ai.dev/usage leads here. */
+private const val GEMINI_USAGE_URL = "https://aistudio.google.com/usage"
+
 @Composable
 private fun ClaudeSettings(a: MainActivity) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val prefs = a.prefs
-    @Suppress("DEPRECATION")
-    val clipboard = LocalClipboardManager.current
-    var saved by remember { mutableStateOf(ApiKeyStore.load(ctx)) }
-    var editing by remember { mutableStateOf(saved == null) }
-    var input by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf(prefs.keyStatus) }
-    var checking by remember { mutableStateOf(false) }
-    var checkError by remember { mutableStateOf<String?>(null) }
-    var usageTick by remember { mutableStateOf(0) }
+    // Bumped when a key is saved or removed: the recognizer choice depends on which keys exist.
+    var keysTick by remember { mutableIntStateOf(0) }
+    val keys = remember(keysTick) { AiKeys.load(ctx) }
 
-    fun check(key: String) {
-        checking = true
-        checkError = null
-        scope.launch {
-            try {
-                withContext(Dispatchers.IO) { ClaudeFood(key).use { it.checkKey() } }
-                status = Prefs.KEY_OK
-            } catch (e: AiException) {
-                // No network - nothing learned about the key, keep the previous status.
-                if (e.failure == AiFailure.BAD_KEY) status = Prefs.KEY_BAD
-                checkError = ctx.getString(if (e.failure == AiFailure.BAD_KEY) R.string.key_rejected else R.string.err_network)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                checkError = e.message
-            } finally {
-                prefs.keyStatus = status
-                checking = false
-            }
-        }
-    }
+    RecognizerCard(a, keys)
 
-    val statusText = when {
-        saved == null -> stringResource(R.string.key_none)
-        checking -> stringResource(R.string.key_checking)
-        status == Prefs.KEY_OK -> stringResource(R.string.key_ok, ApiKeyStore.masked(saved!!))
-        status == Prefs.KEY_BAD -> stringResource(R.string.key_bad, ApiKeyStore.masked(saved!!))
-        else -> stringResource(R.string.key_unchecked, ApiKeyStore.masked(saved!!))
-    }
-    SettingsCard(stringResource(R.string.claude_title), statusText, help = stringResource(R.string.claude_help)) {
-        checkError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = CalColors.Over) }
-        if (editing) {
-            OutlinedTextField(
-                input, { input = it.trim() },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                label = { Text(stringResource(R.string.key_field)) },
-                placeholder = { Text("sk-ant-...") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            )
-            FitRow { style ->
-                OutlinedButton(onClick = { clipboard.getText()?.text?.trim()?.let { input = it } }) {
-                    Text(stringResource(R.string.paste), maxLines = 1, style = style)
-                }
-                if (saved != null) {
-                    OutlinedButton(onClick = { editing = false; input = "" }) { Text(stringResource(R.string.cancel), maxLines = 1, style = style) }
-                }
-                OutlinedButton(enabled = input.startsWith("sk-ant-") && input.length > 20, onClick = {
-                    ApiKeyStore.save(ctx, input)
-                    saved = input
-                    a.hasKey = true
-                    status = Prefs.KEY_UNKNOWN
-                    input = ""
-                    editing = false
-                    check(saved!!)
-                }) { Text(stringResource(R.string.key_save), maxLines = 1, style = style) }
-            }
-            if (input.isNotEmpty() && !input.startsWith("sk-ant-")) {
-                Text(stringResource(R.string.key_format), style = MaterialTheme.typography.bodySmall, color = CalColors.Warn)
-            }
-        } else {
-            FitRow { style ->
-                CompactButton(enabled = !checking, onClick = { check(saved!!) }) { Text(stringResource(R.string.key_check), maxLines = 1, style = style) }
-                CompactButton(onClick = { editing = true }) { Text(stringResource(R.string.key_replace), maxLines = 1, style = style) }
-                CompactButton(onClick = {
-                    ApiKeyStore.clear(ctx)
-                    saved = null
-                    a.hasKey = false
-                    status = Prefs.KEY_UNKNOWN
-                    prefs.keyStatus = status
-                    editing = true
-                }) { Text(stringResource(R.string.delete), maxLines = 1, style = style) }
-            }
-        }
-    }
+    // Everything of one provider together: its key, then what only it has.
+    ProviderHeader("Claude", "Anthropic")
+    KeyCard(a, Provider.CLAUDE) { keysTick++ }
 
     SettingsCard(stringResource(R.string.console_title), help = stringResource(R.string.console_help), secondary = true) {
         Text(stringResource(R.string.console_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -712,21 +640,216 @@ private fun ClaudeSettings(a: MainActivity) {
             CompactButton(onClick = { a.openConsole(Console.USAGE) }) { Text(stringResource(R.string.console_usage), maxLines = 1, style = style) }
         }
     }
+    SpendCard(a, Provider.CLAUDE)
 
-    // A regular key cannot read the balance, so count it ourselves from the usage in answers.
-    val usd = remember(usageTick) { Pricing.usd(prefs.aiNanoUsd) }
-    val since = remember(usageTick) {
-        prefs.usageSince.takeIf { it > 0 }?.let { SimpleDateFormat(dayMonthPattern(), Locale.getDefault()).format(Date(it)) }
+    ProviderHeader("Gemini", "Google")
+    KeyCard(a, Provider.GEMINI) { keysTick++ }
+    SettingsCard("Google AI Studio", help = stringResource(R.string.studio_help), secondary = true) {
+        Text(stringResource(R.string.studio_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FitRow { style ->
+            CompactButton(onClick = { a.openConsole(GEMINI_KEYS_URL) }) { Text(stringResource(R.string.console_keys), maxLines = 1, style = style) }
+            CompactButton(onClick = { a.openConsole(GEMINI_USAGE_URL) }) { Text(stringResource(R.string.studio_usage), maxLines = 1, style = style) }
+        }
     }
-    SettingsCard(stringResource(R.string.spend_title), help = stringResource(R.string.spend_help), secondary = true) {
-        if (prefs.aiRequests == 0) {
+    SpendCard(a, Provider.GEMINI)
+}
+
+/**
+ * What the app spent with one provider. A regular key cannot read the balance or usage, so the
+ * app counts it itself from the usage in answers. Gemini: what the free tier would cost on the
+ * paid one, and today's requests against Google's daily limit.
+ */
+@Composable
+private fun SpendCard(a: MainActivity, p: Provider) {
+    val prefs = a.prefs
+    var tick by remember { mutableIntStateOf(0) }
+    val u = remember(tick) { prefs.usage(p) }
+    val gemini = p == Provider.GEMINI
+    val usd = Pricing.usd(u.nanoUsd)
+    val since = u.since.takeIf { it > 0 }?.let { SimpleDateFormat(dayMonthPattern(), Locale.getDefault()).format(Date(it)) }
+    SettingsCard(stringResource(R.string.spend_title), help = stringResource(if (gemini) R.string.spend_help_gemini else R.string.spend_help), secondary = true) {
+        if (u.requests == 0) {
             Text(stringResource(R.string.spend_none), style = MaterialTheme.typography.bodyMedium)
         } else {
-            AboutLine(stringResource(R.string.spend_requests, since ?: "--"), prefs.aiRequests.toString())
-            AboutLine(stringResource(R.string.spend_tokens), stringResource(R.string.spend_tokens_value, prefs.aiInputTokens, prefs.aiOutputTokens))
-            AboutLine(stringResource(R.string.spend_cost), "$" + String.format(Locale.US, "%.3f", usd))
-            AboutLine(stringResource(R.string.spend_avg), "$" + String.format(Locale.US, "%.4f", usd / prefs.aiRequests))
-            OutlinedButton(onClick = { prefs.resetUsage(); usageTick++ }) { Text(stringResource(R.string.spend_reset)) }
+            AboutLine(stringResource(R.string.spend_requests, since ?: "--"), u.requests.toString())
+            if (gemini) AboutLine(stringResource(R.string.spend_today_google), u.today.toString())
+            AboutLine(stringResource(R.string.spend_tokens), stringResource(R.string.spend_tokens_value, u.input, u.output))
+            if (gemini) {
+                AboutLine(stringResource(R.string.spend_cost_free), "$0")
+                AboutLine(stringResource(R.string.spend_cost_paid), "$" + String.format(Locale.US, "%.3f", usd))
+            } else {
+                AboutLine(stringResource(R.string.spend_cost), "$" + String.format(Locale.US, "%.3f", usd))
+                AboutLine(stringResource(R.string.spend_avg), "$" + String.format(Locale.US, "%.4f", usd / u.requests))
+            }
+            OutlinedButton(onClick = { prefs.resetUsage(p); tick++ }) { Text(stringResource(R.string.spend_reset)) }
+        }
+    }
+}
+
+/** Start of one provider's group of cards; names are brands, not translated. */
+@Composable
+private fun ProviderHeader(name: String, company: String) {
+    Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        HorizontalDivider()
+        Text("$name ($company)", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 4.dp))
+    }
+}
+
+/**
+ * Which recognizer is asked first. One without a key cannot be chosen; a model that answered
+ * "not found" is marked with the date, the next one with a key answers in its place.
+ */
+@Composable
+private fun RecognizerCard(a: MainActivity, keys: AiKeys) {
+    // Keyed by the keys: removing one may move the choice to another recognizer.
+    var chosen by remember(keys) { mutableStateOf(a.prefs.recognizer) }
+    val dateFormat = remember { SimpleDateFormat(dayMonthPattern(), Locale.getDefault()) }
+    SettingsCard(stringResource(R.string.recognizer_title), chosen.label, help = stringResource(R.string.recognizer_help)) {
+        Recognizer.entries.forEach { r ->
+            val usable = keys.has(r.provider)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                FilterChip(
+                    selected = chosen == r,
+                    enabled = usable,
+                    onClick = { chosen = r; a.prefs.recognizer = r },
+                    label = { Text(r.label, maxLines = 1) },
+                )
+                if (!usable) {
+                    Text(
+                        stringResource(R.string.recognizer_no_key), Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        val gone = a.prefs.goneAt(chosen)
+        if (gone > 0) {
+            Text(
+                stringResource(R.string.recognizer_gone, chosen.label, dateFormat.format(Date(gone))),
+                style = MaterialTheme.typography.bodySmall, color = CalColors.Warn,
+            )
+        }
+        if (chosen.provider == Provider.GEMINI) {
+            Text(stringResource(R.string.privacy_note_gemini), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** API key of one provider: enter, check (costs nothing), replace, delete. */
+@Composable
+private fun KeyCard(a: MainActivity, p: Provider, onKeysChanged: () -> Unit) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val prefs = a.prefs
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
+    var saved by remember { mutableStateOf(ApiKeyStore.load(ctx, p)) }
+    var editing by remember { mutableStateOf(saved == null && p == Provider.CLAUDE) }
+    var input by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf(prefs.keyStatus(p)) }
+    var checking by remember { mutableStateOf(false) }
+    var checkError by remember { mutableStateOf<String?>(null) }
+    val claude = p == Provider.CLAUDE
+    // The model the check asks about: the chosen one if it is of this provider.
+    val model = prefs.recognizer.takeIf { it.provider == p } ?: Recognizer.entries.first { it.provider == p }
+
+    fun check(key: String) {
+        checking = true
+        checkError = null
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) { FoodRecognizer.create(model, key).use { it.checkKey() } }
+                status = Prefs.KEY_OK
+            } catch (e: AiException) {
+                // No network - nothing learned about the key, keep the previous status.
+                if (e.failure == AiFailure.BAD_KEY) status = Prefs.KEY_BAD
+                checkError = when (e.failure) {
+                    AiFailure.BAD_KEY -> ctx.getString(R.string.key_rejected)
+                    AiFailure.MODEL_GONE -> ctx.getString(R.string.err_model_gone, model.label)
+                    AiFailure.NETWORK -> ctx.getString(R.string.err_network)
+                    else -> e.message
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                checkError = e.message
+            } finally {
+                prefs.setKeyStatus(p, status)
+                checking = false
+            }
+        }
+    }
+
+    fun keysChanged() {
+        val keys = AiKeys.load(ctx)
+        a.hasKey = keys.any
+        // The chosen recognizer lost its key: fall back to one that has a key.
+        if (!keys.has(prefs.recognizer.provider)) Recognizer.order(prefs.recognizer) { keys.has(it) }.firstOrNull()?.let { prefs.recognizer = it }
+        onKeysChanged()
+    }
+
+    val statusText = when {
+        saved == null -> stringResource(R.string.key_none)
+        checking -> stringResource(R.string.key_checking)
+        status == Prefs.KEY_OK -> stringResource(R.string.key_ok, ApiKeyStore.masked(saved!!))
+        status == Prefs.KEY_BAD -> stringResource(R.string.key_bad, ApiKeyStore.masked(saved!!))
+        else -> stringResource(R.string.key_unchecked, ApiKeyStore.masked(saved!!))
+    }
+    val inputOk = if (claude) input.startsWith("sk-ant-") && input.length > 20 else input.length > 20 && input.none { it.isWhitespace() }
+    SettingsCard(
+        stringResource(R.string.api_key_title), statusText,
+        help = stringResource(if (claude) R.string.claude_help else R.string.gemini_help), secondary = true,
+    ) {
+        checkError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = CalColors.Over) }
+        if (editing) {
+            OutlinedTextField(
+                input, { input = it.trim() },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text(stringResource(R.string.key_field)) },
+                placeholder = { Text(if (claude) "sk-ant-..." else "AIza...") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            )
+            FitRow { style ->
+                OutlinedButton(onClick = { clipboard.getText()?.text?.trim()?.let { input = it } }) {
+                    Text(stringResource(R.string.paste), maxLines = 1, style = style)
+                }
+                if (saved != null || !claude) {
+                    OutlinedButton(onClick = { editing = false; input = "" }) { Text(stringResource(R.string.cancel), maxLines = 1, style = style) }
+                }
+                OutlinedButton(enabled = inputOk, onClick = {
+                    ApiKeyStore.save(ctx, input, p)
+                    saved = input
+                    status = Prefs.KEY_UNKNOWN
+                    input = ""
+                    editing = false
+                    keysChanged()
+                    check(saved!!)
+                }) { Text(stringResource(R.string.key_save), maxLines = 1, style = style) }
+            }
+            if (claude && input.isNotEmpty() && !input.startsWith("sk-ant-")) {
+                Text(stringResource(R.string.key_format), style = MaterialTheme.typography.bodySmall, color = CalColors.Warn)
+            }
+        } else if (saved == null) {
+            // Gemini is optional: no empty field on the page until it is wanted.
+            FitRow { style ->
+                CompactButton(onClick = { a.openConsole(GEMINI_KEYS_URL) }) { Text(stringResource(R.string.gemini_open), maxLines = 1, style = style) }
+                CompactButton(onClick = { editing = true }) { Text(stringResource(R.string.gemini_add), maxLines = 1, style = style) }
+            }
+        } else {
+            FitRow { style ->
+                CompactButton(enabled = !checking, onClick = { check(saved!!) }) { Text(stringResource(R.string.key_check), maxLines = 1, style = style) }
+                CompactButton(onClick = { editing = true }) { Text(stringResource(R.string.key_replace), maxLines = 1, style = style) }
+                CompactButton(onClick = {
+                    ApiKeyStore.clear(ctx, p)
+                    saved = null
+                    status = Prefs.KEY_UNKNOWN
+                    prefs.setKeyStatus(p, status)
+                    editing = claude
+                    keysChanged()
+                }) { Text(stringResource(R.string.delete), maxLines = 1, style = style) }
+            }
         }
     }
 }

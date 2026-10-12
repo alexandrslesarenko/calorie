@@ -42,7 +42,7 @@ import com.calorie.app.ai.AiFailure
 import com.calorie.app.ai.AiQueue
 import com.calorie.app.ai.AiRequest
 import com.calorie.app.ai.Photo
-import com.calorie.app.data.ApiKeyStore
+import com.calorie.app.data.AiKeys
 import com.calorie.app.data.DishExtra
 import com.calorie.app.data.Entry
 import com.calorie.app.data.WeightMark
@@ -61,6 +61,7 @@ import com.calorie.app.data.Source
 import com.calorie.app.logic.AiParser
 import com.calorie.app.logic.Body
 import com.calorie.app.logic.Keys
+import com.calorie.app.logic.Recognizer
 import com.calorie.app.logic.Confidence
 import com.calorie.app.logic.FoodDraft
 import com.calorie.app.logic.Expenditure
@@ -99,7 +100,7 @@ sealed interface Overlay {
     data class Manual(val name: String = "") : Overlay
     class PhotoHint(val jpeg: ByteArray, val hint: String = "") : Overlay
     /** back - where Cancel leads: the input screen with what was typed, not an empty menu. */
-    data class Busy(val text: Int, val back: Overlay? = null) : Overlay
+    data class Busy(val text: Int, val back: Overlay? = null, val arg: String? = null) : Overlay
     class Review(
         val items: List<ReviewItem>,
         val source: Source,
@@ -116,10 +117,14 @@ sealed interface Overlay {
         val meal: Meal? = null,
         /** Scanned barcode of this product: saved with the dish, the next scan finds it in the library. */
         val barcode: String? = null,
+        /** Answered by a fallback recognizer: which one and why, in words. */
+        val fallbackNote: String? = null,
     ) : Overlay
     data class NotFound(val barcode: String) : Overlay
-    /** back - the input screen to return to; retry - send the same request again. */
-    class Failed(val failure: AiFailure?, val detail: String?, val back: Overlay? = null, val retry: (() -> Unit)? = null) : Overlay
+    /** back - the input screen to return to; retry - send the same request again; by - who failed. */
+    class Failed(
+        val failure: AiFailure?, val detail: String?, val back: Overlay? = null, val retry: (() -> Unit)? = null, val by: Recognizer? = null,
+    ) : Overlay
     /** A request in the retry queue: waiting for Claude or failed for good. */
     data class Queued(val id: Long) : Overlay
     /** "My dishes": the whole library, prepared and eaten. */
@@ -151,6 +156,7 @@ class MainActivity : ComponentActivity() {
         }
     var settingsPage by mutableStateOf<SettingsPage?>(null)
     var themeMode by mutableStateOf(Prefs.THEME_SYSTEM)
+    /** Some recognizer has an API key: photo and text recognition can be offered. */
     var hasKey by mutableStateOf(false)
     /** Bumped on any profile or goal change so screens recalculate the target. */
     var profileVersion by mutableIntStateOf(0)
@@ -206,7 +212,7 @@ class MainActivity : ComponentActivity() {
             day = st.getLong(STATE_DAY, day)
             settingsPage = st.getString(STATE_SETTINGS_PAGE)?.let { n -> SettingsPage.entries.firstOrNull { it.name == n } }
         }
-        hasKey = ApiKeyStore.has(this)
+        hasKey = AiKeys.load(this).any
         val dao = FoodDb.get(this).dao()
         lifecycleScope.launch {
             snapshotFlow { trendDay }.flatMapLatest { today ->
@@ -444,22 +450,28 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Claude request with a cache: the same photo or the same description with the same hint
+     * Recognition request with a cache: the same photo or the same description with the same hint
      * is answered from the database for free. A temporary failure puts the request into the
      * retry queue instead of an error screen. back - the input screen with what was entered;
      * askAgain - the same request bypassing the cache.
      */
     private fun runAi(req: AiRequest, back: Overlay, askAgain: () -> Unit) {
-        val key = ApiKeyStore.load(this)
-        overlay = Overlay.Busy(R.string.busy_ai, back)
+        val keys = AiKeys.load(this)
+        // Named by the chosen recognizer: a fallback, if one is needed, is shown on the review.
+        overlay = Overlay.Busy(R.string.busy_ai, back, prefs.recognizer.label)
         work = lifecycleScope.launch {
             try {
-                if (key == null && (!req.useCache || FoodDb.get(this@MainActivity).dao().aiCached(req.cacheKey) == null)) {
-                    overlay = Overlay.Failed(AiFailure.BAD_KEY, null, back)
+                if (!keys.any && (!req.useCache || FoodDb.get(this@MainActivity).dao().aiCached(req.cacheKey) == null)) {
+                    overlay = Overlay.Failed(AiFailure.BAD_KEY, null, back, by = prefs.recognizer)
                     return@launch
                 }
                 // No key but a cached answer: ask() returns it without a request.
-                val a = AiQueue.ask(this@MainActivity, key ?: "", req)
+                val a = AiQueue.ask(this@MainActivity, keys, req)
+                val fallbackNote = a.by?.takeIf { a.skipped.isNotEmpty() }?.let { by ->
+                    val first = a.skipped.first()
+                    val quota = (first.error as? AiException)?.failure == AiFailure.QUOTA_DAY
+                    getString(if (quota) R.string.answered_by_quota else R.string.answered_by_fallback, by.label, first.by.label)
+                }
                 overlay = if (a.result.items.isEmpty()) {
                     Overlay.Failed(null, a.result.note ?: getString(R.string.ai_nothing), back)
                 } else {
@@ -468,15 +480,16 @@ class MainActivity : ComponentActivity() {
                         fromCache = a.fromCache, askAgain = askAgain,
                         // A label of a product scanned and not found: one item is that product.
                         barcode = scanCode?.takeIf { a.result.items.size == 1 },
+                        fallbackNote = fallbackNote,
                     )
                 }
             } catch (e: AiException) {
-                if (e.failure == AiFailure.BAD_KEY) prefs.keyStatus = Prefs.KEY_BAD
+                if (e.failure == AiFailure.BAD_KEY) e.by?.let { prefs.setKeyStatus(it.provider, Prefs.KEY_BAD) }
                 overlay = if (e.failure.retryable) {
                     Overlay.Queued(AiQueue.enqueue(this@MainActivity, req, day, defaultMeal().key, e.failure, e.message))
                 } else {
                     val retry = if (e.failure == AiFailure.BAD_ANSWER) ({ runAi(req, back, askAgain) }) else null
-                    Overlay.Failed(e.failure, e.message, back, retry)
+                    Overlay.Failed(e.failure, e.message, back, retry, e.by ?: prefs.recognizer)
                 }
             } catch (e: CancellationException) {
                 throw e

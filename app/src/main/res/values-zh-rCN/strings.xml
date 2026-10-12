@@ -66,11 +66,11 @@
     <string name="dish_favorite">收藏</string>
     <string name="dish_delete_title">删除菜品？</string>
     <string name="dish_delete_text">%1$s 将从\"我的菜品\"中移除。日记记录会保留。</string>
-    <string name="from_cache">这是同一张照片或同一段文字的已保存回答，没有向 Claude 发送请求。</string>
+    <string name="from_cache">这是同一张照片或同一段文字的已保存回答，没有发出新请求。</string>
     <string name="ask_again">重新询问</string>
     <string name="label_hint">这是营养成分表标签：读取每 100 克的数值，份量按 100 克计</string>
     <string name="recent_line">%1$s 克 - %2$s 千卡</string>
-    <string name="need_key">识别照片和文字需要 Claude API 密钥。</string>
+    <string name="need_key">识别照片和文字需要 API 密钥：Claude 或 Gemini。</string>
     <string name="need_key_btn">设置密钥</string>
     <string name="text_placeholder">例如：一碗加酸奶油的罗宋汤、两片黑麦面包、一杯加糖的茶</string>
     <string name="recognize">识别</string>
@@ -79,7 +79,7 @@
     <string name="hint_placeholder">300 克，黄油煎</string>
     <string name="privacy_note">照片或文字会发送给 Anthropic（Claude）进行识别。发送前会删除位置信息和其他照片元数据。</string>
     <string name="busy_photo">正在准备照片...</string>
-    <string name="busy_ai">Claude 正在查看食物...</string>
+    <string name="busy_ai">%1$s 正在识别食物...</string>
     <string name="busy_barcode">正在查找产品...</string>
 
     <string name="review_title">核对并添加</string>
@@ -106,15 +106,15 @@
     <string name="photo_label">拍摄标签</string>
     <string name="scan_failed">扫描失败：%1$s</string>
     <string name="photo_unreadable">无法读取照片。</string>
-    <string name="ai_nothing">Claude 没有在这里找到食物。</string>
+    <string name="ai_nothing">这里没有找到食物。</string>
 
     <string name="failed_title">未成功</string>
     <string name="err_bad_key">Claude 没有接受 API 密钥。请在设置中检查。</string>
     <string name="err_no_credit">Claude Console 余额已用完。请充值后重试。</string>
     <string name="err_rate_limit">连续请求过多。请等一分钟后重试。</string>
-    <string name="err_overloaded">Claude 目前负载过高。请一分钟后重试。</string>
+    <string name="err_overloaded">识别服务当前过载。请一分钟后重试。</string>
     <string name="err_network">没有网络连接。请检查网络后重试。</string>
-    <string name="err_bad_answer">Claude 的回答不符合预期。请重试或添加提示。</string>
+    <string name="err_bad_answer">回答格式出乎意料。请重试或添加提示。</string>
 
     <string name="diary_days">按天</string>
     <string name="diary_empty">日记是空的。</string>
@@ -193,17 +193,16 @@
     <string name="custom_off">自定义目标（已关闭）</string>
     <string name="custom_kcal">自定义目标（千卡）</string>
 
-    <string name="claude_title">Claude</string>
+    <string name="api_key_title">API 密钥</string>
     <string name="claude_help">照片和文字由 Claude Haiku 5.5 模型识别。费用通过 Claude Console 按用量支付，与 Claude 订阅分开：每张照片约 0.05 美分。\n\n1. 登录 Claude Console（下方按钮）。\n2. 在 Billing 中充值。\n3. 在 API keys 中创建密钥并复制。\n4. 粘贴到这里并点\"保存\"。\n\n密钥只加密保存在这部手机上，不会复制到云备份。</string>
     <string name="tile_claude_none">无密钥</string>
-    <string name="tile_claude_ok">已设置密钥</string>
     <string name="tile_claude_bad">密钥被拒绝</string>
     <string name="key_none">没有 API 密钥：照片和文字识别已关闭。</string>
     <string name="key_checking">正在检查密钥...</string>
     <string name="key_ok">密钥 %1$s 可用。</string>
     <string name="key_bad">密钥 %1$s 被拒绝。</string>
     <string name="key_unchecked">密钥 %1$s 尚未检查。</string>
-    <string name="key_rejected">Claude 没有接受该密钥。请检查是否完整复制，以及是否已在 Console 中撤销。</string>
+    <string name="key_rejected">密钥未被接受。请检查是否完整复制，以及是否已被撤销。</string>
     <string name="key_field">API 密钥</string>
     <string name="key_format">Claude 密钥以 sk-ant- 开头</string>
     <string name="paste">粘贴</string>
@@ -217,7 +216,28 @@
     <string name="console_billing">充值</string>
     <string name="console_usage">用量</string>
     <string name="spend_title">应用花费</string>
-    <string name="spend_help">根据每次回答的令牌数，按 Claude Haiku 5.5 价格估算：每百万输入令牌 0.1 美元，每百万输出令牌 0.5 美元。准确金额见 Console 的 Usage 页面。</string>
+    <string name="spend_help">根据每次回答的令牌数，按回答模型的价格估算：Claude Haiku 5.5 每百万输入令牌 10 美分、每百万输出令牌 50 美分，Claude Haiku 4.5 为 1 美元和 5 美元。准确金额见 Console 的 Usage 页面。</string>
+    <string name="studio_desc">密钥、用量和限额在 Google 网站上管理。</string>
+    <string name="studio_help">页面在内置浏览器标签页中打开，用你的 Google 账号登录。用量页面显示每日免费额度已用了多少。</string>
+    <string name="studio_usage">用量和限额</string>
+    <string name="spend_help_gemini">应用根据每次回答的令牌数（含思考）自行统计。在免费层级中 Gemini 不收费；第二个数字是同样的请求在付费层级的费用（Gemini 3.5 Flash-Lite：每百万输入令牌 30 美分，每百万输出令牌 2.50 美元）。Google 按太平洋时间午夜起算每日限额；准确用量见 AI Studio 的用量页面。</string>
+    <string name="spend_today_google">今天（按 Google 的日期）</string>
+    <string name="spend_cost_free">免费层级费用</string>
+    <string name="spend_cost_paid">付费层级则为</string>
+    <string name="answered_by_fallback">由于 %2$s 不可用，由 %1$s 回答。</string>
+    <string name="answered_by_quota">由于 %2$s 的每日免费额度已用完，由 %1$s 回答。</string>
+    <string name="err_model_gone">%1$s 不可用，其他识别模型也没有密钥。请在设置中选择识别模型。</string>
+    <string name="err_quota_day">%1$s 的每日免费额度已用完，其他识别模型也没有密钥。请求稍后会重新发送。</string>
+    <string name="err_bad_key_gemini">Gemini 未接受 API 密钥。请在设置中检查。</string>
+    <string name="privacy_note_gemini">照片或文字会发送给 Google（Gemini）进行识别。在免费层级中，Google 可能会用它们来改进自己的产品。发送前会删除位置和其他照片元数据。</string>
+    <string name="recognizer_title">识别</string>
+    <string name="recognizer_help">用哪个模型识别照片和文字。如果所选模型停止服务，会由下一个有密钥的模型代为回答，确认页面上也会说明。Gemini 需要来自 Google AI Studio 的单独密钥：免费层级不收费，但 Google 可能会使用发送的内容。</string>
+    <string name="recognizer_gone">%1$s 在 %2$s 回复了\"未找到\"。在恢复之前，由下一个有密钥的模型回答。</string>
+    <string name="recognizer_no_key">无密钥</string>
+    <string name="recognizer_choose">选择识别模型</string>
+    <string name="gemini_help">可选：备用或免费的识别模型。\n\n1. 打开 Google AI Studio（下方按钮），用 Google 账号登录。\n2. 创建 API 密钥并复制。\n3. 点\"添加密钥\"，粘贴后点\"保存\"。\n\n免费层级无需银行卡。在免费层级中，Google 可能会用发送的照片和文字改进自己的产品。密钥只加密保存在这部手机上。</string>
+    <string name="gemini_open">Google AI Studio</string>
+    <string name="gemini_add">添加密钥</string>
     <string name="spend_none">还没有请求。</string>
     <string name="spend_requests">自 %1$s 起的请求</string>
     <string name="spend_tokens">令牌 输入 / 输出</string>
@@ -239,17 +259,18 @@
     <string name="delete">删除</string>
     <string name="help_toggle">说明</string>
 
-    <!-- Retry queue for Claude requests -->
+    <!-- Retry queue for recognition requests -->
     <string name="retry">重试</string>
-    <string name="pending_title">发给 Claude 的请求</string>
-    <string name="pending_wait_title">等待 Claude 回复</string>
-    <string name="pending_reason_overloaded">Claude 当前负载过高。</string>
+    <string name="pending_title">识别请求</string>
+    <string name="pending_wait_title">正在等待回答</string>
+    <string name="pending_reason_overloaded">识别服务当前过载。</string>
+    <string name="pending_reason_quota">每日免费额度已用完。</string>
     <string name="pending_reason_rate">连续请求过多。</string>
     <string name="pending_reason_network">没有网络连接。</string>
     <string name="pending_next">第 %1$d 次尝试失败。下次尝试：%2$s 后</string>
     <string name="pending_soon">即将再次尝试</string>
     <string name="pending_explain">请求已保存：应用会自动重新发送，并显示结果供您确认。可以关闭此页面，请求会保留在\"今天\"中。</string>
-    <string name="pending_gave_up">Claude 已经几个小时没有回复。请重试或删除该请求。</string>
+    <string name="pending_gave_up">已有几个小时没有回答。请重试或删除该请求。</string>
     <string name="pending_retry_now">立即重试</string>
     <string name="pending_delete">删除请求</string>
     <string name="pending_at">下次尝试：%1$s</string>

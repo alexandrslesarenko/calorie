@@ -40,8 +40,11 @@ import com.calorie.app.ai.AiQueue
 import com.calorie.app.data.Pending
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.calorie.app.data.AiKeys
 import com.calorie.app.data.Dish
 import com.calorie.app.logic.Keys
+import com.calorie.app.logic.Provider
+import com.calorie.app.logic.Recognizer
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.material3.Button
@@ -279,14 +282,20 @@ private fun TextInput(a: MainActivity, o: Overlay.TextInput) {
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         )
         FilledTonalButton(enabled = text.isNotBlank(), onClick = { a.recognizeText(text) }) { Text(stringResource(R.string.recognize)) }
-        PrivacyNote()
+        PrivacyNote(a)
     }
 }
 
+/**
+ * Where the photo or text goes. Gemini is named whenever it may answer - chosen or as a fallback
+ * after the Claude models are gone - since on its free tier Google may use what is sent.
+ */
 @Composable
-private fun PrivacyNote() {
+private fun PrivacyNote(a: MainActivity) {
+    val ctx = LocalContext.current
+    val gemini = remember { AiKeys.load(ctx).let { keys -> Recognizer.order(a.prefs.recognizer) { keys.has(it) }.any { it.provider == Provider.GEMINI } } }
     Text(
-        stringResource(R.string.privacy_note),
+        stringResource(if (gemini) R.string.privacy_note_gemini else R.string.privacy_note),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -316,7 +325,7 @@ private fun PhotoHint(a: MainActivity, o: Overlay.PhotoHint) {
             OutlinedButton(onClick = { a.takePhoto(hint) }) { Text(stringResource(R.string.retake), maxLines = 1, style = style) }
             FilledTonalButton(onClick = { a.recognizePhoto(o.jpeg, hint) }) { Text(stringResource(R.string.recognize), maxLines = 1, style = style) }
         }
-        PrivacyNote()
+        PrivacyNote(a)
     }
 }
 
@@ -325,7 +334,7 @@ private fun Busy(a: MainActivity, o: Overlay.Busy) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         CircularProgressIndicator()
         Spacer(Modifier.height(16.dp))
-        Text(stringResource(o.text))
+        Text(if (o.arg != null) stringResource(o.text, o.arg) else stringResource(o.text))
         Spacer(Modifier.height(16.dp))
         OutlinedButton(onClick = { a.closeOverlay() }) { Text(stringResource(R.string.cancel)) }
     }
@@ -361,6 +370,7 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             )
         }
         o.note?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        o.fallbackNote?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = CalColors.Warn) }
         if (o.barcode != null && o.editing == null && items.size == 1) {
             Text(
                 stringResource(R.string.review_barcode, o.barcode),
@@ -541,12 +551,20 @@ private fun NotFound(a: MainActivity, o: Overlay.NotFound) {
     }
 }
 
-/** What went wrong, in words; null - no failure reason, show the detail instead. */
+/** What went wrong, in words; null - no failure reason, show the detail instead. by - who failed. */
 @Composable
-private fun failureText(f: AiFailure?, hasKey: Boolean): String? = when (f) {
-    AiFailure.BAD_KEY -> stringResource(if (hasKey) R.string.err_bad_key else R.string.need_key)
+private fun failureText(f: AiFailure?, hasKey: Boolean, by: Recognizer?): String? = when (f) {
+    AiFailure.BAD_KEY -> stringResource(
+        when {
+            !hasKey -> R.string.need_key
+            by?.provider == Provider.GEMINI -> R.string.err_bad_key_gemini
+            else -> R.string.err_bad_key
+        }
+    )
+    AiFailure.MODEL_GONE -> stringResource(R.string.err_model_gone, (by ?: Recognizer.DEFAULT).label)
     AiFailure.NO_CREDIT -> stringResource(R.string.err_no_credit)
     AiFailure.RATE_LIMIT -> stringResource(R.string.err_rate_limit)
+    AiFailure.QUOTA_DAY -> stringResource(R.string.err_quota_day, (by ?: Recognizer.GEMINI_LITE).label)
     AiFailure.OVERLOADED -> stringResource(R.string.err_overloaded)
     AiFailure.NETWORK -> stringResource(R.string.err_network)
     AiFailure.BAD_ANSWER -> stringResource(R.string.err_bad_answer)
@@ -558,6 +576,7 @@ private fun failureText(f: AiFailure?, hasKey: Boolean): String? = when (f) {
 private fun FixButton(a: MainActivity, f: AiFailure?) {
     when (f) {
         AiFailure.BAD_KEY -> Button(onClick = { a.openSettings(SettingsPage.CLAUDE) }) { Text(stringResource(R.string.need_key_btn)) }
+        AiFailure.MODEL_GONE -> Button(onClick = { a.openSettings(SettingsPage.CLAUDE) }) { Text(stringResource(R.string.recognizer_choose)) }
         AiFailure.NO_CREDIT -> Button(onClick = { a.openConsole(Console.BILLING) }) { Text(stringResource(R.string.console_billing)) }
         else -> {}
     }
@@ -565,7 +584,7 @@ private fun FixButton(a: MainActivity, f: AiFailure?) {
 
 @Composable
 private fun Failed(a: MainActivity, o: Overlay.Failed) {
-    val text = failureText(o.failure, a.hasKey) ?: o.detail ?: ""
+    val text = failureText(o.failure, a.hasKey, o.by) ?: o.detail ?: ""
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Header(stringResource(R.string.failed_title)) { a.closeOverlay() }
         Text(text)
@@ -573,7 +592,7 @@ private fun Failed(a: MainActivity, o: Overlay.Failed) {
             Text(o.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 4)
         }
         FixButton(a, o.failure)
-        if (o.failure != AiFailure.BAD_KEY && o.failure != AiFailure.NO_CREDIT) {
+        if (o.failure != AiFailure.BAD_KEY && o.failure != AiFailure.NO_CREDIT && o.failure != AiFailure.MODEL_GONE) {
             // Back returns to the input with the text or photo kept, so it can be changed and sent again.
             FitRow { style ->
                 OutlinedButton(onClick = { a.closeOverlay() }) { Text(stringResource(R.string.back), maxLines = 1, style = style) }
@@ -638,7 +657,7 @@ private fun Queued(a: MainActivity, o: Overlay.Queued) {
             }
             failed -> {
                 // A temporary reason here means the queue gave up after Retry.GIVE_UP_MS.
-                val text = if (failure?.retryable == true) stringResource(R.string.pending_gave_up) else failureText(failure, a.hasKey) ?: p.detail ?: ""
+                val text = if (failure?.retryable == true) stringResource(R.string.pending_gave_up) else failureText(failure, a.hasKey, a.prefs.recognizer) ?: p.detail ?: ""
                 Text(text)
                 if (failure != null && p.detail != null) {
                     Text(p.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 4)
@@ -664,6 +683,7 @@ private fun Queued(a: MainActivity, o: Overlay.Queued) {
 private fun reasonText(f: AiFailure): String = stringResource(
     when (f) {
         AiFailure.RATE_LIMIT -> R.string.pending_reason_rate
+        AiFailure.QUOTA_DAY -> R.string.pending_reason_quota
         AiFailure.NETWORK -> R.string.pending_reason_network
         else -> R.string.pending_reason_overloaded
     }

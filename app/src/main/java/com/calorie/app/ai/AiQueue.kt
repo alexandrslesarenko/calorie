@@ -10,13 +10,16 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.calorie.app.R
 import com.calorie.app.data.AiCached
-import com.calorie.app.data.ApiKeyStore
+import com.calorie.app.data.AiKeys
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Pending
 import com.calorie.app.data.Prefs
 import com.calorie.app.data.Source
 import com.calorie.app.logic.AiParser
 import com.calorie.app.logic.AiResult
+import com.calorie.app.logic.Recognizer
+import com.calorie.app.logic.Skipped
+import com.calorie.app.logic.askInOrder
 import com.calorie.app.logic.Retry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -37,12 +40,21 @@ class AiRequest(
     val cacheKey: String,
     val useCache: Boolean,
 ) {
-    fun send(c: ClaudeFood): AiResponse =
+    fun send(c: FoodRecognizer): AiResponse =
         if (jpeg != null) c.recognizePhoto(jpeg, text.ifBlank { null }, language) else c.recognizeText(text, language)
 }
 
-/** Parsed answer and its raw JSON (for the cache and the queue). */
-class AiAnswer(val result: AiResult, val json: String, val fromCache: Boolean)
+/**
+ * Parsed answer and its raw JSON (for the cache and the queue). by - who answered (null - the
+ * cache); skipped - recognizers asked before it that turned out to be gone.
+ */
+class AiAnswer(
+    val result: AiResult,
+    val json: String,
+    val fromCache: Boolean,
+    val by: Recognizer? = null,
+    val skipped: List<Skipped> = emptyList(),
+)
 
 /**
  * Claude requests with the answer cache, and the retry queue: a request that failed for a
@@ -54,19 +66,31 @@ object AiQueue {
     fun jpegFile(ctx: Context, id: Long) = File(File(ctx.filesDir, "pending"), "$id.jpg")
 
     /**
-     * Answer from the cache or from Claude. A new answer is counted in the spending and cached,
-     * except an empty one ("no food"): that photo will most likely be retaken.
+     * Answer from the cache or from a recognizer. The chosen recognizer is asked first; when its
+     * model is gone (404) the next one with a key is asked, for this request only. Any other
+     * failure ends the round: a busy service is waited for in the queue, not swapped. A new
+     * answer is counted in the spending at the answering model's price and cached, except an
+     * empty one ("no food"): that photo will most likely be retaken.
      */
-    suspend fun ask(ctx: Context, key: String, req: AiRequest): AiAnswer {
+    suspend fun ask(ctx: Context, keys: AiKeys, req: AiRequest): AiAnswer {
         val dao = FoodDb.get(ctx).dao()
         if (req.useCache) dao.aiCached(req.cacheKey)?.let { return AiAnswer(AiParser.parse(it.json), it.json, fromCache = true) }
-        val r = withContext(Dispatchers.IO) { ClaudeFood(key).use(req::send) }
-        Prefs(ctx).addUsage(r.usage.inputTokens, r.usage.outputTokens)
+        val prefs = Prefs(ctx)
+        val order = Recognizer.order(prefs.recognizer) { keys.has(it) }
+        if (order.isEmpty()) throw AiException(AiFailure.BAD_KEY)
+        val a = askInOrder(
+            order,
+            skips = { it is AiException && it.failure.skipsToNext },
+            onSkip = { rec, e -> if ((e as AiException).failure == AiFailure.MODEL_GONE) prefs.setGone(rec, System.currentTimeMillis()) },
+            failed = { rec, e -> (e as? AiException)?.by = rec },
+        ) { rec -> withContext(Dispatchers.IO) { FoodRecognizer.create(rec, keys[rec.provider]!!).use(req::send) } }
+        val r = a.value
+        prefs.addUsage(r.usage.inputTokens, r.usage.outputTokens, a.by)
         if (r.result.items.isNotEmpty()) {
             dao.putAiCached(AiCached(req.cacheKey, r.json, System.currentTimeMillis()))
             dao.trimAiCache(AI_CACHE_KEEP)
         }
-        return AiAnswer(r.result, r.json, fromCache = false)
+        return AiAnswer(r.result, r.json, fromCache = false, by = a.by, skipped = a.skipped)
     }
 
     /** Puts a request that failed with a retryable reason into the queue; returns the row id. */
@@ -143,12 +167,12 @@ class AiQueueWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
             while (true) {
                 val due = dao.pendingDue(System.currentTimeMillis())
                 if (due.isEmpty()) break
-                val key = ApiKeyStore.load(ctx)
+                val keys = AiKeys.load(ctx)
                 // After one temporary failure the rest would fail too: they wait with it.
                 var downUntil = 0L
                 for (p in due) {
                     if (downUntil > 0) dao.pendingPostpone(p.id, downUntil)
-                    else downUntil = attempt(ctx, key, p)
+                    else downUntil = attempt(ctx, keys, p)
                 }
             }
         } finally {
@@ -160,9 +184,9 @@ class AiQueueWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
     }
 
     /** One try of one row; every path moves the row on. Returns the next try if the service is down, else 0. */
-    private suspend fun attempt(ctx: Context, key: String?, p: Pending): Long {
+    private suspend fun attempt(ctx: Context, keys: AiKeys, p: Pending): Long {
         val dao = FoodDb.get(ctx).dao()
-        if (key == null) {
+        if (!keys.any) {
             dao.pendingFailed(p.id, AiFailure.BAD_KEY.name, null)
             return 0
         }
@@ -173,7 +197,7 @@ class AiQueueWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
         }
         val req = AiRequest(Source.byKey(p.source), p.text, p.language, jpeg, p.cacheKey, p.useCache)
         try {
-            val a = AiQueue.ask(ctx, key, req)
+            val a = AiQueue.ask(ctx, keys, req)
             if (a.result.items.isEmpty()) dao.pendingFailed(p.id, null, a.result.note ?: ctx.getString(R.string.ai_nothing))
             else dao.pendingReady(p.id, a.json)
         } catch (e: AiException) {
@@ -183,7 +207,7 @@ class AiQueueWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
                 dao.pendingRetry(p.id, p.attempts + 1, next, e.failure.name, e.message)
                 return next
             }
-            if (e.failure == AiFailure.BAD_KEY) Prefs(ctx).keyStatus = Prefs.KEY_BAD
+            if (e.failure == AiFailure.BAD_KEY) e.by?.let { Prefs(ctx).setKeyStatus(it.provider, Prefs.KEY_BAD) }
             dao.pendingFailed(p.id, e.failure.name, e.message)
         } catch (e: CancellationException) {
             throw e
