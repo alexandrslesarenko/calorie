@@ -100,6 +100,10 @@
     <string name="kcal_per100">kcal por 100 g</string>
     <string name="grams_eaten">Comido, g</string>
     <string name="macros_optional">Proteínas, grasas y carbohidratos por 100 g - si están en la etiqueta.</string>
+    <string name="macros_optional_portion">Proteínas, grasas y carbohidratos por ración - si están en la etiqueta.</string>
+    <string name="values_per100">Por 100 g</string>
+    <string name="values_per_portion">Por ración</string>
+    <string name="kcal_per_portion">kcal por ración</string>
     <string name="next">Siguiente</string>
 
     <string name="barcode_not_found">El producto %1$s no está en la base de datos de Open Food Facts. Fotografía la etiqueta nutricional o introduce los valores a mano.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">Plato</string>
     <string name="dish_portion">Ración, g</string>
     <string name="macros_per100">Proteínas, grasas y carbohidratos por 100 g</string>
+    <string name="macros_per_portion">Proteínas, grasas y carbohidratos por ración</string>
     <string name="dish_barcode">Código de barras</string>
     <string name="dish_barcode_bad">Un código de barras tiene de 8 a 14 dígitos.</string>
     <string name="dish_name_taken">Ya hay otro plato con este nombre.</string>

@@ -100,6 +100,10 @@
     <string name="kcal_per100">100 g あたり kcal</string>
     <string name="grams_eaten">食べた量（g）</string>
     <string name="macros_optional">100 g あたりのたんぱく質・脂質・炭水化物（ラベルにあれば）。</string>
+    <string name="macros_optional_portion">1食あたりのたんぱく質・脂質・炭水化物（ラベルにあれば）。</string>
+    <string name="values_per100">100 g あたり</string>
+    <string name="values_per_portion">1食あたり</string>
+    <string name="kcal_per_portion">1食あたり kcal</string>
     <string name="next">次へ</string>
 
     <string name="barcode_not_found">商品 %1$s は Open Food Facts のデータベースにありません。栄養成分表示を撮影するか、手入力してください。</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">料理</string>
     <string name="dish_portion">1食の量（g）</string>
     <string name="macros_per100">100 gあたりのたんぱく質・脂質・炭水化物</string>
+    <string name="macros_per_portion">1食あたりのたんぱく質・脂質・炭水化物</string>
     <string name="dish_barcode">バーコード</string>
     <string name="dish_barcode_bad">バーコードは8～14桁です。</string>
     <string name="dish_name_taken">同じ名前の料理がすでにあります。</string>

@@ -100,6 +100,10 @@
     <string name="kcal_per100">kcal per 100 g</string>
     <string name="grams_eaten">Eaten, g</string>
     <string name="macros_optional">Protein, fat and carbs per 100 g - if they are on the label.</string>
+    <string name="macros_optional_portion">Protein, fat and carbs per serving - if they are on the label.</string>
+    <string name="values_per100">Per 100 g</string>
+    <string name="values_per_portion">Per serving</string>
+    <string name="kcal_per_portion">kcal per serving</string>
     <string name="next">Next</string>
 
     <string name="barcode_not_found">Product %1$s is not in the Open Food Facts database. Take a photo of the nutrition label or enter the values manually.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">Dish</string>
     <string name="dish_portion">Portion, g</string>
     <string name="macros_per100">Protein, fat and carbs per 100 g</string>
+    <string name="macros_per_portion">Protein, fat and carbs per serving</string>
     <string name="dish_barcode">Barcode</string>
     <string name="dish_barcode_bad">A barcode has 8 to 14 digits.</string>
     <string name="dish_name_taken">Another dish already has this name.</string>

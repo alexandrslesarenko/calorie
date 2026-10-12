@@ -100,6 +100,10 @@
     <string name="kcal_per100">kcal pour 100 g</string>
     <string name="grams_eaten">Mangé, g</string>
     <string name="macros_optional">Protéines, lipides et glucides pour 100 g - s\'ils figurent sur l\'étiquette.</string>
+    <string name="macros_optional_portion">Protéines, lipides et glucides par portion - s\'ils figurent sur l\'étiquette.</string>
+    <string name="values_per100">Pour 100 g</string>
+    <string name="values_per_portion">Par portion</string>
+    <string name="kcal_per_portion">kcal par portion</string>
     <string name="next">Suivant</string>
 
     <string name="barcode_not_found">Le produit %1$s n\'est pas dans la base Open Food Facts. Photographiez l\'étiquette nutritionnelle ou saisissez les valeurs à la main.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">Plat</string>
     <string name="dish_portion">Portion, g</string>
     <string name="macros_per100">Protéines, lipides et glucides pour 100 g</string>
+    <string name="macros_per_portion">Protéines, lipides et glucides par portion</string>
     <string name="dish_barcode">Code-barres</string>
     <string name="dish_barcode_bad">Un code-barres compte de 8 à 14 chiffres.</string>
     <string name="dish_name_taken">Un autre plat porte déjà ce nom.</string>

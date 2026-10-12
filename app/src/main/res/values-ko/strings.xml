@@ -100,6 +100,10 @@
     <string name="kcal_per100">100 g당 kcal</string>
     <string name="grams_eaten">먹은 양, g</string>
     <string name="macros_optional">100 g당 단백질, 지방, 탄수화물 - 라벨에 있으면 입력하세요.</string>
+    <string name="macros_optional_portion">1회 분량당 단백질, 지방, 탄수화물 - 라벨에 있으면 입력하세요.</string>
+    <string name="values_per100">100 g당</string>
+    <string name="values_per_portion">1회 분량당</string>
+    <string name="kcal_per_portion">1회 분량당 kcal</string>
     <string name="next">다음</string>
 
     <string name="barcode_not_found">제품 %1$s이(가) Open Food Facts 데이터베이스에 없습니다. 영양 성분표를 촬영하거나 값을 직접 입력하세요.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">요리</string>
     <string name="dish_portion">1회 분량, g</string>
     <string name="macros_per100">100 g당 단백질, 지방, 탄수화물</string>
+    <string name="macros_per_portion">1회 분량당 단백질, 지방, 탄수화물</string>
     <string name="dish_barcode">바코드</string>
     <string name="dish_barcode_bad">바코드는 8~14자리입니다.</string>
     <string name="dish_name_taken">같은 이름의 요리가 이미 있습니다.</string>

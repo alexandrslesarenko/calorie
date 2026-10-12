@@ -513,6 +513,8 @@ private fun ManualInput(a: MainActivity, o: Overlay.Manual) {
     var protein by remember { mutableStateOf("") }
     var fat by remember { mutableStateOf("") }
     var carbs by remember { mutableStateOf("") }
+    // Some labels give values per serving (a 40 g cookie) instead of per 100 g.
+    var perPortion by remember { mutableStateOf(false) }
     val k = parseNumber(kcal)?.takeIf { it >= 0 }
     val g = parseNumber(grams)?.takeIf { it > 0 }
     @Composable
@@ -528,19 +530,33 @@ private fun ManualInput(a: MainActivity, o: Overlay.Manual) {
             label = { Text(stringResource(R.string.food_name)) },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            num(R.string.kcal_per100, kcal, { kcal = it }, Modifier.weight(1f))
-            num(R.string.grams_eaten, grams, { grams = it }, Modifier.weight(1f))
+        FitRow { style ->
+            FilterChip(selected = !perPortion, onClick = { perPortion = false }, label = { Text(stringResource(R.string.values_per100), maxLines = 1, style = style) })
+            FilterChip(selected = perPortion, onClick = { perPortion = true }, label = { Text(stringResource(R.string.values_per_portion), maxLines = 1, style = style) })
         }
-        Text(stringResource(R.string.macros_optional), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (perPortion) {
+                num(R.string.kcal_per_portion, kcal, { kcal = it }, Modifier.weight(1f))
+                num(R.string.dish_portion, grams, { grams = it }, Modifier.weight(1f))
+            } else {
+                num(R.string.kcal_per100, kcal, { kcal = it }, Modifier.weight(1f))
+                num(R.string.grams_eaten, grams, { grams = it }, Modifier.weight(1f))
+            }
+        }
+        Text(
+            stringResource(if (perPortion) R.string.macros_optional_portion else R.string.macros_optional),
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             num(R.string.protein, protein, { protein = it }, Modifier.weight(1f))
             num(R.string.fat, fat, { fat = it }, Modifier.weight(1f))
             num(R.string.carbs, carbs, { carbs = it }, Modifier.weight(1f))
         }
         FilledTonalButton(enabled = name.isNotBlank() && k != null && g != null, onClick = {
-            val per100 = Nutrients(k!!, parseNumber(protein) ?: 0.0, parseNumber(fat) ?: 0.0, parseNumber(carbs) ?: 0.0)
-            a.overlay = Overlay.Review(listOf(ReviewItem(FoodDraft(name.trim(), g!!, per100))), Source.MANUAL, barcode = a.scanCode)
+            val values = Nutrients(k!!, parseNumber(protein) ?: 0.0, parseNumber(fat) ?: 0.0, parseNumber(carbs) ?: 0.0)
+            // Per portion: the portion is what was eaten, the confirm screen can change the grams.
+            val draft = if (perPortion) FoodDraft.fromPortion(name.trim(), g!!, values) else FoodDraft(name.trim(), g!!, values)
+            a.overlay = Overlay.Review(listOf(ReviewItem(draft)), Source.MANUAL, barcode = a.scanCode)
         }) { Text(stringResource(R.string.next)) }
     }
 }

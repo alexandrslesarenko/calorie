@@ -100,6 +100,10 @@
     <string name="kcal_per100">每 100 克千卡</string>
     <string name="grams_eaten">食用量（克）</string>
     <string name="macros_optional">每 100 克的蛋白质、脂肪和碳水 - 如果标签上有。</string>
+    <string name="macros_optional_portion">每份的蛋白质、脂肪和碳水 - 如果标签上有。</string>
+    <string name="values_per100">每 100 克</string>
+    <string name="values_per_portion">每份</string>
+    <string name="kcal_per_portion">每份千卡</string>
     <string name="next">下一步</string>
 
     <string name="barcode_not_found">Open Food Facts 数据库中没有产品 %1$s。请拍摄营养成分表，或手动输入数值。</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">菜品</string>
     <string name="dish_portion">每份，克</string>
     <string name="macros_per100">每 100 克的蛋白质、脂肪和碳水化合物</string>
+    <string name="macros_per_portion">每份的蛋白质、脂肪和碳水化合物</string>
     <string name="dish_barcode">条形码</string>
     <string name="dish_barcode_bad">条形码为 8 到 14 位数字。</string>
     <string name="dish_name_taken">已有同名菜品。</string>

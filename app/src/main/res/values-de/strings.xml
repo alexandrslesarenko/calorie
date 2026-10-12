@@ -100,6 +100,10 @@
     <string name="kcal_per100">kcal pro 100 g</string>
     <string name="grams_eaten">Gegessen, g</string>
     <string name="macros_optional">Eiweiß, Fett und Kohlenhydrate pro 100 g - falls auf dem Etikett.</string>
+    <string name="macros_optional_portion">Eiweiß, Fett und Kohlenhydrate pro Portion - falls auf dem Etikett.</string>
+    <string name="values_per100">Pro 100 g</string>
+    <string name="values_per_portion">Pro Portion</string>
+    <string name="kcal_per_portion">kcal pro Portion</string>
     <string name="next">Weiter</string>
 
     <string name="barcode_not_found">Produkt %1$s ist nicht in der Open-Food-Facts-Datenbank. Fotografiere das Nährwertetikett oder gib die Werte manuell ein.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">Gericht</string>
     <string name="dish_portion">Portion, g</string>
     <string name="macros_per100">Eiweiß, Fett und Kohlenhydrate pro 100 g</string>
+    <string name="macros_per_portion">Eiweiß, Fett und Kohlenhydrate pro Portion</string>
     <string name="dish_barcode">Barcode</string>
     <string name="dish_barcode_bad">Ein Barcode hat 8 bis 14 Ziffern.</string>
     <string name="dish_name_taken">Ein anderes Gericht hat schon diesen Namen.</string>

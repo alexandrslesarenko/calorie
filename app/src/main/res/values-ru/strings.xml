@@ -100,6 +100,10 @@
     <string name="kcal_per100">ккал на 100 г</string>
     <string name="grams_eaten">Съедено, г</string>
     <string name="macros_optional">Белки, жиры и углеводы на 100 г - если есть на этикетке.</string>
+    <string name="macros_optional_portion">Белки, жиры и углеводы на порцию - если есть на этикетке.</string>
+    <string name="values_per100">На 100 г</string>
+    <string name="values_per_portion">На порцию</string>
+    <string name="kcal_per_portion">ккал на порцию</string>
     <string name="next">Далее</string>
 
     <string name="barcode_not_found">Продукта %1$s нет в базе Open Food Facts. Сфотографируйте этикетку с пищевой ценностью или введите значения вручную.</string>
@@ -294,6 +298,7 @@
     <string name="dish_edit_title">Блюдо</string>
     <string name="dish_portion">Порция, г</string>
     <string name="macros_per100">Белки, жиры и углеводы на 100 г</string>
+    <string name="macros_per_portion">Белки, жиры и углеводы на порцию</string>
     <string name="dish_barcode">Штрихкод</string>
     <string name="dish_barcode_bad">В штрихкоде от 8 до 14 цифр.</string>
     <string name="dish_name_taken">Блюдо с таким названием уже есть.</string>

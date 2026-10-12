@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,19 +75,39 @@ data class DishForm(
     val carbs: String,
     val grams: String,
     val barcode: String,
+    /** kcal and macros are typed for the portion (a label per 40 g cookie), not per 100 g. */
+    val perPortion: Boolean = false,
 ) {
     /** The edited dish; null - something required is missing or not a number. */
     fun toDish(old: Dish): Dish? {
         val n = name.trim().takeIf { it.isNotEmpty() } ?: return null
-        val k = parseNumber(kcal)?.takeIf { it >= 0 } ?: return null
         val g = parseNumber(grams)?.takeIf { it > 0 } ?: return null
-        fun macro(s: String): Double? = if (s.isBlank()) 0.0 else parseNumber(s)?.takeIf { it >= 0 }
+        // The dish keeps values per 100 g.
+        val to100 = if (perPortion) 100.0 / g else 1.0
+        val k = parseNumber(kcal)?.takeIf { it >= 0 }?.times(to100) ?: return null
+        fun macro(s: String): Double? = if (s.isBlank()) 0.0 else parseNumber(s)?.takeIf { it >= 0 }?.times(to100)
         val p = macro(protein) ?: return null
         val f = macro(fat) ?: return null
         val c = macro(carbs) ?: return null
         val b = barcode.trim()
         if (b.isNotEmpty() && !barcodeValid(b)) return null
         return old.copy(id = Keys.dish(n), name = n, kcal = k, protein = p, fat = f, carbs = c, lastGrams = g, barcode = b.ifEmpty { null })
+    }
+
+    /**
+     * Switches between values per 100 g and per portion, converting what is typed by the
+     * current portion. Two decimals, so switching back and forth does not drift the values.
+     * Without a valid portion, or for a field that is not a number, the text stays as it is.
+     */
+    fun withPerPortion(on: Boolean): DishForm {
+        if (on == perPortion) return this
+        val g = parseNumber(grams)?.takeIf { it > 0 } ?: return copy(perPortion = on)
+        val k = if (on) g / 100.0 else 100.0 / g
+        fun conv(s: String) = parseNumber(s)?.let { v ->
+            val r = (v * k * 100).roundToInt() / 100.0
+            if (r == r.toLong().toDouble()) r.toLong().toString() else r.toString()
+        } ?: s
+        return copy(kcal = conv(kcal), protein = conv(protein), fat = conv(fat), carbs = conv(carbs), perPortion = on)
     }
 
     companion object {
@@ -265,11 +286,24 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
             supportingText = if (nameTaken) ({ Text(stringResource(R.string.dish_name_taken)) }) else null,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         )
+        FitRow { style ->
+            FilterChip(
+                selected = !form.perPortion, onClick = { form = form.withPerPortion(false) },
+                label = { Text(stringResource(R.string.values_per100), maxLines = 1, style = style) },
+            )
+            FilterChip(
+                selected = form.perPortion, onClick = { form = form.withPerPortion(true) },
+                label = { Text(stringResource(R.string.values_per_portion), maxLines = 1, style = style) },
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            field(R.string.kcal_per100, form.kcal, { form = form.copy(kcal = it) }, Modifier.weight(1f))
+            field(if (form.perPortion) R.string.kcal_per_portion else R.string.kcal_per100, form.kcal, { form = form.copy(kcal = it) }, Modifier.weight(1f))
             field(R.string.dish_portion, form.grams, { form = form.copy(grams = it) }, Modifier.weight(1f))
         }
-        Text(stringResource(R.string.macros_per100), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(if (form.perPortion) R.string.macros_per_portion else R.string.macros_per100),
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             field(R.string.protein, form.protein, { form = form.copy(protein = it) }, Modifier.weight(1f))
             field(R.string.fat, form.fat, { form = form.copy(fat = it) }, Modifier.weight(1f))
