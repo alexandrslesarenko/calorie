@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Daten</string>
     <string name="tile_data">Tagebucheinträge: %1$d</string>
+    <string name="dishes_all">Alle Gerichte</string>
+    <string name="dish_new_title">Neues Gericht</string>
+    <string name="add_to_library">Zu meinen Gerichten</string>
+    <string name="library_add">Gericht hinzufügen</string>
+    <string name="library_hint">Vorbereitete Produkte und alles, was du eingetragen hast. Tippe auf ein Gericht, um es zu ändern.</string>
+    <string name="library_empty">Noch leer. Füge ein Gericht per Foto, Etikett, Barcode oder von Hand hinzu: Wenn du es isst, ist es schon da.</string>
+    <string name="dish_line">%1$s kcal pro 100 g, Portion %2$s g</string>
+    <string name="dish_edit_title">Gericht</string>
+    <string name="dish_portion">Portion, g</string>
+    <string name="macros_per100">Eiweiß, Fett und Kohlenhydrate pro 100 g</string>
+    <string name="dish_barcode">Barcode</string>
+    <string name="dish_barcode_bad">Ein Barcode hat 8 bis 14 Ziffern.</string>
+    <string name="dish_name_taken">Ein anderes Gericht hat schon diesen Namen.</string>
+    <string name="dish_photo_camera">Kamera</string>
+    <string name="dish_photo_gallery">Galerie</string>
+    <string name="dish_photo_remove">Foto entfernen</string>
+    <string name="review_barcode">Der Barcode %1$s wird mit diesem Produkt gespeichert: Der nächste Scan findet es sofort, auch offline.</string>
+    <string name="tile_dishes">Gerichte: %1$d</string>
     <string name="data_export_help">Die Sicherung enthält das Tagebuch, das Gewichtsprotokoll, Meine Gerichte und das Profil mit dem Ziel. Der Claude-Schlüssel, gespeicherte Claude-Antworten und nicht gesendete Anfragen sind nicht enthalten. CSV ist nur das Tagebuch, für Tabellen: Es kann nicht wieder importiert werden.</string>
     <string name="data_export_json">Sicherung speichern</string>
     <string name="data_export_csv">Tagebuch als CSV</string>

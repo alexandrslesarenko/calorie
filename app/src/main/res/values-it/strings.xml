@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Dati</string>
     <string name="tile_data">Voci del diario: %1$d</string>
+    <string name="dishes_all">Tutti i piatti</string>
+    <string name="dish_new_title">Nuovo piatto</string>
+    <string name="add_to_library">Nei miei piatti</string>
+    <string name="library_add">Aggiungi piatto</string>
+    <string name="library_hint">Prodotti preparati in anticipo e tutto ciò che hai registrato. Tocca un piatto per modificarlo.</string>
+    <string name="library_empty">Ancora vuoto. Aggiungi un piatto con foto, etichetta, codice a barre o a mano: sarà pronto quando lo mangerai.</string>
+    <string name="dish_line">%1$s kcal per 100 g, porzione %2$s g</string>
+    <string name="dish_edit_title">Piatto</string>
+    <string name="dish_portion">Porzione, g</string>
+    <string name="macros_per100">Proteine, grassi e carboidrati per 100 g</string>
+    <string name="dish_barcode">Codice a barre</string>
+    <string name="dish_barcode_bad">Un codice a barre ha da 8 a 14 cifre.</string>
+    <string name="dish_name_taken">Un altro piatto ha già questo nome.</string>
+    <string name="dish_photo_camera">Fotocamera</string>
+    <string name="dish_photo_gallery">Galleria</string>
+    <string name="dish_photo_remove">Rimuovi foto</string>
+    <string name="review_barcode">Il codice a barre %1$s viene salvato con questo prodotto: la prossima scansione lo trova subito, anche offline.</string>
+    <string name="tile_dishes">Piatti: %1$d</string>
     <string name="data_export_help">Il backup contiene il diario, il registro del peso, I miei piatti e il profilo con l\'obiettivo. La chiave Claude, le risposte Claude salvate e le richieste non inviate non sono incluse. Il CSV è solo il diario, per i fogli di calcolo: non può essere reimportato.</string>
     <string name="data_export_json">Salva backup</string>
     <string name="data_export_csv">Diario in CSV</string>

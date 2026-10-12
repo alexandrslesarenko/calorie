@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">数据</string>
     <string name="tile_data">日记记录：%1$d</string>
+    <string name="dishes_all">全部菜品</string>
+    <string name="dish_new_title">新菜品</string>
+    <string name="add_to_library">存入我的菜品</string>
+    <string name="library_add">添加菜品</string>
+    <string name="library_hint">提前准备的食品和你记录过的所有食物。点按菜品即可修改。</string>
+    <string name="library_empty">这里还是空的。通过照片、标签、条形码或手动添加菜品，吃的时候就能直接用。</string>
+    <string name="dish_line">每 100 克 %1$s 千卡，每份 %2$s 克</string>
+    <string name="dish_edit_title">菜品</string>
+    <string name="dish_portion">每份，克</string>
+    <string name="macros_per100">每 100 克的蛋白质、脂肪和碳水化合物</string>
+    <string name="dish_barcode">条形码</string>
+    <string name="dish_barcode_bad">条形码为 8 到 14 位数字。</string>
+    <string name="dish_name_taken">已有同名菜品。</string>
+    <string name="dish_photo_camera">相机</string>
+    <string name="dish_photo_gallery">图库</string>
+    <string name="dish_photo_remove">移除照片</string>
+    <string name="review_barcode">条形码 %1$s 会与该产品一起保存：下次扫描即使离线也能立即找到。</string>
+    <string name="tile_dishes">菜品：%1$d</string>
     <string name="data_export_help">备份包含日记、体重记录、我的菜品以及含目标的个人资料。不包含 Claude 密钥、已保存的 Claude 回复和未发送的请求。CSV 仅包含日记，供表格使用，无法再导入。</string>
     <string name="data_export_json">保存备份</string>
     <string name="data_export_csv">日记导出为 CSV</string>

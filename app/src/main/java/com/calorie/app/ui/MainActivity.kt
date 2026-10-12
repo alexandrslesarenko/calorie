@@ -43,6 +43,7 @@ import com.calorie.app.ai.AiQueue
 import com.calorie.app.ai.AiRequest
 import com.calorie.app.ai.Photo
 import com.calorie.app.data.ApiKeyStore
+import com.calorie.app.data.DishExtra
 import com.calorie.app.data.Entry
 import com.calorie.app.data.WeightMark
 import com.calorie.app.data.DayTarget
@@ -113,12 +114,18 @@ sealed interface Overlay {
         val pendingId: Long? = null,
         val day: Long? = null,
         val meal: Meal? = null,
+        /** Scanned barcode of this product: saved with the dish, the next scan finds it in the library. */
+        val barcode: String? = null,
     ) : Overlay
     data class NotFound(val barcode: String) : Overlay
     /** back - the input screen to return to; retry - send the same request again. */
     class Failed(val failure: AiFailure?, val detail: String?, val back: Overlay? = null, val retry: (() -> Unit)? = null) : Overlay
     /** A request in the retry queue: waiting for Claude or failed for good. */
     data class Queued(val id: Long) : Overlay
+    /** "My dishes": the whole library, prepared and eaten. */
+    data object Library : Overlay
+    /** Editing a library dish; form - what was typed before leaving for a photo. */
+    data class DishEdit(val id: String, val form: DishForm? = null) : Overlay
 }
 
 /** Claude Console pages, opened in an in-app browser tab. */
@@ -134,7 +141,14 @@ class MainActivity : ComponentActivity() {
 
     /** Selected diary day (LocalDate.toEpochDay). */
     var day by mutableLongStateOf(LocalDate.now().toEpochDay())
-    var overlay by mutableStateOf<Overlay?>(null)
+    private var shownOverlay by mutableStateOf<Overlay?>(null)
+    /** Leaving the add screens by any path also leaves "My dishes": the next add is for the diary. */
+    var overlay: Overlay?
+        get() = shownOverlay
+        set(v) {
+            if (v == null) libraryMode = false
+            shownOverlay = v
+        }
     var settingsPage by mutableStateOf<SettingsPage?>(null)
     var themeMode by mutableStateOf(Prefs.THEME_SYSTEM)
     var hasKey by mutableStateOf(false)
@@ -158,14 +172,28 @@ class MainActivity : ComponentActivity() {
     private var shotUri: Uri? = null
     /** Hint for the next photo (prefilled for a nutrition label). */
     private var pendingHint = ""
+    /**
+     * Adding to "My dishes" rather than to the diary: the add screens lead back to the library
+     * and the review saves there.
+     */
+    var libraryMode by mutableStateOf(false)
+    /** Barcode that was scanned and not found: a label photo or manual entry then gets it. */
+    var scanCode: String? = null
+    /** The next photo is the thumbnail of this library dish, not food to recognize. */
+    private var photoFor: Overlay.DishEdit? = null
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val uri = shotUri
-        if (ok && uri != null) loadPhoto(uri) else overlay = Overlay.AddMenu
+        if (ok && uri != null) loadPhoto(uri) else photoCancelled()
     }
 
     private val pickPhoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) loadPhoto(uri) else overlay = Overlay.AddMenu
+        if (uri != null) loadPhoto(uri) else photoCancelled()
+    }
+
+    private fun photoCancelled() {
+        overlay = photoFor ?: Overlay.AddMenu
+        photoFor = null
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -344,13 +372,28 @@ class MainActivity : ComponentActivity() {
     fun closeOverlay() {
         work?.cancel()
         overlay = when (val o = overlay) {
-            null, Overlay.AddMenu, is Overlay.Queued -> null
+            null, is Overlay.Queued -> null
+            Overlay.AddMenu -> if (libraryMode) Overlay.Library else null
+            Overlay.Library -> null
+            is Overlay.DishEdit -> Overlay.Library
             // A queued answer stays on Today until it is saved or deleted.
             is Overlay.Review -> if (o.editing != null || o.pendingId != null) null else Overlay.AddMenu
             is Overlay.Busy -> o.back ?: Overlay.AddMenu
             is Overlay.Failed -> o.back ?: Overlay.AddMenu
             else -> Overlay.AddMenu
         }
+    }
+
+    /** "My dishes" from the add menu or the settings tile. */
+    fun openLibrary() {
+        libraryMode = true
+        overlay = Overlay.Library
+    }
+
+    /** New thumbnail of a library dish: from the camera or the gallery, the typed form is kept. */
+    fun takeDishPhoto(edit: Overlay.DishEdit, camera: Boolean) {
+        photoFor = edit
+        if (camera) takePhoto() else pickFromGallery()
     }
 
     fun takePhoto(hint: String = "") {
@@ -367,11 +410,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun loadPhoto(uri: Uri) {
-        overlay = Overlay.Busy(R.string.busy_photo)
+        val dishEdit = photoFor
+        photoFor = null
+        overlay = Overlay.Busy(R.string.busy_photo, dishEdit)
         work = lifecycleScope.launch {
             val jpeg = runCatching { withContext(Dispatchers.IO) { Photo.prepare(this@MainActivity, uri) } }.getOrNull()
             // The camera shot is no longer needed: only what went into the diary stays on the phone.
             withContext(Dispatchers.IO) { File(cacheDir, "photos/shot.jpg").delete() }
+            if (dishEdit != null) {
+                val thumb = jpeg?.let { withContext(Dispatchers.Default) { Photo.thumb(it) } }
+                if (thumb != null) FoodDb.get(this@MainActivity).dao().putDishPhoto(com.calorie.app.data.DishPhoto(dishEdit.id, thumb))
+                overlay = dishEdit
+                return@launch
+            }
             overlay = if (jpeg != null) Overlay.PhotoHint(jpeg, pendingHint) else Overlay.Failed(null, getString(R.string.photo_unreadable))
         }
     }
@@ -415,6 +466,8 @@ class MainActivity : ComponentActivity() {
                     Overlay.Review(
                         a.result.items.map { ReviewItem(it.draft, it.confidence) }, req.source, a.result.note, req.jpeg,
                         fromCache = a.fromCache, askAgain = askAgain,
+                        // A label of a product scanned and not found: one item is that product.
+                        barcode = scanCode?.takeIf { a.result.items.size == 1 },
                     )
                 }
             } catch (e: AiException) {
@@ -461,15 +514,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun lookupBarcode(code: String) {
+        scanCode = code
         overlay = Overlay.Busy(R.string.busy_barcode)
         work = lifecycleScope.launch {
             try {
+                // Own library first: products missing from Open Food Facts are prepared there from a label.
+                FoodDb.get(this@MainActivity).dao().dishByBarcode(code)?.let { d ->
+                    overlay = Overlay.Review(listOf(ReviewItem(d.toDraft())), Source.BARCODE, barcode = code)
+                    return@launch
+                }
                 val p = OffApi.find(this@MainActivity, code)
                 overlay = if (p == null) {
                     Overlay.NotFound(code)
                 } else {
                     val name = listOfNotNull(p.name, p.brand?.takeIf { !p.name.contains(it, ignoreCase = true) }).joinToString(", ")
-                    Overlay.Review(listOf(ReviewItem(FoodDraft(name, p.servingG ?: 100.0, p.per100))), Source.BARCODE)
+                    Overlay.Review(listOf(ReviewItem(FoodDraft(name, p.servingG ?: 100.0, p.per100))), Source.BARCODE, barcode = code)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -481,11 +540,18 @@ class MainActivity : ComponentActivity() {
 
     fun defaultMeal(): Meal = Meal.byHour(LocalTime.now().hour)
 
-    fun save(items: List<FoodDraft>, meal: Meal, source: Source, editing: Entry?, day: Long = this.day, pendingId: Long? = null) {
+    /** Thumbnail and barcode a review gives its dishes; the barcode only to a single product. */
+    private suspend fun extra(items: List<FoodDraft>, jpeg: ByteArray?, barcode: String?): DishExtra =
+        DishExtra(jpeg?.let { withContext(Dispatchers.Default) { Photo.thumb(it) } }, barcode?.takeIf { items.size == 1 })
+
+    fun save(
+        items: List<FoodDraft>, meal: Meal, source: Source, editing: Entry?, day: Long = this.day, pendingId: Long? = null,
+        jpeg: ByteArray? = null, barcode: String? = null,
+    ) {
         val dao = FoodDb.get(this).dao()
         val now = System.currentTimeMillis()
         lifecycleScope.launch {
-            dao.rememberDishes(items, now)
+            dao.rememberDishes(items, now, extra(items, jpeg, barcode))
             if (editing != null) {
                 val d = items.first()
                 val t = d.total
@@ -502,6 +568,17 @@ class MainActivity : ComponentActivity() {
             if (pendingId != null) AiQueue.delete(this@MainActivity, pendingId)
         }
         overlay = null
+    }
+
+    /** Save to "My dishes" without eating: a label prepared in advance. */
+    fun saveToLibrary(items: List<FoodDraft>, jpeg: ByteArray?, barcode: String?, pendingId: Long?) {
+        val dao = FoodDb.get(this).dao()
+        val now = System.currentTimeMillis()
+        lifecycleScope.launch {
+            dao.prepareDishes(items, now, extra(items, jpeg, barcode))
+            if (pendingId != null) AiQueue.delete(this@MainActivity, pendingId)
+        }
+        openLibrary()
     }
 
     fun delete(e: Entry) {

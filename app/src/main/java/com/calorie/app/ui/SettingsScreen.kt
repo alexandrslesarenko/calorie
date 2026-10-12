@@ -132,6 +132,8 @@ enum class SettingsPage(@StringRes val title: Int, @DrawableRes val icon: Int, v
     CLAUDE(R.string.claude_title, R.drawable.ic_set_key, Color(0xFFD97757)),
     THEME(R.string.theme_title, R.drawable.ic_set_palette, Color(0xFF00A5B8)),
     LANGUAGE(R.string.lang_title, R.drawable.ic_set_language, Color(0xFF5C6BC0)),
+    /** Not a page: the tile opens the "My dishes" screen. */
+    DISHES(R.string.my_dishes, R.drawable.ic_set_dish, Color(0xFFE0A030)),
     DATA(R.string.data_title, R.drawable.ic_set_data, Color(0xFF8D6E63)),
 }
 
@@ -155,6 +157,7 @@ fun SettingsScreen(a: MainActivity) {
                 SettingsPage.THEME -> ThemeSettings(a)
                 SettingsPage.LANGUAGE -> LanguageSettings()
                 SettingsPage.DATA -> DataSettings(a)
+                SettingsPage.DISHES -> {}
             }
         }
     }
@@ -165,12 +168,13 @@ private fun SettingsGrid(a: MainActivity) {
     val ctx = LocalContext.current
     val lastWeight by remember { FoodDb.get(ctx).dao().lastWeight() }.collectAsState(null)
     val entryCount by remember { FoodDb.get(ctx).dao().entryCount() }.collectAsState(0)
+    val dishCount by remember { FoodDb.get(ctx).dao().dishCount() }.collectAsState(0)
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // The per-app language setting exists only since Android 13.
         val pages = SettingsPage.entries.filter { it != SettingsPage.LANGUAGE || Build.VERSION.SDK_INT >= 33 }
         pages.chunked(2).forEach { pair ->
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                pair.forEach { p -> SettingsTile(a, p, tileStatus(a, p, lastWeight?.kg, entryCount), Modifier.weight(1f).fillMaxHeight()) }
+                pair.forEach { p -> SettingsTile(a, p, tileStatus(a, p, lastWeight?.kg, entryCount, dishCount), Modifier.weight(1f).fillMaxHeight()) }
                 if (pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
@@ -179,7 +183,7 @@ private fun SettingsGrid(a: MainActivity) {
 
 @Composable
 private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modifier: Modifier) {
-    Card(onClick = { a.settingsPage = p }, modifier = modifier) {
+    Card(onClick = { if (p == SettingsPage.DISHES) a.openLibrary() else a.settingsPage = p }, modifier = modifier) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.size(32.dp).background(p.color.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
@@ -196,7 +200,7 @@ private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modif
 
 /** Short tile status: the key value, so the page need not be opened just to see it. */
 @Composable
-private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?, entryCount: Int): String = when (p) {
+private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?, entryCount: Int, dishCount: Int): String = when (p) {
     SettingsPage.PROFILE -> {
         val prefs = a.prefs
         if (prefs.sex == null || prefs.birthDate == null || prefs.heightCm == 0 || weight == null) stringResource(R.string.tile_profile_empty)
@@ -213,6 +217,7 @@ private fun tileStatus(a: MainActivity, p: SettingsPage, weight: Double?, entryC
     SettingsPage.THEME -> stringResource(themeLabel(a.themeMode))
     SettingsPage.LANGUAGE -> APP_LANGUAGES.firstOrNull { it.first == currentAppLanguage() }?.second ?: systemLanguageLabel()
     SettingsPage.DATA -> stringResource(R.string.tile_data, entryCount)
+    SettingsPage.DISHES -> stringResource(R.string.tile_dishes, dishCount)
 }
 
 private fun themeLabel(mode: String) = when (mode) {

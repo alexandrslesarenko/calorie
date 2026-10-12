@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Données</string>
     <string name="tile_data">Entrées du journal : %1$d</string>
+    <string name="dishes_all">Tous les plats</string>
+    <string name="dish_new_title">Nouveau plat</string>
+    <string name="add_to_library">Dans mes plats</string>
+    <string name="library_add">Ajouter un plat</string>
+    <string name="library_hint">Produits préparés à l\'avance et tout ce que vous avez noté. Touchez un plat pour le modifier.</string>
+    <string name="library_empty">Rien pour l\'instant. Ajoutez un plat par photo, étiquette, code-barres ou à la main : il sera prêt quand vous le mangerez.</string>
+    <string name="dish_line">%1$s kcal pour 100 g, portion %2$s g</string>
+    <string name="dish_edit_title">Plat</string>
+    <string name="dish_portion">Portion, g</string>
+    <string name="macros_per100">Protéines, lipides et glucides pour 100 g</string>
+    <string name="dish_barcode">Code-barres</string>
+    <string name="dish_barcode_bad">Un code-barres compte de 8 à 14 chiffres.</string>
+    <string name="dish_name_taken">Un autre plat porte déjà ce nom.</string>
+    <string name="dish_photo_camera">Appareil photo</string>
+    <string name="dish_photo_gallery">Galerie</string>
+    <string name="dish_photo_remove">Retirer la photo</string>
+    <string name="review_barcode">Le code-barres %1$s est enregistré avec ce produit : le prochain scan le trouve aussitôt, même hors ligne.</string>
+    <string name="tile_dishes">Plats : %1$d</string>
     <string name="data_export_help">La sauvegarde contient le journal, le suivi du poids, Mes plats et le profil avec l\'objectif. La clé Claude, les réponses Claude enregistrées et les requêtes non envoyées n\'y sont pas. Le CSV ne contient que le journal, pour les tableurs : il ne peut pas être réimporté.</string>
     <string name="data_export_json">Enregistrer la sauvegarde</string>
     <string name="data_export_csv">Journal en CSV</string>

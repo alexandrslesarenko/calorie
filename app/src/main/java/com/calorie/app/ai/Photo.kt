@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
@@ -41,4 +42,18 @@ object Photo {
 
     /** Decoded bitmap for the preview on the review screen. */
     fun thumbnail(jpeg: ByteArray): Bitmap? = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
+
+    /** Side of a library dish thumbnail: sharp enough for the editor, a few KB in the database and the backup. */
+    const val THUMB_SIDE = 240
+
+    /** Small JPEG of a prepared photo for "My dishes"; null - not an image. */
+    fun thumb(jpeg: ByteArray): ByteArray? {
+        val src = thumbnail(jpeg) ?: return null
+        val scale = THUMB_SIDE.toFloat() / max(src.width, src.height)
+        val bmp = if (scale < 1f) src.scale((src.width * scale).toInt().coerceAtLeast(1), (src.height * scale).toInt().coerceAtLeast(1)) else src
+        return ByteArrayOutputStream().use { out ->
+            bmp.compress(Bitmap.CompressFormat.JPEG, 80, out)
+            out.toByteArray()
+        }
+    }
 }

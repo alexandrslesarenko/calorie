@@ -112,6 +112,8 @@ fun OverlayScreen(a: MainActivity, o: Overlay) {
         is Overlay.NotFound -> NotFound(a, o)
         is Overlay.Failed -> Failed(a, o)
         is Overlay.Queued -> Queued(a, o)
+        Overlay.Library -> LibraryScreen(a)
+        is Overlay.DishEdit -> DishEditScreen(a, o)
     }
 }
 
@@ -134,6 +136,8 @@ private fun AddMenu(a: MainActivity) {
     var query by rememberSaveable { mutableStateOf("") }
     var deleting by remember { mutableStateOf<Dish?>(null) }
     val scope = rememberCoroutineScope()
+    // Back at the menu: a barcode scanned earlier no longer belongs to what is added next.
+    LaunchedEffect(Unit) { a.scanCode = null }
     val ways = listOf(
         AddWay(R.string.way_photo, R.string.way_photo_hint, CalColors.Photo, true, { painterResource(R.drawable.ic_photo_camera) }) { a.takePhoto() },
         AddWay(R.string.way_gallery, R.string.way_gallery_hint, CalColors.Gallery, true, { painterResource(R.drawable.ic_image) }, a::pickFromGallery),
@@ -142,7 +146,7 @@ private fun AddMenu(a: MainActivity) {
         AddWay(R.string.way_manual, R.string.way_manual_hint, CalColors.Manual, false, { rememberVectorPainter(Icons.Filled.Create) }) { a.overlay = Overlay.Manual() },
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Header(stringResource(R.string.add_title, dayTitle(a.day, inline = true))) { a.closeOverlay() }
+        Header(if (a.libraryMode) stringResource(R.string.dish_new_title) else stringResource(R.string.add_title, dayTitle(a.day, inline = true))) { a.closeOverlay() }
         if (!a.hasKey) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -157,8 +161,16 @@ private fun AddMenu(a: MainActivity) {
                 if (pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
-        if (dishes.isNotEmpty()) {
-            Text(stringResource(R.string.my_dishes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (!a.libraryMode) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.my_dishes), Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(onClick = { a.openLibrary() }) { Text(stringResource(R.string.dishes_all)) }
+            }
+        }
+        if (dishes.isNotEmpty() && !a.libraryMode) {
             OutlinedTextField(
                 query, { query = it },
                 modifier = Modifier.fillMaxWidth(),
@@ -349,6 +361,13 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             )
         }
         o.note?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        if (o.barcode != null && o.editing == null && items.size == 1) {
+            Text(
+                stringResource(R.string.review_barcode, o.barcode),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (o.fromCache && o.askAgain != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -387,12 +406,25 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             style = MaterialTheme.typography.titleMedium,
         )
         val valid = items.isNotEmpty() && items.all { it.draft.name.isNotBlank() && it.draft.grams > 0 }
+        val drafts = items.map { it.draft }
+        val toDiary = { a.save(drafts, meal, o.source, o.editing, day, o.pendingId, o.jpeg, o.barcode) }
+        val toLibrary = { a.saveToLibrary(drafts, o.jpeg, o.barcode, o.pendingId) }
         FitRow { style ->
-            if (o.editing != null) {
-                OutlinedButton(onClick = { a.delete(o.editing) }) { Text(stringResource(R.string.delete), maxLines = 1, style = style) }
-            }
-            FilledTonalButton(enabled = valid, onClick = { a.save(items.map { it.draft }, meal, o.source, o.editing, day, o.pendingId) }) {
-                Text(stringResource(if (o.editing != null) R.string.save else R.string.add_to_diary), maxLines = 1, style = style)
+            when {
+                o.editing != null -> {
+                    OutlinedButton(onClick = { a.delete(o.editing) }) { Text(stringResource(R.string.delete), maxLines = 1, style = style) }
+                    FilledTonalButton(enabled = valid, onClick = toDiary) { Text(stringResource(R.string.save), maxLines = 1, style = style) }
+                }
+                // Opened from "My dishes": preparing is the main action, eating it right away is still possible.
+                // A repeat of a library dish is there to be eaten.
+                a.libraryMode && o.source != Source.REPEAT -> {
+                    OutlinedButton(enabled = valid, onClick = toDiary) { Text(stringResource(R.string.add_to_diary), maxLines = 1, style = style) }
+                    FilledTonalButton(enabled = valid, onClick = toLibrary) { Text(stringResource(R.string.add_to_library), maxLines = 1, style = style) }
+                }
+                else -> {
+                    OutlinedButton(enabled = valid, onClick = toLibrary) { Text(stringResource(R.string.add_to_library), maxLines = 1, style = style) }
+                    FilledTonalButton(enabled = valid, onClick = toDiary) { Text(stringResource(R.string.add_to_diary), maxLines = 1, style = style) }
+                }
             }
         }
     }
@@ -491,7 +523,7 @@ private fun ManualInput(a: MainActivity, o: Overlay.Manual) {
         }
         FilledTonalButton(enabled = name.isNotBlank() && k != null && g != null, onClick = {
             val per100 = Nutrients(k!!, parseNumber(protein) ?: 0.0, parseNumber(fat) ?: 0.0, parseNumber(carbs) ?: 0.0)
-            a.overlay = Overlay.Review(listOf(ReviewItem(FoodDraft(name.trim(), g!!, per100))), Source.MANUAL)
+            a.overlay = Overlay.Review(listOf(ReviewItem(FoodDraft(name.trim(), g!!, per100))), Source.MANUAL, barcode = a.scanCode)
         }) { Text(stringResource(R.string.next)) }
     }
 }

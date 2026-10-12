@@ -9,6 +9,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
+import java.util.Base64
 import java.util.Locale
 import kotlin.math.roundToLong
 
@@ -42,6 +43,8 @@ data class BackupData(
     val dishes: List<Dish>,
     /** Target of each past day (format 2); without it old days are measured against today's. */
     val targets: List<DayTarget> = emptyList(),
+    /** Dish thumbnails by dish id (format 3). */
+    val photos: Map<String, ByteArray> = emptyMap(),
 )
 
 enum class BackupError {
@@ -57,10 +60,12 @@ class BackupException(val error: BackupError, message: String? = null, cause: Th
 data class BackupMerge(
     val entries: List<Entry>,
     val weights: List<WeightMark>,
-    /** New dishes and existing ones that become favorites. */
+    /** New dishes and existing ones that gain the favorite mark or a barcode. */
     val dishes: List<Dish>,
     val targets: List<DayTarget>,
     val skippedEntries: Int,
+    /** Thumbnails of new dishes and of existing ones that have none. */
+    val photos: Map<String, ByteArray> = emptyMap(),
 )
 
 /**
@@ -71,7 +76,7 @@ data class BackupMerge(
  */
 object Backup {
     const val APP = "calorie"
-    const val FORMAT = 2
+    const val FORMAT = 3
     /** Byte order mark: Excel needs it to read UTF-8, and a file edited on Windows may start with it. */
     private const val BOM = 0xFEFF.toChar()
 
@@ -125,6 +130,10 @@ object Backup {
                 .put("uses", x.uses)
                 .put("lastUsed", x.lastUsed)
                 .put("favorite", x.favorite)
+                .apply {
+                    x.barcode?.let { put("barcode", it) }
+                    d.photos[x.id]?.let { put("photo", Base64.getEncoder().encodeToString(it)) }
+                }
         }))
         root.put("targets", JSONArray(d.targets.map { t ->
             JSONObject().put("date", LocalDate.ofEpochDay(t.day).toString()).put("kcal", t.kcal)
@@ -167,20 +176,28 @@ object Backup {
             val kg = num(o, "kg")?.takeIf { it > 0 } ?: return@mapNotNull null
             WeightMark(day, kg)
         }.distinctBy { it.day }
+        val photos = HashMap<String, ByteArray>()
         val dishes = objects(root, "dishes").mapNotNull { o ->
             val name = o.optString("name").trim().takeIf { it.isNotEmpty() } ?: return@mapNotNull null
             val kcal = num(o, "kcal100") ?: return@mapNotNull null
+            val id = Keys.dish(name)
+            // A broken picture costs only the picture.
+            o.optString("photo").takeIf { it.isNotEmpty() && id !in photos }?.let { b64 ->
+                runCatching { Base64.getDecoder().decode(b64) }.getOrNull()?.takeIf { it.isNotEmpty() }?.let { photos[id] = it }
+            }
             Dish(
-                id = Keys.dish(name),
+                id = id,
                 name = name,
                 kcal = kcal,
                 protein = num(o, "protein100") ?: 0.0,
                 fat = num(o, "fat100") ?: 0.0,
                 carbs = num(o, "carbs100") ?: 0.0,
                 lastGrams = num(o, "lastGrams")?.takeIf { it > 0 } ?: 100.0,
-                uses = o.optInt("uses", 1).coerceAtLeast(1),
+                // Format 3 has prepared dishes that were never eaten; before it every dish was eaten.
+                uses = o.optInt("uses", 1).coerceAtLeast(if (format >= 3) 0 else 1),
                 lastUsed = o.optLong("lastUsed", 0),
                 favorite = o.optBoolean("favorite", false),
+                barcode = o.optString("barcode").trim().takeIf { it.isNotEmpty() && !o.isNull("barcode") },
             )
         }.distinctBy { it.id }
         val targets = objects(root, "targets").mapNotNull { o ->
@@ -204,14 +221,14 @@ object Backup {
                 theme = p.optString("theme"),
             )
         }
-        return BackupData(root.optLong("exported", 0), profile, entries, weights, dishes, targets)
+        return BackupData(root.optLong("exported", 0), profile, entries, weights, dishes, targets, photos)
     }
 
     /**
      * Records of the backup that are not there yet. An entry is the same when day, meal, name
      * and grams match; counted, so two identical yogurts in one meal both survive a merge.
      * Weight and target of an existing day and an existing dish are kept as they are (a dish
-     * only gains the favorite mark).
+     * only gains the favorite mark, a barcode and a thumbnail it does not have).
      */
     fun merge(have: BackupData, add: BackupData): BackupMerge {
         val left = have.entries.groupingBy(::entryKey).eachCount().toMutableMap()
@@ -224,19 +241,19 @@ object Backup {
         val days = have.weights.map { it.day }.toSet()
         val targetDays = have.targets.map { it.day }.toSet()
         val dishes = have.dishes.associateBy { it.id }
+        // A barcode already on one of our dishes stays there: adding must not change what is here.
+        val ownBarcodes = have.dishes.mapNotNull { d -> d.barcode?.let { it to d.id } }.toMap()
+        fun free(d: Dish): Dish = if (d.barcode != null && ownBarcodes[d.barcode].let { it != null && it != d.id }) d.copy(barcode = null) else d
         return BackupMerge(
             entries = entries,
             weights = add.weights.filter { it.day !in days },
-            dishes = add.dishes.mapNotNull { d ->
-                val old = dishes[d.id]
-                when {
-                    old == null -> d
-                    d.favorite && !old.favorite -> old.copy(favorite = true)
-                    else -> null
-                }
+            dishes = add.dishes.map(::free).mapNotNull { d ->
+                val old = dishes[d.id] ?: return@mapNotNull d
+                old.copy(favorite = old.favorite || d.favorite, barcode = old.barcode ?: d.barcode).takeIf { it != old }
             },
             targets = add.targets.filter { it.day !in targetDays },
             skippedEntries = add.entries.size - entries.size,
+            photos = add.photos.filterKeys { it !in have.photos && add.dishes.any { d -> d.id == it } },
         )
     }
 

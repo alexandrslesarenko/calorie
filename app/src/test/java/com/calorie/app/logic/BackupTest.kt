@@ -4,6 +4,7 @@ import com.calorie.app.data.DayTarget
 import com.calorie.app.data.Dish
 import com.calorie.app.data.Entry
 import com.calorie.app.data.WeightMark
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -29,6 +30,61 @@ class BackupTest {
     fun roundTrip() {
         val d = data(listOf(entry("Борщ, со сметаной")), listOf(WeightMark(day, 70.3)), listOf(dish("Гречка", true)), profile, listOf(DayTarget(day, 2080)))
         assertEquals(d, Backup.parse(Backup.toJson(d)))
+    }
+
+    @Test
+    fun formatThreeKeepsBarcodeAndPhoto() {
+        val jpeg = byteArrayOf(-1, -40, -1, 0, 1, 2, 3)
+        val d = data(dishes = listOf(dish("Кефир").copy(barcode = "4870001234567", uses = 0), dish("Гречка")))
+            .copy(photos = mapOf(Keys.dish("Кефир") to jpeg))
+        val back = Backup.parse(Backup.toJson(d))
+        assertEquals(d.dishes, back.dishes)
+        assertEquals(setOf(Keys.dish("Кефир")), back.photos.keys)
+        assertArrayEquals(jpeg, back.photos[Keys.dish("Кефир")])
+    }
+
+    @Test
+    fun formatTwoDishesStillImport() {
+        val d = Backup.parse(
+            """{"app":"calorie","format":2,"dishes":[{"name":"Сыр","kcal100":350,"lastGrams":30,"uses":0}]}"""
+        )
+        val dish = d.dishes.single()
+        assertNull(dish.barcode)
+        // Before format 3 every dish in the library had been eaten.
+        assertEquals(1, dish.uses)
+        assertTrue(d.photos.isEmpty())
+    }
+
+    @Test
+    fun brokenPhotoCostsOnlyThePhoto() {
+        val d = Backup.parse(
+            """{"app":"calorie","format":3,"dishes":[{"name":"Сыр","kcal100":350,"photo":"not base64 !!"}]}"""
+        )
+        assertEquals(1, d.dishes.size)
+        assertTrue(d.photos.isEmpty())
+    }
+
+    @Test
+    fun mergeFillsMissingPhotoAndBarcodeButNeverReplaces() {
+        val mine = byteArrayOf(1)
+        val theirs = byteArrayOf(2)
+        val have = data(dishes = listOf(dish("Кефир"), dish("Сыр").copy(barcode = "111111111"))).copy(photos = mapOf(Keys.dish("Сыр") to mine))
+        val add = data(dishes = listOf(dish("Кефир").copy(barcode = "4870001234567"), dish("Сыр").copy(barcode = "222222222"), dish("Хлеб")))
+            .copy(photos = mapOf(Keys.dish("Кефир") to theirs, Keys.dish("Сыр") to theirs, Keys.dish("Хлеб") to theirs))
+        val m = Backup.merge(have, add)
+        assertEquals(setOf(Keys.dish("Кефир"), Keys.dish("Хлеб")), m.photos.keys)
+        val byId = m.dishes.associateBy { it.id }
+        assertEquals("4870001234567", byId[Keys.dish("Кефир")]?.barcode)
+        // The barcode already here is kept and nothing else differs, so the dish is not rewritten.
+        assertNull(byId[Keys.dish("Сыр")])
+        assertTrue(Keys.dish("Хлеб") in byId)
+    }
+
+    @Test
+    fun mergeDoesNotTakeBarcodeFromOwnDish() {
+        val have = data(dishes = listOf(dish("Кефир").copy(barcode = "4870001234567")))
+        val add = data(dishes = listOf(dish("Кефир 2.5%").copy(barcode = "4870001234567")))
+        assertNull(Backup.merge(have, add).dishes.single().barcode)
     }
 
     @Test

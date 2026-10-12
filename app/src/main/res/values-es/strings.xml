@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Datos</string>
     <string name="tile_data">Entradas del diario: %1$d</string>
+    <string name="dishes_all">Todos los platos</string>
+    <string name="dish_new_title">Plato nuevo</string>
+    <string name="add_to_library">A mis platos</string>
+    <string name="library_add">Añadir plato</string>
+    <string name="library_hint">Productos preparados de antemano y todo lo que has anotado. Toca un plato para cambiarlo.</string>
+    <string name="library_empty">Aún está vacío. Añade un plato por foto, etiqueta, código de barras o a mano: estará listo cuando lo comas.</string>
+    <string name="dish_line">%1$s kcal por 100 g, ración %2$s g</string>
+    <string name="dish_edit_title">Plato</string>
+    <string name="dish_portion">Ración, g</string>
+    <string name="macros_per100">Proteínas, grasas y carbohidratos por 100 g</string>
+    <string name="dish_barcode">Código de barras</string>
+    <string name="dish_barcode_bad">Un código de barras tiene de 8 a 14 dígitos.</string>
+    <string name="dish_name_taken">Ya hay otro plato con este nombre.</string>
+    <string name="dish_photo_camera">Cámara</string>
+    <string name="dish_photo_gallery">Galería</string>
+    <string name="dish_photo_remove">Quitar foto</string>
+    <string name="review_barcode">El código de barras %1$s se guarda con este producto: el próximo escaneo lo encuentra al instante, incluso sin conexión.</string>
+    <string name="tile_dishes">Platos: %1$d</string>
     <string name="data_export_help">La copia incluye el diario, el registro de peso, Mis platos y el perfil con el objetivo. La clave de Claude, las respuestas guardadas de Claude y las solicitudes sin enviar no se incluyen. El CSV es solo el diario, para hojas de cálculo: no se puede volver a importar.</string>
     <string name="data_export_json">Guardar copia</string>
     <string name="data_export_csv">Diario a CSV</string>

@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Data</string>
     <string name="tile_data">Diary entries: %1$d</string>
+    <string name="dishes_all">All dishes</string>
+    <string name="dish_new_title">New dish</string>
+    <string name="add_to_library">To My dishes</string>
+    <string name="library_add">Add dish</string>
+    <string name="library_hint">Products prepared in advance and everything you have logged. Tap a dish to change it.</string>
+    <string name="library_empty">Nothing here yet. Add a dish by photo, label, barcode or manually: it will be ready when you eat it.</string>
+    <string name="dish_line">%1$s kcal per 100 g, portion %2$s g</string>
+    <string name="dish_edit_title">Dish</string>
+    <string name="dish_portion">Portion, g</string>
+    <string name="macros_per100">Protein, fat and carbs per 100 g</string>
+    <string name="dish_barcode">Barcode</string>
+    <string name="dish_barcode_bad">A barcode has 8 to 14 digits.</string>
+    <string name="dish_name_taken">Another dish already has this name.</string>
+    <string name="dish_photo_camera">Camera</string>
+    <string name="dish_photo_gallery">Gallery</string>
+    <string name="dish_photo_remove">Remove photo</string>
+    <string name="review_barcode">Barcode %1$s is saved with this product: the next scan finds it at once, even offline.</string>
+    <string name="tile_dishes">Dishes: %1$d</string>
     <string name="data_export_help">The backup holds the diary, the weight log, My dishes and the profile with the goal. The Claude key, saved Claude answers and unsent requests are not included. CSV is the diary only, for spreadsheets: it cannot be imported back.</string>
     <string name="data_export_json">Save backup</string>
     <string name="data_export_csv">Diary to CSV</string>

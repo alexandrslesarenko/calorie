@@ -15,13 +15,17 @@ The app is in early testing; the name is a working one.
   The recognized dishes can be corrected before saving: names, grams, meal.
 - "My dishes": every saved dish is remembered, and repeating it needs no request to
   Claude. Answers are also cached, so sending the same photo or text again is free.
+  A product can be prepared in advance without eating it (for example from a label photo),
+  edited later and shown with a small picture.
+- A barcode is kept with the dish: products missing from Open Food Facts are found in "My
+  dishes" on the next scan, also offline.
 - If Claude is overloaded or there is no connection, the request is not lost: the app
   resends it on its own and shows the answer on Today, ready to check and add.
 - Diary by meals, balance of each day against the target that day had (a later change of
   weight or activity does not rewrite the past), deficit or surplus over the last week in
   kilograms of fat.
 - Weight log.
-- Backup to a file and back: the diary, weight log, daily targets, "My dishes" and profile as JSON, which can
+- Backup to a file and back: the diary, weight log, daily targets, "My dishes" with pictures and profile as JSON, which can
   be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,
   with safety limits: not below 1200 / 1500 kcal and the basal metabolic rate, at most

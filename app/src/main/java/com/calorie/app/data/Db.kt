@@ -74,11 +74,12 @@ data class CachedProduct(
 )
 
 /**
- * Dish in the "My dishes" library: everything ever logged, with values per 100 g
- * and the last portion weight. Repeating from the library costs no Claude request.
- * id - Keys.dish(name).
+ * Dish in the "My dishes" library: everything ever logged or prepared in advance, with values
+ * per 100 g and the last portion weight. Repeating from the library costs no Claude request.
+ * id - Keys.dish(name); uses - how many times it went into the diary (0 - prepared, not eaten yet).
+ * barcode - a scan finds the dish here before Open Food Facts, also offline.
  */
-@Entity(tableName = "dish")
+@Entity(tableName = "dish", indices = [Index("barcode")])
 data class Dish(
     @PrimaryKey val id: String,
     val name: String,
@@ -90,9 +91,20 @@ data class Dish(
     val uses: Int,
     val lastUsed: Long,
     val favorite: Boolean,
+    val barcode: String? = null,
 ) {
     fun toDraft(): FoodDraft = FoodDraft(name, lastGrams, Nutrients(kcal, protein, fat, carbs))
 }
+
+/**
+ * Thumbnail of a library dish (Photo.thumb). A table of its own: the dish list is observed
+ * all the time, and a star toggle must not read every picture again.
+ */
+@Entity(tableName = "dish_photo")
+class DishPhoto(@PrimaryKey val id: String, val jpeg: ByteArray)
+
+/** What a dish gets besides its values when saved: a thumbnail and the barcode it was scanned by. */
+class DishExtra(val thumb: ByteArray? = null, val barcode: String? = null)
 
 /** Claude answer (report_food tool input) by Keys.photo / Keys.description. */
 @Entity(tableName = "ai_cache")
@@ -164,8 +176,55 @@ interface FoodDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putDish(d: Dish)
 
-    @Delete
-    suspend fun deleteDish(d: Dish)
+    @Query("DELETE FROM dish WHERE id = :id")
+    suspend fun deleteDishRow(id: String)
+
+    /** A dish goes away together with its thumbnail. */
+    @Transaction
+    suspend fun deleteDish(d: Dish) {
+        deleteDishRow(d.id)
+        deleteDishPhoto(d.id)
+    }
+
+    @Query("SELECT * FROM dish WHERE barcode = :barcode LIMIT 1")
+    suspend fun dishByBarcode(barcode: String): Dish?
+
+    /** A barcode belongs to one dish: the latest one to get it. */
+    @Query("UPDATE dish SET barcode = NULL WHERE barcode = :barcode AND id != :keep")
+    suspend fun releaseBarcode(barcode: String, keep: String)
+
+    @Query("SELECT * FROM dish_photo")
+    fun dishPhotos(): Flow<List<DishPhoto>>
+
+    @Query("SELECT * FROM dish_photo")
+    suspend fun allDishPhotos(): List<DishPhoto>
+
+    @Query("SELECT * FROM dish_photo WHERE id = :id")
+    fun dishPhotoFlow(id: String): Flow<DishPhoto?>
+
+    @Query("SELECT * FROM dish WHERE id = :id")
+    fun dishFlow(id: String): Flow<Dish?>
+
+    @Query("SELECT COUNT(*) FROM dish")
+    fun dishCount(): Flow<Int>
+
+    @Query("SELECT id FROM dish_photo WHERE id = :id")
+    suspend fun dishPhotoId(id: String): String?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putDishPhoto(p: DishPhoto)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putDishPhotos(p: List<DishPhoto>)
+
+    @Query("DELETE FROM dish_photo WHERE id = :id")
+    suspend fun deleteDishPhoto(id: String)
+
+    @Query("UPDATE dish_photo SET id = :to WHERE id = :from")
+    suspend fun moveDishPhoto(from: String, to: String)
+
+    @Query("DELETE FROM dish_photo")
+    suspend fun clearDishPhotos()
 
     @Query("UPDATE dish SET favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: String, favorite: Boolean)
@@ -185,13 +244,64 @@ interface FoodDao {
      * the favorite mark is kept.
      */
     @Transaction
-    suspend fun rememberDishes(drafts: List<FoodDraft>, now: Long) {
+    suspend fun rememberDishes(drafts: List<FoodDraft>, now: Long, extra: DishExtra = DishExtra()) {
         drafts.forEach { d ->
             val key = Keys.dish(d.name)
             val old = dish(key)
             val p = d.per100
-            putDish(Dish(key, d.name.trim(), p.kcal, p.protein, p.fat, p.carbs, d.grams, (old?.uses ?: 0) + 1, now, old?.favorite ?: false))
+            putDish(Dish(key, d.name.trim(), p.kcal, p.protein, p.fat, p.carbs, d.grams, (old?.uses ?: 0) + 1, now, old?.favorite ?: false, old?.barcode))
+            // Eaten, not prepared: a photo only fills an empty place, it does not replace a chosen one.
+            attach(key, extra, replacePhoto = false)
         }
+    }
+
+    /**
+     * Save dishes to the library without eating them: values and weight are the new ones, the
+     * counter and the last use stay (they mean "eaten"); a new dish is placed among the recent.
+     */
+    @Transaction
+    suspend fun prepareDishes(drafts: List<FoodDraft>, now: Long, extra: DishExtra = DishExtra()) {
+        drafts.forEach { d ->
+            val key = Keys.dish(d.name)
+            val old = dish(key)
+            val p = d.per100
+            putDish(
+                Dish(key, d.name.trim(), p.kcal, p.protein, p.fat, p.carbs, d.grams, old?.uses ?: 0, old?.lastUsed ?: now, old?.favorite ?: false, old?.barcode)
+            )
+            attach(key, extra, replacePhoto = true)
+        }
+    }
+
+    private suspend fun attach(key: String, extra: DishExtra, replacePhoto: Boolean) {
+        extra.barcode?.let { b ->
+            releaseBarcode(b, key)
+            setBarcode(key, b)
+        }
+        extra.thumb?.let { t -> if (replacePhoto || dishPhotoId(key) == null) putDishPhoto(DishPhoto(key, t)) }
+    }
+
+    @Query("UPDATE dish SET barcode = :barcode WHERE id = :id")
+    suspend fun setBarcode(id: String, barcode: String?)
+
+    /**
+     * Edit of a library dish, possibly renamed. false - the new name belongs to another dish
+     * (nothing changed). The thumbnail follows the dish; thumb: null - keep, empty - remove.
+     */
+    @Transaction
+    suspend fun editDish(oldId: String, d: Dish, thumb: ByteArray?): Boolean {
+        if (d.id != oldId && dish(d.id) != null) return false
+        if (d.id != oldId) {
+            deleteDishRow(oldId)
+            moveDishPhoto(oldId, d.id)
+        }
+        d.barcode?.let { releaseBarcode(it, d.id) }
+        putDish(d)
+        when {
+            thumb == null -> {}
+            thumb.isEmpty() -> deleteDishPhoto(d.id)
+            else -> putDishPhoto(DishPhoto(d.id, thumb))
+        }
+        return true
     }
 
     @Query("SELECT * FROM pending ORDER BY id")
@@ -276,16 +386,22 @@ interface FoodDao {
 
     /** Import in one transaction: a broken file must not leave half a diary. */
     @Transaction
-    suspend fun importBackup(replace: Boolean, entries: List<Entry>, weights: List<WeightMark>, dishes: List<Dish>, targets: List<DayTarget>) {
+    suspend fun importBackup(
+        replace: Boolean, entries: List<Entry>, weights: List<WeightMark>, dishes: List<Dish>, targets: List<DayTarget>, photos: List<DishPhoto>,
+    ) {
         if (replace) {
             clearEntries()
             clearWeights()
             clearDishes()
+            clearDishPhotos()
             clearDayTargets()
         }
         insert(entries)
         putWeights(weights)
+        // A barcode moves to the imported dish, as when it is attached here.
+        dishes.forEach { d -> d.barcode?.let { releaseBarcode(it, d.id) } }
         putDishes(dishes)
+        putDishPhotos(photos)
         putDayTargets(targets)
     }
 
@@ -309,8 +425,8 @@ interface FoodDao {
 }
 
 @Database(
-    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class, Pending::class, DayTarget::class],
-    version = 3,
+    entities = [Entry::class, WeightMark::class, CachedProduct::class, Dish::class, AiCached::class, Pending::class, DayTarget::class, DishPhoto::class],
+    version = 4,
     exportSchema = false,
 )
 abstract class FoodDb : RoomDatabase() {
@@ -333,6 +449,19 @@ abstract class FoodDb : RoomDatabase() {
             }
         }
 
+        /** v4: barcode of a library dish and dish thumbnails. SQL copied from the generated FoodDb_Impl. */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `dish` ADD COLUMN `barcode` TEXT")
+                db.execSQL(DISH_BARCODE_INDEX_SQL)
+                db.execSQL(DISH_PHOTO_SQL)
+            }
+        }
+
+        private const val DISH_BARCODE_INDEX_SQL = "CREATE INDEX IF NOT EXISTS `index_dish_barcode` ON `dish` (`barcode`)"
+        private const val DISH_PHOTO_SQL =
+            "CREATE TABLE IF NOT EXISTS `dish_photo` (`id` TEXT NOT NULL, `jpeg` BLOB NOT NULL, PRIMARY KEY(`id`))"
+
         private const val DAY_TARGET_SQL =
             "CREATE TABLE IF NOT EXISTS `day_target` (`day` INTEGER NOT NULL, `kcal` INTEGER NOT NULL, PRIMARY KEY(`day`))"
 
@@ -345,7 +474,7 @@ abstract class FoodDb : RoomDatabase() {
         // Migrations are written by hand: any schema change - bump version and add a Migration.
         fun get(context: Context): FoodDb = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, FoodDb::class.java, "food.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build().also { instance = it }
         }
     }

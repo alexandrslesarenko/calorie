@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">데이터</string>
     <string name="tile_data">일기 기록: %1$d</string>
+    <string name="dishes_all">모든 요리</string>
+    <string name="dish_new_title">새 요리</string>
+    <string name="add_to_library">내 요리에 저장</string>
+    <string name="library_add">요리 추가</string>
+    <string name="library_hint">미리 준비한 식품과 지금까지 기록한 모든 것입니다. 요리를 누르면 수정할 수 있습니다.</string>
+    <string name="library_empty">아직 비어 있습니다. 사진, 라벨, 바코드 또는 직접 입력으로 요리를 추가해 두면 먹을 때 바로 쓸 수 있습니다.</string>
+    <string name="dish_line">100 g당 %1$s kcal, 1회 %2$s g</string>
+    <string name="dish_edit_title">요리</string>
+    <string name="dish_portion">1회 분량, g</string>
+    <string name="macros_per100">100 g당 단백질, 지방, 탄수화물</string>
+    <string name="dish_barcode">바코드</string>
+    <string name="dish_barcode_bad">바코드는 8~14자리입니다.</string>
+    <string name="dish_name_taken">같은 이름의 요리가 이미 있습니다.</string>
+    <string name="dish_photo_camera">카메라</string>
+    <string name="dish_photo_gallery">갤러리</string>
+    <string name="dish_photo_remove">사진 삭제</string>
+    <string name="review_barcode">바코드 %1$s가 이 제품과 함께 저장됩니다. 다음 스캔에서는 오프라인에서도 바로 찾습니다.</string>
+    <string name="tile_dishes">요리: %1$d</string>
     <string name="data_export_help">백업에는 일기, 체중 기록, 내 요리, 목표가 포함된 프로필이 들어 있습니다. Claude 키, 저장된 Claude 응답, 보내지 않은 요청은 포함되지 않습니다. CSV는 스프레드시트용 일기만 담으며 다시 가져올 수 없습니다.</string>
     <string name="data_export_json">백업 저장</string>
     <string name="data_export_csv">일기를 CSV로</string>

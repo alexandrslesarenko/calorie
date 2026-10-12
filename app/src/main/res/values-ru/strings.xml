@@ -258,6 +258,24 @@
     <!-- Backup: export and import -->
     <string name="data_title">Данные</string>
     <string name="tile_data">Записей в дневнике: %1$d</string>
+    <string name="dishes_all">Все блюда</string>
+    <string name="dish_new_title">Новое блюдо</string>
+    <string name="add_to_library">В мои блюда</string>
+    <string name="library_add">Добавить блюдо</string>
+    <string name="library_hint">Заготовки и всё, что вы записывали. Нажмите на блюдо, чтобы изменить его.</string>
+    <string name="library_empty">Пока пусто. Добавьте блюдо по фото, этикетке, штрихкоду или вручную: когда съедите его, оно будет под рукой.</string>
+    <string name="dish_line">%1$s ккал на 100 г, порция %2$s г</string>
+    <string name="dish_edit_title">Блюдо</string>
+    <string name="dish_portion">Порция, г</string>
+    <string name="macros_per100">Белки, жиры и углеводы на 100 г</string>
+    <string name="dish_barcode">Штрихкод</string>
+    <string name="dish_barcode_bad">В штрихкоде от 8 до 14 цифр.</string>
+    <string name="dish_name_taken">Блюдо с таким названием уже есть.</string>
+    <string name="dish_photo_camera">Камера</string>
+    <string name="dish_photo_gallery">Галерея</string>
+    <string name="dish_photo_remove">Убрать фото</string>
+    <string name="review_barcode">Штрихкод %1$s сохранится вместе с продуктом: следующий скан найдёт его сразу, даже без сети.</string>
+    <string name="tile_dishes">Блюд: %1$d</string>
     <string name="data_export_help">В резервной копии - дневник, журнал веса, \"Мои блюда\" и профиль с целью. Ключ Claude, сохранённые ответы Claude и неотправленные запросы в неё не входят. CSV - только дневник, для таблиц: обратно его не загрузить.</string>
     <string name="data_export_json">Сохранить копию</string>
     <string name="data_export_csv">Дневник в CSV</string>
