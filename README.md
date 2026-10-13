@@ -92,8 +92,10 @@ JDK 17 and the Android SDK are required. Put the SDK path into `local.properties
 
 Calorie reads per-minute heart rate on walks and workouts from Pulsar's content provider.
 It is guarded by a signature permission, so both apps must be signed with the same key.
-Debug builds made on one machine use the same debug keystore, so this works out of the
-box. If Calorie was installed before Pulsar, reinstall Calorie to get the permission.
+The author's builds of both apps share one release key. Builds from source made on one
+machine share its debug keystore, so a self-built pair works out of the box, but a
+self-built Calorie cannot read a Pulsar installed from its Releases page. If Calorie was
+installed before Pulsar, reinstall Calorie to get the permission.
 
 ## Disclaimer
 
