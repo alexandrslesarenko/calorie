@@ -7,7 +7,8 @@ text description with Claude Haiku 5.5, finds packaged products by barcode in Op
 Facts, keeps a food diary and a weight log, and computes a daily calorie target for your
 goal.
 
-The app is in early testing; the name is a working one.
+Version 0.2, in early testing; the name is a working one. A ready APK is on the
+[Releases](https://github.com/alexandrslesarenko/calorie/releases) page.
 
 ## Features
 
@@ -85,6 +86,7 @@ JDK 17 and the Android SDK are required. Put the SDK path into `local.properties
 ```bash
 ./gradlew :app:assembleDebug         # APK in app/build/outputs/apk/debug/
 ./gradlew :app:installDebug          # install on a connected phone
+./gradlew :app:assembleRelease       # APK in app/build/outputs/apk/release/
 ./gradlew :app:testDebugUnitTest     # unit tests, no device and no API calls
 ```
 

@@ -6,7 +6,8 @@ Android-приложение для подсчёта калорий с упор�
 в описании словами через Claude Haiku 5.5, находит продукты по штрихкоду в Open Food
 Facts, ведёт дневник питания и журнал веса, считает суточную норму под цель.
 
-Приложение на стадии испытаний, название рабочее.
+Версия 0.2, приложение на стадии испытаний, название рабочее. Готовый APK - на странице
+[Releases](https://github.com/alexandrslesarenko/calorie/releases).
 
 ## Возможности
 
@@ -85,6 +86,7 @@ Gemini необязателен, для него нужен свой ключ и
 ```bash
 ./gradlew :app:assembleDebug         # APK в app/build/outputs/apk/debug/
 ./gradlew :app:installDebug          # поставить на подключённый телефон
+./gradlew :app:assembleRelease       # APK в app/build/outputs/apk/release/
 ./gradlew :app:testDebugUnitTest     # unit-тесты, без устройства и без запросов к API
 ```
 
