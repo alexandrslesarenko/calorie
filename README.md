@@ -8,7 +8,10 @@ Facts, keeps a food diary and a weight log, and computes a daily calorie target 
 goal.
 
 Version 0.2, in early testing; the name is a working one. A ready APK is on the
-[Releases](https://github.com/alexandrslesarenko/calorie/releases) page.
+[Releases](https://github.com/alexandrslesarenko/calorie/releases) page. To get updates
+automatically, add the repository URL `https://github.com/alexandrslesarenko/calorie` to
+[Obtainium](https://github.com/ImranR98/Obtainium): it checks the Releases page and installs
+new versions over the old one.
 
 ## Features
 

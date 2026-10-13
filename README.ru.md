@@ -7,7 +7,11 @@ Android-приложение для подсчёта калорий с упор�
 Facts, ведёт дневник питания и журнал веса, считает суточную норму под цель.
 
 Версия 0.2, приложение на стадии испытаний, название рабочее. Готовый APK - на странице
-[Releases](https://github.com/alexandrslesarenko/calorie/releases).
+[Releases](https://github.com/alexandrslesarenko/calorie/releases). Чтобы получать
+обновления автоматически, добавьте адрес репозитория
+`https://github.com/alexandrslesarenko/calorie` в
+[Obtainium](https://github.com/ImranR98/Obtainium): он следит за страницей Releases и ставит
+новые версии поверх старых.
 
 ## Возможности
 
