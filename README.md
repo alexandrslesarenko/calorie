@@ -3,8 +3,8 @@
 # Calorie
 
 An Android calorie counter aimed at weight loss. It recognizes food on a photo or in a
-text description with Claude Haiku 5.5, finds packaged products by barcode in Open Food
-Facts, keeps a food diary and a weight log, and computes a daily calorie target for your
+text description with Claude Haiku 5.5 or Gemini 3.5 Flash-Lite, finds packaged products by
+barcode in Open Food Facts, keeps a food diary and a weight log, and computes a daily calorie target for your
 goal.
 
 Version 0.2, in early testing; the name is a working one. A ready APK is on the
@@ -46,15 +46,20 @@ new versions over the old one.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
   Japanese, Korean, Chinese (Simplified). Claude answers in the app language.
 
-## Claude API key
+## API key: Claude or Gemini
 
-Recognition by photo and description needs your own Claude API key from
-[platform.claude.com](https://platform.claude.com). It is paid per use, separately from
-Claude subscriptions: about 0.05 cents per photo with Claude Haiku 5.5. The app counts the
-spending itself from the token usage in the answers. Barcodes, the diary, "My dishes"
-and cached answers work without a key.
+Recognition by photo and description needs your own API key; either service is enough.
 
-The key is encrypted with a key from the Android Keystore and excluded from cloud
+- Claude: a key from [platform.claude.com](https://platform.claude.com). It is paid per
+  use, separately from Claude subscriptions: about 0.05 cents per photo with Claude Haiku 5.5.
+- Gemini: a key from [Google AI Studio](https://aistudio.google.com/apikey). Its free tier
+  costs nothing, but on it Google may use what is sent to improve its products; on the
+  paid tier it does not.
+
+The app counts the spending of each service itself from the token usage in the answers.
+Barcodes, the diary, "My dishes" and cached answers work without a key.
+
+The keys are encrypted with a key from the Android Keystore and excluded from cloud
 backup.
 
 ### Choosing the recognizer
@@ -62,10 +67,6 @@ backup.
 Settings - Recognition: Claude Haiku 5.5 (default), Claude Haiku 4.5 or Gemini 3.5
 Flash-Lite. If the chosen model is retired, the next one with a key answers instead and
 the review screen says so; a busy service is waited for, not swapped.
-
-Gemini is optional and needs its own key from
-[Google AI Studio](https://aistudio.google.com/apikey). Its free tier costs nothing, but on
-it Google may use what is sent to improve its products.
 
 ## Privacy
 
@@ -79,7 +80,7 @@ it Google may use what is sent to improve its products.
 
 - Android 12 (API 31) or newer.
 - Google Play services for the barcode scanner.
-- A Claude API key for photo and text recognition.
+- A Claude or Gemini API key for photo and text recognition.
 
 ## Building
 
