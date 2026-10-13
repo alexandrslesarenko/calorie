@@ -60,6 +60,7 @@ import com.calorie.app.ai.Photo
 import com.calorie.app.data.Dish
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Source
+import com.calorie.app.logic.Cooking
 import com.calorie.app.logic.Keys
 import com.calorie.app.logic.gramsText
 import com.calorie.app.logic.kcalText
@@ -77,13 +78,20 @@ data class DishForm(
     val barcode: String,
     /** kcal and macros are typed for the portion (a label per 40 g cookie), not per 100 g. */
     val perPortion: Boolean = false,
+    /** Weighed after cooking: the values typed are for the product as sold, see [Cooking]. */
+    val afterCooking: Boolean = false,
+    /** What 100 g as sold weigh cooked. */
+    val cooked: String = "",
 ) {
     /** The edited dish; null - something required is missing or not a number. */
     fun toDish(old: Dish): Dish? {
         val n = name.trim().takeIf { it.isNotEmpty() } ?: return null
         val g = parseNumber(grams)?.takeIf { it > 0 } ?: return null
-        // The dish keeps values per 100 g.
-        val to100 = if (perPortion) 100.0 / g else 1.0
+        val cw = if (afterCooking) parseNumber(cooked)?.takeIf { Cooking.valid(it) } ?: return null else 100.0
+        // The dish keeps values per 100 g of what is eaten. A label serving is weighed as sold,
+        // so the portion eaten is that serving cooked.
+        val to100 = (if (perPortion) 100.0 / g else 1.0) * 100.0 / cw
+        val eaten = if (perPortion) g * cw / 100.0 else g
         val k = parseNumber(kcal)?.takeIf { it >= 0 }?.times(to100) ?: return null
         fun macro(s: String): Double? = if (s.isBlank()) 0.0 else parseNumber(s)?.takeIf { it >= 0 }?.times(to100)
         val p = macro(protein) ?: return null
@@ -91,7 +99,14 @@ data class DishForm(
         val c = macro(carbs) ?: return null
         val b = barcode.trim()
         if (b.isNotEmpty() && !barcodeValid(b)) return null
-        return old.copy(id = Keys.dish(n), name = n, kcal = k, protein = p, fat = f, carbs = c, lastGrams = g, barcode = b.ifEmpty { null })
+        return old.copy(id = Keys.dish(n), name = n, kcal = k, protein = p, fat = f, carbs = c, lastGrams = eaten, barcode = b.ifEmpty { null })
+    }
+
+    /** kcal per 100 g as typed (before the cooking conversion); null - not a number yet. */
+    fun rawKcal(): Double? {
+        val k = parseNumber(kcal) ?: return null
+        if (!perPortion) return k
+        return parseNumber(grams)?.takeIf { it > 0 }?.let { k * 100.0 / it }
     }
 
     /**
@@ -318,7 +333,19 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
             supportingText = if (badBarcode) ({ Text(stringResource(R.string.dish_barcode_bad)) }) else null,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
+        CookedWeight(
+            form.afterCooking, form.cooked, form.rawKcal(),
+            onToggle = { form = form.copy(afterCooking = it, cooked = if (it) form.cooked else "") },
+            onText = { form = form.copy(cooked = it) },
+        )
         edited?.let { d ->
+            if (form.afterCooking) {
+                val raw = d.kcal * (parseNumber(form.cooked) ?: 100.0) / 100.0
+                Text(
+                    stringResource(R.string.per100_cooked_line, d.kcal.kcalText(), raw.kcalText()),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             val t = d.toDraft().total
             Text(
                 stringResource(R.string.item_line, t.kcal.kcalText(), t.protein.roundToInt(), t.fat.roundToInt(), t.carbs.roundToInt()),

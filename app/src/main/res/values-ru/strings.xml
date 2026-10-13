@@ -93,6 +93,11 @@
     <string name="remove_item">Убрать</string>
     <string name="item_line">%1$s ккал - Б %2$d / Ж %3$d / У %4$d</string>
     <string name="per100_line">%1$s ккал на 100 г</string>
+    <string name="after_cooking">Вес после готовки</string>
+    <string name="cooked_from_100">Из 100 г выходит, г</string>
+    <string name="cooked_hint">Взвесьте до и после готовки. Примерно: макароны 230, рис 280, гречка 250, мясо 70.</string>
+    <string name="values_look_cooked">Похоже, значения уже для готового: %1$s ккал на 100 г, а у сухих макарон и круп около 350.</string>
+    <string name="per100_cooked_line">%1$s ккал на 100 г готового, %2$s - до готовки</string>
     <string name="low_confidence">Примерная догадка: проверьте, что это и сколько.</string>
     <string name="review_total">Итого: %1$s ккал, Б %2$d / Ж %3$d / У %4$d</string>
     <string name="add_to_diary">В дневник</string>

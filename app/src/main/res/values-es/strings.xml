@@ -93,6 +93,11 @@
     <string name="remove_item">Quitar</string>
     <string name="item_line">%1$s kcal - P %2$d / G %3$d / C %4$d</string>
     <string name="per100_line">%1$s kcal por 100 g</string>
+    <string name="after_cooking">Pesado tras cocinar</string>
+    <string name="cooked_from_100">100 g rinden, g</string>
+    <string name="cooked_hint">Pese antes y después de cocinar. Aprox.: pasta 230, arroz 280, trigo sarraceno 250, carne 70.</string>
+    <string name="values_look_cooked">Estos valores parecen ya de cocinado: %1$s kcal por 100 g, y la pasta y los cereales secos tienen unas 350.</string>
+    <string name="per100_cooked_line">%1$s kcal por 100 g cocinado, %2$s antes de cocinar</string>
     <string name="low_confidence">Suposición aproximada: comprueba qué es y cuánto.</string>
     <string name="review_total">Total: %1$s kcal, P %2$d / G %3$d / C %4$d</string>
     <string name="add_to_diary">Al diario</string>

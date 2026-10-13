@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Search
@@ -90,6 +91,7 @@ import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.Source
 import com.calorie.app.logic.Confidence
+import com.calorie.app.logic.Cooking
 import com.calorie.app.logic.FoodDraft
 import com.calorie.app.logic.Nutrients
 import com.calorie.app.logic.gramsText
@@ -422,7 +424,7 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             stringResource(R.string.review_total, total.kcal.kcalText(), total.protein.roundToInt(), total.fat.roundToInt(), total.carbs.roundToInt()),
             style = MaterialTheme.typography.titleMedium,
         )
-        val valid = items.isNotEmpty() && items.all { it.draft.name.isNotBlank() && it.draft.grams > 0 }
+        val valid = items.isNotEmpty() && items.all { it.draft.name.isNotBlank() && it.draft.grams > 0 && it.ready }
         val drafts = items.map { it.draft }
         val toDiary = { a.save(drafts, meal, o.source, o.editing, day, o.pendingId, o.jpeg, o.barcode) }
         val toLibrary = { a.saveToLibrary(drafts, o.jpeg, o.barcode, o.pendingId) }
@@ -450,6 +452,7 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
 @Composable
 private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewItem) -> Unit, onRemove: () -> Unit) {
     var gramsText by remember { mutableStateOf(item.draft.grams.gramsText()) }
+    var cookedText by remember { mutableStateOf(item.cooked?.gramsText() ?: "") }
     fun setGrams(g: Double) {
         val v = g.coerceIn(0.0, 5000.0)
         gramsText = v.gramsText()
@@ -494,13 +497,57 @@ private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewIt
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
-                stringResource(R.string.per100_line, item.draft.per100.kcal.kcalText()),
+                if (item.raw != null && item.cooked != null) {
+                    stringResource(R.string.per100_cooked_line, item.draft.per100.kcal.kcalText(), item.raw.kcal.kcalText())
+                } else {
+                    stringResource(R.string.per100_line, item.draft.per100.kcal.kcalText())
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            CookedWeight(
+                item.raw != null, cookedText, (item.raw ?: item.draft.per100).kcal,
+                onToggle = { on ->
+                    if (!on) cookedText = ""
+                    onChange(item.afterCooking(on))
+                },
+                onText = { t ->
+                    cookedText = t
+                    onChange(item.withCooked(parseNumber(t)))
+                },
             )
             if (item.confidence == Confidence.LOW) {
                 Text(stringResource(R.string.low_confidence), style = MaterialTheme.typography.bodySmall, color = CalColors.Warn)
             }
+        }
+    }
+}
+
+/**
+ * "Weighed after cooking": label values are for the product as sold, the grams typed are of
+ * the cooked food; text - how much 100 g as sold weigh cooked.
+ */
+@Composable
+fun CookedWeight(on: Boolean, text: String, rawKcal: Double?, onToggle: (Boolean) -> Unit, onText: (String) -> Unit) {
+    FilterChip(
+        selected = on, onClick = { onToggle(!on) },
+        label = { Text(stringResource(R.string.after_cooking), maxLines = 1) },
+        leadingIcon = if (on) ({ Icon(Icons.Filled.Check, null, Modifier.size(FilterChipDefaults.IconSize)) }) else null,
+    )
+    if (on) {
+        val bad = text.isNotBlank() && parseNumber(text)?.let { Cooking.valid(it) } != true
+        OutlinedTextField(
+            text, onText,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            label = { Text(stringResource(R.string.cooked_from_100), maxLines = 1) },
+            isError = bad,
+            supportingText = { Text(stringResource(R.string.cooked_hint)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        )
+        val c = parseNumber(text)
+        if (rawKcal != null && c != null && Cooking.valid(c) && Cooking.looksCooked(rawKcal, c)) {
+            Text(stringResource(R.string.values_look_cooked, rawKcal.kcalText()), style = MaterialTheme.typography.bodySmall, color = CalColors.Warn)
         }
     }
 }

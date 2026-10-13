@@ -64,6 +64,8 @@ import com.calorie.app.logic.Keys
 import com.calorie.app.logic.Recognizer
 import com.calorie.app.logic.Confidence
 import com.calorie.app.logic.FoodDraft
+import com.calorie.app.logic.Cooking
+import com.calorie.app.logic.Nutrients
 import com.calorie.app.logic.Expenditure
 import com.calorie.app.logic.Goals
 import com.calorie.app.logic.TrendStatus
@@ -90,8 +92,26 @@ private const val STATE_SETTINGS_PAGE = "settings_page"
 /** Background time after which the diary returns to today. */
 private const val RETURN_TO_TODAY_MS = 10 * 60_000L
 
-/** Draft row on the review screen; confidence is set only for Claude results. */
-data class ReviewItem(val draft: FoodDraft, val confidence: Confidence? = null)
+/**
+ * Draft row on the review screen; confidence is set only for Claude results. raw - weighed
+ * after cooking: the values as sold, which draft.per100 is recomputed from by the cooked weight
+ * (null while it is not typed, then the draft keeps raw and cannot be saved).
+ */
+data class ReviewItem(val draft: FoodDraft, val confidence: Confidence? = null, val raw: Nutrients? = null, val cooked: Double? = null) {
+    val ready: Boolean get() = raw == null || cooked != null
+
+    fun afterCooking(on: Boolean): ReviewItem = when {
+        on -> copy(raw = raw ?: draft.per100)
+        raw == null -> this
+        else -> copy(draft = draft.copy(per100 = raw), raw = null, cooked = null)
+    }
+
+    fun withCooked(c: Double?): ReviewItem {
+        val r = raw ?: return this
+        val ok = c?.takeIf { Cooking.valid(it) }
+        return copy(draft = draft.copy(per100 = if (ok != null) Cooking.per100(r, ok) else r), cooked = ok)
+    }
+}
 
 /** Screen on top of the tabs: adding food step by step. */
 sealed interface Overlay {

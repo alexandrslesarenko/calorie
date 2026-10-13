@@ -17,6 +17,9 @@ The app is in early testing; the name is a working one.
   Claude. Answers are also cached, so sending the same photo or text again is free.
   A product can be prepared in advance without eating it (for example from a label photo),
   edited later and shown with a small picture.
+- Label values for dry pasta or grains while you weigh them cooked: tick "Weighed after
+  cooking" and type how much 100 g weigh cooked, the values are converted. The app warns
+  when the values look cooked already, so they are not converted twice.
 - A barcode is kept with the dish: products missing from Open Food Facts are found in "My
   dishes" on the next scan, also offline.
 - If Claude is overloaded or there is no connection, the request is not lost: the app

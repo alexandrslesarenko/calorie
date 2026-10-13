@@ -93,6 +93,11 @@
     <string name="remove_item">빼기</string>
     <string name="item_line">%1$s kcal - 단 %2$d / 지 %3$d / 탄 %4$d</string>
     <string name="per100_line">100 g당 %1$s kcal</string>
+    <string name="after_cooking">조리 후 무게</string>
+    <string name="cooked_from_100">100 g이 조리 후, g</string>
+    <string name="cooked_hint">조리 전후에 무게를 재세요. 대략: 파스타 230, 쌀 280, 메밀 250, 고기 70.</string>
+    <string name="values_look_cooked">이미 조리 후 값으로 보입니다: 100 g당 %1$s kcal, 마른 파스타와 곡물은 약 350입니다.</string>
+    <string name="per100_cooked_line">조리 후 100 g당 %1$s kcal, 조리 전 %2$s</string>
     <string name="low_confidence">대략적인 추측입니다. 음식과 양을 확인하세요.</string>
     <string name="review_total">합계: %1$s kcal, 단 %2$d / 지 %3$d / 탄 %4$d</string>
     <string name="add_to_diary">기록에 추가</string>

@@ -93,6 +93,11 @@
     <string name="remove_item">Entfernen</string>
     <string name="item_line">%1$s kcal - E %2$d / F %3$d / K %4$d</string>
     <string name="per100_line">%1$s kcal pro 100 g</string>
+    <string name="after_cooking">Nach dem Kochen gewogen</string>
+    <string name="cooked_from_100">Aus 100 g werden, g</string>
+    <string name="cooked_hint">Vor und nach dem Kochen wiegen. Etwa: Nudeln 230, Reis 280, Buchweizen 250, Fleisch 70.</string>
+    <string name="values_look_cooked">Diese Werte sehen schon gekocht aus: %1$s kcal pro 100 g, trockene Nudeln und Getreide haben etwa 350.</string>
+    <string name="per100_cooked_line">%1$s kcal pro 100 g gekocht, %2$s vor dem Kochen</string>
     <string name="low_confidence">Grobe Schätzung: prüfe, was es ist und wie viel.</string>
     <string name="review_total">Gesamt: %1$s kcal, E %2$d / F %3$d / K %4$d</string>
     <string name="add_to_diary">Ins Tagebuch</string>

@@ -93,6 +93,11 @@
     <string name="remove_item">Retirer</string>
     <string name="item_line">%1$s kcal - P %2$d / L %3$d / G %4$d</string>
     <string name="per100_line">%1$s kcal pour 100 g</string>
+    <string name="after_cooking">Pesé après cuisson</string>
+    <string name="cooked_from_100">100 g donnent, g</string>
+    <string name="cooked_hint">Pesez avant et après cuisson. Environ : pâtes 230, riz 280, sarrasin 250, viande 70.</string>
+    <string name="values_look_cooked">Ces valeurs semblent déjà pour le cuit : %1$s kcal pour 100 g, contre environ 350 pour les pâtes et céréales sèches.</string>
+    <string name="per100_cooked_line">%1$s kcal pour 100 g cuit, %2$s avant cuisson</string>
     <string name="low_confidence">Estimation grossière : vérifiez ce que c\'est et la quantité.</string>
     <string name="review_total">Total : %1$s kcal, P %2$d / L %3$d / G %4$d</string>
     <string name="add_to_diary">Au journal</string>

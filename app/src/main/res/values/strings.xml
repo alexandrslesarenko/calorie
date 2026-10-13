@@ -93,6 +93,11 @@
     <string name="remove_item">Remove</string>
     <string name="item_line">%1$s kcal - P %2$d / F %3$d / C %4$d</string>
     <string name="per100_line">%1$s kcal per 100 g</string>
+    <string name="after_cooking">Weighed after cooking</string>
+    <string name="cooked_from_100">Cooked from 100 g, g</string>
+    <string name="cooked_hint">Weigh it before and after cooking. Roughly: pasta 230, rice 280, buckwheat 250, meat 70.</string>
+    <string name="values_look_cooked">These values look cooked already: %1$s kcal per 100 g, while dry pasta and grains have about 350.</string>
+    <string name="per100_cooked_line">%1$s kcal per 100 g cooked, %2$s before cooking</string>
     <string name="low_confidence">Rough guess: check what it is and how much.</string>
     <string name="review_total">Total: %1$s kcal, P %2$d / F %3$d / C %4$d</string>
     <string name="add_to_diary">Add to diary</string>

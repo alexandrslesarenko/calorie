@@ -93,6 +93,11 @@
     <string name="remove_item">移除</string>
     <string name="item_line">%1$s 千卡 - 蛋 %2$d / 脂 %3$d / 碳 %4$d</string>
     <string name="per100_line">每 100 克 %1$s 千卡</string>
+    <string name="after_cooking">按熟重称量</string>
+    <string name="cooked_from_100">100 克生重煮熟后，克</string>
+    <string name="cooked_hint">请在烹饪前后各称一次。大约：意面 230，米饭 280，荞麦 250，肉 70。</string>
+    <string name="values_look_cooked">这些数值看起来已是熟重：每 100 克 %1$s 千卡，而干意面和谷物约为 350。</string>
+    <string name="per100_cooked_line">熟重每 100 克 %1$s 千卡（生重 %2$s）</string>
     <string name="low_confidence">粗略猜测：请核对食物和份量。</string>
     <string name="review_total">合计：%1$s 千卡，蛋 %2$d / 脂 %3$d / 碳 %4$d</string>
     <string name="add_to_diary">加入日记</string>
