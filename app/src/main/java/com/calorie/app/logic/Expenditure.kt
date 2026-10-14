@@ -50,6 +50,15 @@ object Expenditure {
         return TrendStatus(WeightTrend(span, avg - slope * Goals.KCAL_PER_KG, avg, slope * 7), null, span, MIN_DAYS)
     }
 
+    /**
+     * Activity multiplier from the trend; null - it is above [formula] (Pulsar or the manual
+     * level). The trend only lowers the target: water lost in the first weeks of a diet
+     * overstates it (2 weeks once gave +570 kcal), and a faster loss than planned goes to the
+     * deficit instead of being eaten.
+     */
+    fun factor(t: WeightTrend, bmr: Double, formula: Double): Double? =
+        (t.tdee / bmr).coerceIn(Burn.BASE_FACTOR, Burn.MAX_FACTOR).takeIf { it <= formula }
+
     /** kg per day by least squares. */
     private fun slope(w: List<WeightMark>): Double {
         val mx = w.map { it.day.toDouble() }.average()

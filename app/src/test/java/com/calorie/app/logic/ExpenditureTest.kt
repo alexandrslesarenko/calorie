@@ -79,4 +79,14 @@ class ExpenditureTest {
         assertEquals(8, s.have) // days 10..3 back: the last weigh-in day and later are after the span
         assertEquals(21, s.need)
     }
+
+    @Test
+    fun trendOnlyLowers() {
+        // A fast loss: 2000 + 1100 kcal, factor 1.82 against 1.375 by hand - not used.
+        val high = Expenditure.estimate(intake(28), weights(28, 1.0, step = 1), bmr, today).trend!!
+        assertNull(Expenditure.factor(high, bmr, 1.375))
+        // Eating 1900 with a stable weight is 1.12, clamped to 1.2.
+        val low = Expenditure.estimate(intake(28, 1900.0), weights(28, 0.0, step = 1), bmr, today).trend!!
+        assertEquals(1.2, Expenditure.factor(low, bmr, 1.375)!!, 0.001)
+    }
 }

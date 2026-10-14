@@ -2,6 +2,7 @@ package com.calorie.app.ui
 
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
@@ -359,18 +360,22 @@ class MainActivity : ComponentActivity() {
         return Expenditure.estimate(trendData.intake, trendData.weights, Goals.bmr(b), trendData.today)
     }
 
-    /** Activity multiplier from the weight trend, if it is switched on and there is enough data. */
+    /** Activity multiplier from the weight trend, if it is on, has enough data and is lower (Expenditure.factor). */
     fun trendFactor(lastWeightKg: Double?): Double? {
         if (!prefs.activityFromWeight) return null
         val b = body(lastWeightKg) ?: return null
         val t = weightTrend(lastWeightKg)?.trend ?: return null
-        return (t.tdee / Goals.bmr(b)).coerceIn(Burn.BASE_FACTOR, Burn.MAX_FACTOR)
+        return Expenditure.factor(t, Goals.bmr(b), formulaFactor(lastWeightKg))
     }
 
+    /** The trend is there but would raise the target, so it is not used. */
+    fun trendHeld(lastWeightKg: Double?): Boolean =
+        prefs.activityFromWeight && weightTrend(lastWeightKg)?.trend != null && trendFactor(lastWeightKg) == null
+
     /**
-     * Pulsar multiplier when it is below the manual level. Above it Pulsar is not trusted until
-     * the weight trend confirms the burn: heart rate formulas tend to overstate walking, and a
-     * higher target eats the deficit. Walks above the manual level then add to the deficit.
+     * Pulsar multiplier when it is below the manual level. Above it Pulsar is not trusted: heart
+     * rate formulas tend to overstate walking, and a higher target eats the deficit. Walks above
+     * the manual level then add to the deficit.
      */
     fun pulsarFactor(lastWeightKg: Double?): Double? = calibration(lastWeightKg)?.factor?.takeIf { it < prefs.activity.factor }
 
@@ -536,14 +541,25 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun scanBarcode() {
-        val options = GmsBarcodeScannerOptions.Builder()
+    private fun scanner() = GmsBarcodeScanning.getClient(
+        this,
+        GmsBarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
             .enableAutoZoom()
-            .build()
-        GmsBarcodeScanning.getClient(this, options).startScan()
+            .build(),
+    )
+
+    fun scanBarcode() {
+        scanner().startScan()
             .addOnSuccessListener { b -> b.rawValue?.let(::lookupBarcode) }
             .addOnFailureListener { e -> overlay = Overlay.Failed(null, getString(R.string.scan_failed, e.message ?: "")) }
+    }
+
+    /** Scan only to fill a field: a failure is a toast, so the form being edited stays. */
+    fun scanInto(onCode: (String) -> Unit) {
+        scanner().startScan()
+            .addOnSuccessListener { b -> b.rawValue?.let(onCode) }
+            .addOnFailureListener { e -> Toast.makeText(this, getString(R.string.scan_failed, e.message ?: ""), Toast.LENGTH_LONG).show() }
     }
 
     private fun lookupBarcode(code: String) {

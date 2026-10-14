@@ -331,6 +331,11 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
             label = { Text(stringResource(R.string.dish_barcode), maxLines = 1) },
             isError = badBarcode,
             supportingText = if (badBarcode) ({ Text(stringResource(R.string.dish_barcode_bad)) }) else null,
+            trailingIcon = {
+                IconButton(onClick = { a.scanInto { code -> form = form.copy(barcode = code.filter(Char::isDigit)) } }) {
+                    Icon(painterResource(R.drawable.ic_barcode), stringResource(R.string.dish_barcode_scan))
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
         CookedWeight(

@@ -505,12 +505,13 @@ private fun WeightTrendBlock(a: MainActivity, weightKg: Double?) {
 private fun weightTrendText(a: MainActivity, weightKg: Double?): String? {
     val status = remember(weightKg, a.profileVersion, a.trendData) { a.weightTrend(weightKg) } ?: return null
     val formula = remember(weightKg, a.profileVersion, a.pulsar) { a.body(weightKg)?.let { Goals.bmr(it) * a.formulaFactor(weightKg) } }
+    val held = remember(weightKg, a.profileVersion, a.pulsar, a.trendData) { a.trendHeld(weightKg) }
     val t = status.trend
     return when {
         t != null -> stringResource(
             R.string.weight_trend_result, t.days, t.intake.roundToInt(), String.format(Locale.US, "%+.2f", t.kgPerWeek),
             t.tdee.roundToInt(), formula?.roundToInt() ?: 0,
-        )
+        ) + if (held) " " + stringResource(R.string.weight_trend_held) else ""
         status.short == TrendShort.WEIGHINS -> stringResource(R.string.weight_trend_weighins, status.have, status.need, Expenditure.WINDOW_DAYS)
         status.short == TrendShort.SPAN -> stringResource(R.string.weight_trend_span, status.have, status.need)
         else -> stringResource(R.string.weight_trend_diary, status.have, status.need)
@@ -524,7 +525,9 @@ private fun pulsarText(a: MainActivity, weightKg: Double?): String? {
     val byWeight = remember(weightKg, a.profileVersion, a.trendData) { a.trendFactor(weightKg) != null }
     val note = when {
         byWeight -> stringResource(R.string.pulsar_by_weight)
-        a.pulsarFactor(weightKg) == null -> stringResource(R.string.pulsar_capped)
+        a.pulsarFactor(weightKg) == null -> stringResource(
+            R.string.pulsar_capped, activityLabel(a.prefs.activity), a.prefs.activity.factor.toString(),
+        )
         else -> null
     }
     return listOfNotNull(pulsarCalibratedText(calib), note).joinToString(" ")
@@ -588,7 +591,11 @@ private fun GoalSettings(a: MainActivity) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         // Where the expenditure comes from, so a changed target is not a mystery.
-        val source = if (byWeight) weightTrendText(a, lastWeight?.kg) else pulsarText(a, lastWeight?.kg)
+        val held = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.trendHeld(lastWeight?.kg) }
+        val source = listOfNotNull(
+            if (byWeight || held) weightTrendText(a, lastWeight?.kg) else null,
+            if (byWeight) null else pulsarText(a, lastWeight?.kg),
+        ).joinToString(" ").ifEmpty { null }
         source?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         if (t.kgPerWeek > 0) {
             Text(

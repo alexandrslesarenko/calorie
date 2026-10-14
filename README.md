@@ -38,11 +38,12 @@ new versions over the old one.
   with safety limits: not below 1200 / 1500 kcal and the basal metabolic rate, at most
   1% of body weight per week, maintenance when the goal is reached or BMI is below 18.5.
 - Optional activity from [Pulsar](https://github.com/alexandrslesarenko/pulsar): heart
-  rate on walks and workouts can lower the manual activity level, but not raise it - walks
-  above it go to the deficit until the weight trend confirms the burn.
+  rate on walks and workouts can lower the activity level set in the profile, but not raise
+  it - walks beyond it do not raise the target, what they burn speeds up the weight loss.
 - Expenditure from the weight trend: after two weeks of a full diary and regular weigh-ins
   the app measures what you actually burn (what you ate plus what the weight lost) and uses
-  it ahead of Pulsar and the manual level; the goal page shows it next to the formula.
+  it ahead of Pulsar and the manual level, but only to lower the target, never to raise it;
+  the goal page shows it next to the formula.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
   Japanese, Korean, Chinese (Simplified). Claude answers in the app language.
 
