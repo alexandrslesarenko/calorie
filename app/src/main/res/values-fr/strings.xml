@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">La photo ou le texte est envoyé à Google (Gemini) pour la reconnaissance. La position et les autres métadonnées de la photo sont supprimées avant l\'envoi.</string>
     <string name="answered_by_fallback">Réponse de %1$s, car %2$s n\'est pas disponible.</string>
     <string name="answered_by_quota">Réponse de %1$s, car la limite gratuite quotidienne de %2$s est épuisée.</string>
+    <string name="answered_by_busy">Réponse de %1$s, car %2$s est restée surchargée.</string>
     <string name="err_model_gone">%1$s n\'est pas disponible et aucun autre outil de reconnaissance n\'a de clé. Choisissez-en un dans les réglages.</string>
     <string name="err_quota_day">La limite gratuite quotidienne de %1$s est épuisée et aucun autre outil de reconnaissance n\'a de clé. La requête sera renvoyée plus tard.</string>
     <string name="err_bad_key_gemini">Gemini n\'a pas accepté la clé API. Vérifiez-la dans les réglages.</string>

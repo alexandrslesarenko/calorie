@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">The photo or text is sent to Google (Gemini) for recognition. Location and other photo metadata are removed before sending.</string>
     <string name="answered_by_fallback">Answered by %1$s, because %2$s is not available.</string>
     <string name="answered_by_quota">Answered by %1$s, because the daily free limit of %2$s is used up.</string>
+    <string name="answered_by_busy">Answered by %1$s, because %2$s stayed overloaded.</string>
     <string name="err_model_gone">%1$s is not available, and no other recognizer has a key. Choose a recognizer in settings.</string>
     <string name="err_quota_day">The daily free limit of %1$s is used up, and no other recognizer has a key. The request will be sent again later.</string>
     <string name="err_bad_key_gemini">Gemini did not accept the API key. Check it in settings.</string>

@@ -35,4 +35,14 @@ class RetryTest {
             AiFailure.entries.filter { it.retryable }.toSet(),
         )
     }
+
+    @Test
+    fun swapsOnTheThirdOverload() {
+        // First try failed (1), the queue retried once (2): the third overload moves on.
+        assertFalse(Retry.swapBusy(1, lastBusy = true))
+        assertTrue(Retry.swapBusy(2, lastBusy = true))
+        assertTrue(Retry.swapBusy(5, lastBusy = true))
+        // The last failure was the network, not an overload.
+        assertFalse(Retry.swapBusy(5, lastBusy = false))
+    }
 }

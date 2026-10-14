@@ -325,8 +325,9 @@ interface FoodDao {
     @Query("DELETE FROM pending WHERE id = :id")
     suspend fun deletePending(id: Long)
 
-    @Query("UPDATE pending SET state = 'ready', json = :json, failure = NULL, detail = NULL WHERE id = :id")
-    suspend fun pendingReady(id: Long, json: String)
+    /** fallback - Fallback.encode() when another recognizer answered; kept in detail. */
+    @Query("UPDATE pending SET state = 'ready', json = :json, failure = NULL, detail = :fallback WHERE id = :id")
+    suspend fun pendingReady(id: Long, json: String, fallback: String?)
 
     @Query("UPDATE pending SET state = 'failed', failure = :failure, detail = :detail WHERE id = :id")
     suspend fun pendingFailed(id: Long, failure: String?, detail: String?)

@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">Фото или текст уходят на распознавание в Google (Gemini). Геометка и другие метаданные фото удаляются перед отправкой.</string>
     <string name="answered_by_fallback">Ответила модель %1$s, потому что %2$s недоступна.</string>
     <string name="answered_by_quota">Ответила модель %1$s, потому что у %2$s кончился дневной бесплатный лимит.</string>
+    <string name="answered_by_busy">Ответила модель %1$s, потому что %2$s раз за разом была перегружена.</string>
     <string name="err_model_gone">Модель %1$s недоступна, а у других распознавателей нет ключа. Выберите распознаватель в настройках.</string>
     <string name="err_quota_day">У %1$s кончился дневной бесплатный лимит, а у других распознавателей нет ключа. Запрос будет отправлен позже.</string>
     <string name="err_bad_key_gemini">Gemini не принял ключ API. Проверьте его в настройках.</string>

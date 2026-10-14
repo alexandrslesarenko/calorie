@@ -2,6 +2,7 @@ package com.calorie.app.logic
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -80,5 +81,13 @@ class RecognizersTest {
         } catch (e: Gone) {
             assertEquals(Recognizer.HAIKU_5_5, e.who)
         }
+    }
+
+    @Test
+    fun fallbackSurvivesTheDetailColumn() {
+        val f = Fallback(Recognizer.HAIKU_5_5, Recognizer.GEMINI_LITE, "OVERLOADED")
+        assertEquals(f, Fallback.decode(f.encode()))
+        assertNull(Fallback.decode(null))
+        assertNull(Fallback.decode("some error text from the API"))
     }
 }

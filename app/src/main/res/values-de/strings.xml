@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">Das Foto oder der Text wird zur Erkennung an Google (Gemini) gesendet. Standort und andere Fotometadaten werden vorher entfernt.</string>
     <string name="answered_by_fallback">Geantwortet hat %1$s, weil %2$s nicht verfügbar ist.</string>
     <string name="answered_by_quota">Geantwortet hat %1$s, weil das tägliche Gratislimit von %2$s aufgebraucht ist.</string>
+    <string name="answered_by_busy">Geantwortet hat %1$s, weil %2$s wiederholt überlastet war.</string>
     <string name="err_model_gone">%1$s ist nicht verfügbar, und kein anderer Erkenner hat einen Schlüssel. Wähle einen Erkenner in den Einstellungen.</string>
     <string name="err_quota_day">Das tägliche Gratislimit von %1$s ist aufgebraucht, und kein anderer Erkenner hat einen Schlüssel. Die Anfrage wird später erneut gesendet.</string>
     <string name="err_bad_key_gemini">Gemini hat den API-Schlüssel nicht angenommen. Prüfe ihn in den Einstellungen.</string>

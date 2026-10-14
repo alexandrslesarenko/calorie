@@ -62,6 +62,7 @@ import com.calorie.app.data.Source
 import com.calorie.app.logic.AiParser
 import com.calorie.app.logic.Body
 import com.calorie.app.logic.Keys
+import com.calorie.app.logic.Fallback
 import com.calorie.app.logic.Recognizer
 import com.calorie.app.logic.Confidence
 import com.calorie.app.logic.FoodDraft
@@ -492,10 +493,8 @@ class MainActivity : ComponentActivity() {
                 }
                 // No key but a cached answer: ask() returns it without a request.
                 val a = AiQueue.ask(this@MainActivity, keys, req)
-                val fallbackNote = a.by?.takeIf { a.skipped.isNotEmpty() }?.let { by ->
-                    val first = a.skipped.first()
-                    val quota = (first.error as? AiException)?.failure == AiFailure.QUOTA_DAY
-                    getString(if (quota) R.string.answered_by_quota else R.string.answered_by_fallback, by.label, first.by.label)
+                val fallbackNote = a.by?.let { by ->
+                    a.skipped.firstOrNull()?.let { s -> fallbackNote(by, s.by, (s.error as? AiException)?.failure) }
                 }
                 overlay = if (a.result.items.isEmpty()) {
                     Overlay.Failed(null, a.result.note ?: getString(R.string.ai_nothing), back)
@@ -525,6 +524,16 @@ class MainActivity : ComponentActivity() {
     }
 
     /** Opens the answer of a queued request on the review screen. */
+    /** Why another recognizer answered, in words for the review. */
+    private fun fallbackNote(by: Recognizer, from: Recognizer, why: AiFailure?): String = getString(
+        when (why) {
+            AiFailure.QUOTA_DAY -> R.string.answered_by_quota
+            AiFailure.OVERLOADED -> R.string.answered_by_busy
+            else -> R.string.answered_by_fallback
+        },
+        by.label, from.label,
+    )
+
     fun openPendingReview(p: Pending) {
         val json = p.json ?: return
         work = lifecycleScope.launch {
@@ -537,6 +546,7 @@ class MainActivity : ComponentActivity() {
             overlay = Overlay.Review(
                 result.items.map { ReviewItem(it.draft, it.confidence) }, Source.byKey(p.source), result.note,
                 AiQueue.jpeg(this@MainActivity, p), pendingId = p.id, day = p.day, meal = Meal.byKey(p.meal),
+                fallbackNote = Fallback.decode(p.detail)?.let { fallbackNote(it.by, it.from, AiFailure.byName(it.why)) },
             )
         }
     }

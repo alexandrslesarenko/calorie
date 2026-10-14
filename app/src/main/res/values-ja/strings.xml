@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">写真またはテキストは認識のために Google（Gemini）へ送信されます。位置情報などの写真メタデータは送信前に削除されます。</string>
     <string name="answered_by_fallback">%2$sが利用できないため、%1$sが回答しました。</string>
     <string name="answered_by_quota">%2$sの1日の無料上限に達したため、%1$sが回答しました。</string>
+    <string name="answered_by_busy">%2$sが混雑し続けたため、%1$sが回答しました。</string>
     <string name="err_model_gone">%1$sは利用できず、ほかの認識モデルにはキーがありません。設定で認識モデルを選んでください。</string>
     <string name="err_quota_day">%1$sの1日の無料上限に達し、ほかの認識モデルにはキーがありません。リクエストは後で再送されます。</string>
     <string name="err_bad_key_gemini">Gemini が API キーを受け付けませんでした。設定で確認してください。</string>

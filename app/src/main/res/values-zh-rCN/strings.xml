@@ -241,6 +241,7 @@
     <string name="privacy_note_gemini_paid">照片或文字会发送到 Google（Gemini）进行识别。照片的位置和其他元数据会在发送前删除。</string>
     <string name="answered_by_fallback">由于 %2$s 不可用，由 %1$s 回答。</string>
     <string name="answered_by_quota">由于 %2$s 的每日免费额度已用完，由 %1$s 回答。</string>
+    <string name="answered_by_busy">由于 %2$s 持续过载，由 %1$s 回答。</string>
     <string name="err_model_gone">%1$s 不可用，其他识别模型也没有密钥。请在设置中选择识别模型。</string>
     <string name="err_quota_day">%1$s 的每日免费额度已用完，其他识别模型也没有密钥。请求稍后会重新发送。</string>
     <string name="err_bad_key_gemini">Gemini 未接受 API 密钥。请在设置中检查。</string>

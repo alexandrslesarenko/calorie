@@ -17,6 +17,7 @@ import com.calorie.app.data.Prefs
 import com.calorie.app.data.Source
 import com.calorie.app.logic.AiParser
 import com.calorie.app.logic.AiResult
+import com.calorie.app.logic.Fallback
 import com.calorie.app.logic.Recognizer
 import com.calorie.app.logic.Skipped
 import com.calorie.app.logic.askInOrder
@@ -67,12 +68,13 @@ object AiQueue {
 
     /**
      * Answer from the cache or from a recognizer. The chosen recognizer is asked first; when its
-     * model is gone (404) the next one with a key is asked, for this request only. Any other
-     * failure ends the round: a busy service is waited for in the queue, not swapped. A new
+     * model is gone (404) or out of its daily quota the next one with a key is asked, for this
+     * request only; on an overload too when swapBusy (Retry.swapBusy). Any other failure
+     * ends the round, and a first overload waits in the queue. A new
      * answer is counted in the spending at the answering model's price and cached, except an
      * empty one ("no food"): that photo will most likely be retaken.
      */
-    suspend fun ask(ctx: Context, keys: AiKeys, req: AiRequest): AiAnswer {
+    suspend fun ask(ctx: Context, keys: AiKeys, req: AiRequest, swapBusy: Boolean = false): AiAnswer {
         val dao = FoodDb.get(ctx).dao()
         if (req.useCache) dao.aiCached(req.cacheKey)?.let { return AiAnswer(AiParser.parse(it.json), it.json, fromCache = true) }
         val prefs = Prefs(ctx)
@@ -80,7 +82,7 @@ object AiQueue {
         if (order.isEmpty()) throw AiException(AiFailure.BAD_KEY)
         val a = askInOrder(
             order,
-            skips = { it is AiException && it.failure.skipsToNext },
+            skips = { it is AiException && (it.failure.skipsToNext || swapBusy && it.failure == AiFailure.OVERLOADED) },
             onSkip = { rec, e -> if ((e as AiException).failure == AiFailure.MODEL_GONE) prefs.setGone(rec, System.currentTimeMillis()) },
             failed = { rec, e -> (e as? AiException)?.by = rec },
         ) { rec -> withContext(Dispatchers.IO) { FoodRecognizer.create(rec, keys[rec.provider]!!).use(req::send) } }
@@ -197,9 +199,13 @@ class AiQueueWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
         }
         val req = AiRequest(Source.byKey(p.source), p.text, p.language, jpeg, p.cacheKey, p.useCache)
         try {
-            val a = AiQueue.ask(ctx, keys, req)
+            val swapBusy = Retry.swapBusy(p.attempts, p.failure == AiFailure.OVERLOADED.name)
+            val a = AiQueue.ask(ctx, keys, req, swapBusy)
+            val fallback = a.by?.let { by ->
+                a.skipped.firstOrNull()?.let { s -> Fallback(by, s.by, (s.error as? AiException)?.failure?.name ?: "").encode() }
+            }
             if (a.result.items.isEmpty()) dao.pendingFailed(p.id, null, a.result.note ?: ctx.getString(R.string.ai_nothing))
-            else dao.pendingReady(p.id, a.json)
+            else dao.pendingReady(p.id, a.json, fallback)
         } catch (e: AiException) {
             val now = System.currentTimeMillis()
             if (e.failure.retryable && !Retry.giveUp(p.since, now)) {

@@ -53,7 +53,10 @@ enum class AiFailure(val retryable: Boolean) {
      */
     QUOTA_DAY(true);
 
-    /** The next recognizer may answer instead: this one cannot for now, whatever is sent. */
+    /**
+     * The next recognizer may answer instead: this one cannot for now, whatever is sent.
+     * An overload also skips, but only after Retry.BUSY_TRIES tries (AiQueue.ask).
+     */
     val skipsToNext: Boolean get() = this == MODEL_GONE || this == QUOTA_DAY
 
     companion object {
