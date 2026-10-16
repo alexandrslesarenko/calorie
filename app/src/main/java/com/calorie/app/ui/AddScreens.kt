@@ -78,8 +78,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -462,13 +464,7 @@ private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewIt
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    item.draft.name, { onChange(item.copy(draft = item.draft.copy(name = it))) },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.food_name)) },
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                )
+                NameField(item.draft.name, { onChange(item.copy(draft = item.draft.copy(name = it))) }, Modifier.weight(1f))
                 if (removable) {
                     IconButton(onClick = onRemove) { Icon(Icons.Filled.Close, stringResource(R.string.remove_item)) }
                 }
@@ -524,6 +520,31 @@ private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewIt
 }
 
 /**
+ * Food name: Open Food Facts names with a brand are long, so the field wraps to a few lines
+ * instead of scrolling sideways. A name stays one line: Enter ends the input.
+ */
+@Composable
+fun NameField(
+    value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier,
+    isError: Boolean = false, supportingText: (@Composable () -> Unit)? = null,
+) {
+    val focus = LocalFocusManager.current
+    OutlinedTextField(
+        value,
+        { s ->
+            if (s.contains('\n')) focus.clearFocus()
+            onChange(s.replace(Regex("[\r\n]+"), ""))
+        },
+        modifier = modifier,
+        maxLines = 3,
+        label = { Text(stringResource(R.string.food_name)) },
+        isError = isError,
+        supportingText = supportingText,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+    )
+}
+
+/**
  * "Weighed after cooking": label values are for the product as sold, the grams typed are of
  * the cooked food; text - how much 100 g as sold weigh cooked.
  */
@@ -572,11 +593,7 @@ private fun ManualInput(a: MainActivity, o: Overlay.Manual) {
     )
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Header(stringResource(R.string.way_manual)) { a.closeOverlay() }
-        OutlinedTextField(
-            name, { name = it }, modifier = Modifier.fillMaxWidth(), singleLine = true,
-            label = { Text(stringResource(R.string.food_name)) },
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-        )
+        NameField(name, { name = it }, Modifier.fillMaxWidth())
         FitRow { style ->
             FilterChip(selected = !perPortion, onClick = { perPortion = false }, label = { Text(stringResource(R.string.values_per100), maxLines = 1, style = style) })
             FilterChip(selected = perPortion, onClick = { perPortion = true }, label = { Text(stringResource(R.string.values_per_portion), maxLines = 1, style = style) })

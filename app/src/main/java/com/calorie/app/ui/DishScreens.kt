@@ -51,7 +51,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -293,13 +292,10 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
                 }
             }
         }
-        OutlinedTextField(
-            form.name, { form = form.copy(name = it); nameTaken = false },
-            modifier = Modifier.fillMaxWidth(), singleLine = true,
-            label = { Text(stringResource(R.string.food_name)) },
+        NameField(
+            form.name, { form = form.copy(name = it); nameTaken = false }, Modifier.fillMaxWidth(),
             isError = nameTaken,
             supportingText = if (nameTaken) ({ Text(stringResource(R.string.dish_name_taken)) }) else null,
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         )
         FitRow { style ->
             FilterChip(
