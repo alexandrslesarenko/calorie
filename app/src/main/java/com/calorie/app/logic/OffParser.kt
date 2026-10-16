@@ -9,6 +9,8 @@ data class Product(
     val brand: String?,
     val per100: Nutrients,
     val servingG: Double?,
+    /** From the category; not kept in the product cache, so only a fresh lookup has it. */
+    val cookKind: CookKind? = null,
 )
 
 /**
@@ -36,6 +38,7 @@ object OffParser {
             barcode, name, brand,
             Nutrients(kcal, num(n, "proteins_100g") ?: 0.0, num(n, "fat_100g") ?: 0.0, num(n, "carbohydrates_100g") ?: 0.0),
             serving,
+            p.optJSONArray("categories_tags")?.let { a -> CookedGuess.kindOfCategories((0 until a.length()).map { a.optString(it) }) },
         )
     }
 

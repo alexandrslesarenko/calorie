@@ -100,6 +100,8 @@
     <string name="after_cooking">調理後の重さ</string>
     <string name="cooked_from_100">100 g が調理後に、g</string>
     <string name="cooked_hint">調理の前後で量ってください。目安：パスタ230、米280、そば米250、肉70。</string>
+    <string name="cooked_guess_own">前回あなたが入力した値です。</string>
+    <string name="cooked_guess_usual">この食品の一般的な値です。一度調理の前後で量れば、あなたの値を覚えます。</string>
     <string name="values_look_cooked">すでに調理後の値のようです：100 g あたり %1$s kcal（乾燥したパスタや穀物は約350）。</string>
     <string name="per100_cooked_line">調理後 100 g あたり %1$s kcal（調理前 %2$s）</string>
     <string name="low_confidence">おおまかな推測です。料理と量を確認してください。</string>

@@ -56,6 +56,9 @@ import com.calorie.app.data.PulsarData
 import com.calorie.app.data.PulsarSource
 import com.calorie.app.data.PulsarStatus
 import com.calorie.app.logic.Burn
+import com.calorie.app.logic.CookKind
+import com.calorie.app.logic.CookedGuess
+import com.calorie.app.logic.CookedValue
 import com.calorie.app.logic.Calibration
 import com.calorie.app.data.Prefs
 import com.calorie.app.data.Source
@@ -99,7 +102,11 @@ private const val RETURN_TO_TODAY_MS = 10 * 60_000L
  * after cooking: the values as sold, which draft.per100 is recomputed from by the cooked weight
  * (null while it is not typed, then the draft keeps raw and cannot be saved).
  */
-data class ReviewItem(val draft: FoodDraft, val confidence: Confidence? = null, val raw: Nutrients? = null, val cooked: Double? = null) {
+/** cookKind - from the Open Food Facts category, for guessing the weight after cooking. */
+data class ReviewItem(
+    val draft: FoodDraft, val confidence: Confidence? = null, val raw: Nutrients? = null, val cooked: Double? = null,
+    val cookKind: CookKind? = null,
+) {
     val ready: Boolean get() = raw == null || cooked != null
 
     fun afterCooking(on: Boolean): ReviewItem = when {
@@ -589,7 +596,7 @@ class MainActivity : ComponentActivity() {
                     Overlay.NotFound(code)
                 } else {
                     val name = listOfNotNull(p.name, p.brand?.takeIf { !p.name.contains(it, ignoreCase = true) }).joinToString(", ")
-                    Overlay.Review(listOf(ReviewItem(FoodDraft(name, p.servingG ?: 100.0, p.per100))), Source.BARCODE, barcode = code)
+                    Overlay.Review(listOf(ReviewItem(FoodDraft(name, p.servingG ?: 100.0, p.per100), cookKind = p.cookKind)), Source.BARCODE, barcode = code)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -600,6 +607,19 @@ class MainActivity : ComponentActivity() {
     }
 
     fun defaultMeal(): Meal = Meal.byHour(LocalTime.now().hour)
+
+    /** What 100 g as sold of [name] probably weigh cooked; kcalAsSold - per 100 g before cooking. */
+    fun guessCooked(name: String, kcalAsSold: Double, kind: CookKind? = null): CookedValue? =
+        CookedGuess.guess(name, kcalAsSold, kind, prefs.cookedMine)
+
+    /** A saved number becomes the next guess for this dish and, if not the table one, for its kind. */
+    fun rememberCooked(name: String, kcalAsSold: Double, kind: CookKind?, cooked: Double) {
+        prefs.cookedMine = CookedGuess.remember(prefs.cookedMine, name, kcalAsSold, kind, cooked)
+    }
+
+    fun rememberCooked(items: List<ReviewItem>) = items.forEach { i ->
+        if (i.raw != null && i.cooked != null) rememberCooked(i.draft.name, i.raw.kcal, i.cookKind, i.cooked)
+    }
 
     /** Thumbnail and barcode a review gives its dishes; the barcode only to a single product. */
     private suspend fun extra(items: List<FoodDraft>, jpeg: ByteArray?, barcode: String?): DishExtra =

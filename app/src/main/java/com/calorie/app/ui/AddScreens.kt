@@ -93,6 +93,7 @@ import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.Source
 import com.calorie.app.logic.Confidence
+import com.calorie.app.logic.CookedValue
 import com.calorie.app.logic.Cooking
 import com.calorie.app.logic.FoodDraft
 import com.calorie.app.logic.Nutrients
@@ -404,6 +405,7 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
             androidx.compose.runtime.key(id) {
                 ItemEditor(
                     item,
+                    guess = { a.guessCooked(it.draft.name, it.draft.per100.kcal, it.cookKind) },
                     removable = rows.size > 1,
                     onChange = { rows[i] = id to it },
                     onRemove = { rows.removeAt(i) },
@@ -428,8 +430,14 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
         )
         val valid = items.isNotEmpty() && items.all { it.draft.name.isNotBlank() && it.draft.grams > 0 && it.ready }
         val drafts = items.map { it.draft }
-        val toDiary = { a.save(drafts, meal, o.source, o.editing, day, o.pendingId, o.jpeg, o.barcode) }
-        val toLibrary = { a.saveToLibrary(drafts, o.jpeg, o.barcode, o.pendingId) }
+        val toDiary = {
+            a.rememberCooked(items)
+            a.save(drafts, meal, o.source, o.editing, day, o.pendingId, o.jpeg, o.barcode)
+        }
+        val toLibrary = {
+            a.rememberCooked(items)
+            a.saveToLibrary(drafts, o.jpeg, o.barcode, o.pendingId)
+        }
         FitRow { style ->
             when {
                 o.editing != null -> {
@@ -452,9 +460,10 @@ private fun Review(a: MainActivity, o: Overlay.Review) {
 }
 
 @Composable
-private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewItem) -> Unit, onRemove: () -> Unit) {
+private fun ItemEditor(item: ReviewItem, guess: (ReviewItem) -> CookedValue?, removable: Boolean, onChange: (ReviewItem) -> Unit, onRemove: () -> Unit) {
     var gramsText by remember { mutableStateOf(item.draft.grams.gramsText()) }
     var cookedText by remember { mutableStateOf(item.cooked?.gramsText() ?: "") }
+    var guessed by remember { mutableStateOf<CookedValue?>(null) }
     fun setGrams(g: Double) {
         val v = g.coerceIn(0.0, 5000.0)
         gramsText = v.gramsText()
@@ -502,13 +511,17 @@ private fun ItemEditor(item: ReviewItem, removable: Boolean, onChange: (ReviewIt
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             CookedWeight(
-                item.raw != null, cookedText, (item.raw ?: item.draft.per100).kcal,
+                item.raw != null, cookedText, (item.raw ?: item.draft.per100).kcal, guessed,
                 onToggle = { on ->
-                    if (!on) cookedText = ""
-                    onChange(item.afterCooking(on))
+                    // Turning it on fills the number in: the user's earlier one or the usual one.
+                    val g = if (on && cookedText.isBlank()) guess(item) else null
+                    guessed = g
+                    cookedText = g?.grams?.gramsText() ?: ""
+                    onChange(item.afterCooking(on).let { if (g != null) it.withCooked(g.grams) else it })
                 },
                 onText = { t ->
                     cookedText = t
+                    guessed = null
                     onChange(item.withCooked(parseNumber(t)))
                 },
             )
@@ -549,7 +562,7 @@ fun NameField(
  * the cooked food; text - how much 100 g as sold weigh cooked.
  */
 @Composable
-fun CookedWeight(on: Boolean, text: String, rawKcal: Double?, onToggle: (Boolean) -> Unit, onText: (String) -> Unit) {
+fun CookedWeight(on: Boolean, text: String, rawKcal: Double?, guessed: CookedValue?, onToggle: (Boolean) -> Unit, onText: (String) -> Unit) {
     FilterChip(
         selected = on, onClick = { onToggle(!on) },
         label = { Text(stringResource(R.string.after_cooking), maxLines = 1) },
@@ -566,6 +579,12 @@ fun CookedWeight(on: Boolean, text: String, rawKcal: Double?, onToggle: (Boolean
             supportingText = { Text(stringResource(R.string.cooked_hint)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
+        if (guessed != null) {
+            Text(
+                stringResource(if (guessed.own) R.string.cooked_guess_own else R.string.cooked_guess_usual),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         val c = parseNumber(text)
         if (rawKcal != null && c != null && Cooking.valid(c) && Cooking.looksCooked(rawKcal, c)) {
             Text(stringResource(R.string.values_look_cooked, rawKcal.kcalText()), style = MaterialTheme.typography.bodySmall, color = CalColors.Warn)

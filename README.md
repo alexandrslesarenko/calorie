@@ -22,8 +22,10 @@ new versions over the old one.
   A product can be prepared in advance without eating it (for example from a label photo),
   edited later and shown with a small picture.
 - Label values for dry pasta or grains while you weigh them cooked: tick "Weighed after
-  cooking" and type how much 100 g weigh cooked, the values are converted. The app warns
-  when the values look cooked already, so they are not converted twice.
+  cooking" and type how much 100 g weigh cooked, the values are converted. The number is
+  filled in for you: your own from last time, or the usual one for pasta, rice, grains,
+  legumes, meat and fish (by the Open Food Facts category or the name). The app warns when
+  the values look cooked already, so they are not converted twice.
 - A barcode is kept with the dish: products missing from Open Food Facts are found in "My
   dishes" on the next scan, also offline.
 - If Claude is overloaded or there is no connection, the request is not lost: the app

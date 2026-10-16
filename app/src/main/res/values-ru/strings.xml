@@ -100,6 +100,8 @@
     <string name="after_cooking">Вес после готовки</string>
     <string name="cooked_from_100">Из 100 г выходит, г</string>
     <string name="cooked_hint">Взвесьте до и после готовки. Примерно: макароны 230, рис 280, гречка 250, мясо 70.</string>
+    <string name="cooked_guess_own">Ваше число с прошлого раза.</string>
+    <string name="cooked_guess_usual">Обычное значение для такой еды. Взвесьте один раз до и после готовки, и приложение запомнит ваше.</string>
     <string name="values_look_cooked">Похоже, значения уже для готового: %1$s ккал на 100 г, а у сухих макарон и круп около 350.</string>
     <string name="per100_cooked_line">%1$s ккал на 100 г готового, %2$s - до готовки</string>
     <string name="low_confidence">Примерная догадка: проверьте, что это и сколько.</string>

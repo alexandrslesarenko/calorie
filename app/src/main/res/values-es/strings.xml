@@ -100,6 +100,8 @@
     <string name="after_cooking">Pesado tras cocinar</string>
     <string name="cooked_from_100">100 g rinden, g</string>
     <string name="cooked_hint">Pese antes y después de cocinar. Aprox.: pasta 230, arroz 280, trigo sarraceno 250, carne 70.</string>
+    <string name="cooked_guess_own">Tu cifra de la última vez.</string>
+    <string name="cooked_guess_usual">El valor habitual para este alimento. Pesa una vez antes y después de cocinar y la app recordará el tuyo.</string>
     <string name="values_look_cooked">Estos valores parecen ya de cocinado: %1$s kcal por 100 g, y la pasta y los cereales secos tienen unas 350.</string>
     <string name="per100_cooked_line">%1$s kcal por 100 g cocinado, %2$s antes de cocinar</string>
     <string name="low_confidence">Suposición aproximada: comprueba qué es y cuánto.</string>

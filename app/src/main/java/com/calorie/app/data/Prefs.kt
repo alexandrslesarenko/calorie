@@ -2,6 +2,7 @@ package com.calorie.app.data
 
 import android.content.Context
 import com.calorie.app.logic.Activity
+import com.calorie.app.logic.CookedGuess
 import com.calorie.app.logic.Pace
 import com.calorie.app.logic.Pricing
 import com.calorie.app.logic.Provider
@@ -124,6 +125,11 @@ class Prefs(context: Context) {
     var recognizer: Recognizer
         get() = Recognizer.byKey(sp.getString("recognizer", null))
         set(v) = sp.edit().putString("recognizer", v.key).apply()
+
+    /** The user's own "100 g weigh cooked" numbers, see [CookedGuess]. */
+    var cookedMine: Map<String, Double>
+        get() = CookedGuess.decode(sp.getString("cooked_mine", null))
+        set(v) = sp.edit().putString("cooked_mine", CookedGuess.encode(v)).apply()
 
     /**
      * When a recognizer last answered "model not found", 0 - never. Only shown in settings:

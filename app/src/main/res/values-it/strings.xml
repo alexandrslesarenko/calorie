@@ -100,6 +100,8 @@
     <string name="after_cooking">Pesato dopo la cottura</string>
     <string name="cooked_from_100">Da 100 g si ottengono, g</string>
     <string name="cooked_hint">Pesa prima e dopo la cottura. Circa: pasta 230, riso 280, grano saraceno 250, carne 70.</string>
+    <string name="cooked_guess_own">Il tuo numero dell\'ultima volta.</string>
+    <string name="cooked_guess_usual">Il valore abituale per questo alimento. Pesa una volta prima e dopo la cottura e l\'app ricorderà il tuo.</string>
     <string name="values_look_cooked">Questi valori sembrano già del cotto: %1$s kcal per 100 g, mentre pasta e cereali secchi ne hanno circa 350.</string>
     <string name="per100_cooked_line">%1$s kcal per 100 g cotto, %2$s prima della cottura</string>
     <string name="low_confidence">Stima approssimativa: controlla cos\'è e quanto.</string>

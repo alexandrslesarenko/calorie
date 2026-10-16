@@ -59,6 +59,7 @@ import com.calorie.app.ai.Photo
 import com.calorie.app.data.Dish
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Source
+import com.calorie.app.logic.CookedValue
 import com.calorie.app.logic.Cooking
 import com.calorie.app.logic.Keys
 import com.calorie.app.logic.gramsText
@@ -254,6 +255,7 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
     val bmp = remember(photo) { photo?.let { Photo.thumbnail(it.jpeg)?.asImageBitmap() } }
     var form by remember(o) { mutableStateOf(o.form ?: DishForm.of(dish)) }
     var nameTaken by remember(o) { mutableStateOf(false) }
+    var guessed by remember(o) { mutableStateOf<CookedValue?>(null) }
     var deleting by remember { mutableStateOf(false) }
     val edited = form.toDish(dish)
 
@@ -267,7 +269,12 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
     fun saveThen(next: (Dish) -> Unit) {
         val d = edited ?: return
         scope.launch {
-            if (dao.editDish(dish.id, d, null)) next(d) else nameTaken = true
+            if (dao.editDish(dish.id, d, null)) {
+                if (form.afterCooking) parseNumber(form.cooked)?.let { c -> form.rawKcal()?.let { a.rememberCooked(d.name, it, null, c) } }
+                next(d)
+            } else {
+                nameTaken = true
+            }
         }
     }
 
@@ -335,9 +342,16 @@ fun DishEditScreen(a: MainActivity, o: Overlay.DishEdit) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
         CookedWeight(
-            form.afterCooking, form.cooked, form.rawKcal(),
-            onToggle = { form = form.copy(afterCooking = it, cooked = if (it) form.cooked else "") },
-            onText = { form = form.copy(cooked = it) },
+            form.afterCooking, form.cooked, form.rawKcal(), guessed,
+            onToggle = { on ->
+                val g = if (on && form.cooked.isBlank()) form.rawKcal()?.let { a.guessCooked(form.name, it) } else null
+                guessed = g
+                form = form.copy(afterCooking = on, cooked = if (on) g?.grams?.gramsText() ?: form.cooked else "")
+            },
+            onText = {
+                guessed = null
+                form = form.copy(cooked = it)
+            },
         )
         edited?.let { d ->
             if (form.afterCooking) {

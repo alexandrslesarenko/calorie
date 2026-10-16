@@ -19,7 +19,7 @@ import java.util.Locale
 object OffApi {
     private const val TIMEOUT_MS = 15_000
     private const val FIELDS = "product_name,product_name_ru,product_name_en,generic_name,brands," +
-        "nutriments,serving_quantity,serving_quantity_unit"
+        "nutriments,serving_quantity,serving_quantity_unit,categories_tags"
 
     /** Cache first, then network. null - not in the database. Network errors are thrown. */
     suspend fun find(ctx: Context, barcode: String): Product? {
