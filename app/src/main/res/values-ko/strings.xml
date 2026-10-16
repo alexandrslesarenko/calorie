@@ -46,6 +46,10 @@
     <string name="weight_fix">수정</string>
     <string name="weight_on">체중: %1$s</string>
     <string name="weight_kg">체중, kg</string>
+    <string name="weight_ask_title">오늘 체중이 기록되지 않았습니다</string>
+    <string name="weight_ask_text">마지막 기록: %1$s kg, %2$s. 식사 전에 체중을 재고 같은 숫자라도 저장하세요. 기록 없는 날은 추세의 빈칸이 됩니다.</string>
+    <string name="weight_ask_record">체중 기록</string>
+    <string name="weight_ask_later">나중에</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">추가: %1$s</string>

@@ -95,6 +95,18 @@ fun TodayScreen(a: MainActivity) {
     val target = current?.let { t -> t.copy(kcal = Goals.targetOn(a.day, LocalDate.now().toEpochDay(), t.kcal, saved) ?: t.kcal) }
     val eaten = entries.map { it.nutrients }.sum()
     var weightDialog by remember { mutableStateOf(false) }
+    var weightAsk by remember { mutableStateOf(false) }
+    // Weigh-ins in a row with the same number are easy to skip: "it's already there". So the
+    // first food of the day asks for today's weight if it was not recorded.
+    fun addFood() {
+        val today = LocalDate.now().toEpochDay()
+        if (a.day == today && entries.isEmpty() && lastWeight != null && lastWeight?.day != today && a.weightAskedDay != today) {
+            a.weightAskedDay = today
+            weightAsk = true
+        } else {
+            a.overlay = Overlay.AddMenu
+        }
+    }
 
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         DayHeader(a)
@@ -126,7 +138,7 @@ fun TodayScreen(a: MainActivity) {
             }
         }
         Summary(eaten, target)
-        FilledTonalButton(onClick = { a.overlay = Overlay.AddMenu }, modifier = Modifier.fillMaxWidth()) {
+        FilledTonalButton(onClick = { addFood() }, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Filled.Add, null)
             Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.add_food))
@@ -146,7 +158,24 @@ fun TodayScreen(a: MainActivity) {
         ActivityCard(a, lastWeight?.kg)
         WeightCard(lastWeight, a.day) { weightDialog = true }
     }
-    if (weightDialog) WeightDialog(a, lastWeight?.kg) { weightDialog = false }
+    if (weightDialog) WeightDialog(a, lastWeight?.kg, onSaved = { if (weightAsk) a.overlay = Overlay.AddMenu }) {
+        weightDialog = false
+        weightAsk = false
+    }
+    if (weightAsk && !weightDialog) {
+        AlertDialog(
+            onDismissRequest = { weightAsk = false },
+            title = { Text(stringResource(R.string.weight_ask_title)) },
+            text = { Text(stringResource(R.string.weight_ask_text, lastWeight?.kg?.gramsText() ?: "", lastWeight?.let { dayTitle(it.day, inline = true) } ?: "")) },
+            confirmButton = { TextButton(onClick = { weightDialog = true }) { Text(stringResource(R.string.weight_ask_record)) } },
+            dismissButton = {
+                TextButton(onClick = {
+                    weightAsk = false
+                    a.overlay = Overlay.AddMenu
+                }) { Text(stringResource(R.string.weight_ask_later)) }
+            },
+        )
+    }
 }
 
 /** Date with arrows: yesterday's dinner can be added later. No going past today. */
@@ -411,7 +440,7 @@ private fun WeightCard(last: WeightMark?, day: Long, onRecord: () -> Unit) {
 }
 
 @Composable
-private fun WeightDialog(a: MainActivity, last: Double?, onClose: () -> Unit) {
+private fun WeightDialog(a: MainActivity, last: Double?, onSaved: () -> Unit = {}, onClose: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf(last?.gramsText() ?: "") }
@@ -435,6 +464,7 @@ private fun WeightDialog(a: MainActivity, last: Double?, onClose: () -> Unit) {
                     // The target depends on weight.
                     a.profileVersion++
                 }
+                onSaved()
                 onClose()
             }) { Text(stringResource(R.string.save)) }
         },

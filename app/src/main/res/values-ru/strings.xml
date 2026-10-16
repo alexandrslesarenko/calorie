@@ -46,6 +46,10 @@
     <string name="weight_fix">Исправить</string>
     <string name="weight_on">Вес: %1$s</string>
     <string name="weight_kg">Вес, кг</string>
+    <string name="weight_ask_title">Вес за сегодня не записан</string>
+    <string name="weight_ask_text">Последнее взвешивание: %1$s кг, %2$s. Взвесьтесь до еды и сохраните число, даже если оно такое же: день без записи - пропуск в тренде.</string>
+    <string name="weight_ask_record">Записать вес</string>
+    <string name="weight_ask_later">Не сейчас</string>
     <string name="kg_value">%1$s кг</string>
 
     <string name="add_title">Добавить: %1$s</string>

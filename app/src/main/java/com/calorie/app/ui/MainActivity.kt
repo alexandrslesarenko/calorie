@@ -207,6 +207,8 @@ class MainActivity : ComponentActivity() {
     var libraryMode by mutableStateOf(false)
     /** Barcode that was scanned and not found: a label photo or manual entry then gets it. */
     var scanCode: String? = null
+    /** Day the "no weigh-in yet" reminder was shown: once is enough, even if dismissed. */
+    var weightAskedDay = -1L
     /** The next photo is the thumbnail of this library dish, not food to recognize. */
     private var photoFor: Overlay.DishEdit? = null
 

@@ -46,6 +46,10 @@
     <string name="weight_fix">Correggi</string>
     <string name="weight_on">Peso: %1$s</string>
     <string name="weight_kg">Peso, kg</string>
+    <string name="weight_ask_title">Peso di oggi non registrato</string>
+    <string name="weight_ask_text">Ultima pesata: %1$s kg, %2$s. Pesati prima di mangiare e salva il numero anche se è uguale: un giorno senza pesata è un vuoto nel trend.</string>
+    <string name="weight_ask_record">Registra peso</string>
+    <string name="weight_ask_later">Non ora</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">Aggiungi: %1$s</string>

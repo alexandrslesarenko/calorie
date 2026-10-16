@@ -46,6 +46,10 @@
     <string name="weight_fix">Korrigieren</string>
     <string name="weight_on">Gewicht: %1$s</string>
     <string name="weight_kg">Gewicht, kg</string>
+    <string name="weight_ask_title">Heutiges Gewicht nicht eingetragen</string>
+    <string name="weight_ask_text">Letzte Messung: %1$s kg, %2$s. Wiege dich vor dem Essen und speichere den Wert, auch wenn er gleich ist: ein Tag ohne Eintrag ist eine Lücke im Trend.</string>
+    <string name="weight_ask_record">Gewicht eintragen</string>
+    <string name="weight_ask_later">Nicht jetzt</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">Hinzufügen: %1$s</string>

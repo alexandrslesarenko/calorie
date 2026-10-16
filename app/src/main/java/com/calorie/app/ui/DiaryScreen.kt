@@ -2,6 +2,9 @@ package com.calorie.app.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,12 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -48,6 +55,7 @@ import com.calorie.app.logic.gramsText
 import com.calorie.app.logic.kcalText
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** How many days the diary list shows. */
@@ -198,14 +206,45 @@ private fun WeightSection(a: MainActivity, all: List<WeightMark>) {
     }
 }
 
-/** Weight line by day; the dashed line is the target weight when it fits a sensible scale. */
+/**
+ * Weight line by day; the dashed line is the target weight when it fits a sensible scale.
+ * A touch shows the date and weight of the nearest point, as in Pulsar; after a long press
+ * the tooltip follows the finger.
+ */
 @Composable
 private fun WeightChart(points: List<WeightMark>, goal: Double?) {
     val colors = MaterialTheme.colorScheme
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontSize = 11.sp, color = colors.onSurfaceVariant)
+    val tipStyle = TextStyle(fontSize = 12.sp, color = colors.inverseOnSurface)
     val fmt = remember { DateTimeFormatter.ofPattern(dayMonthPattern()) }
-    Canvas(Modifier.fillMaxWidth().height(180.dp)) {
+    var touchX by remember { mutableStateOf<Float?>(null) }
+    // Formatted outside the Canvas: stringResource is not available in a DrawScope.
+    val tips = points.associate { it.day to stringResource(R.string.weight_last, it.kg.gramsText(), LocalDate.ofEpochDay(it.day).format(fmt)) }
+    Canvas(
+        Modifier.fillMaxWidth().height(180.dp)
+            .pointerInput(points) {
+                // Only read, not consumed: a swipe over the chart still scrolls the list and the tabs.
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    touchX = down.position.x
+                    while (true) {
+                        val c = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                        if (!c.pressed || c.isConsumed) break
+                        if ((c.position - down.position).getDistance() > viewConfiguration.touchSlop) break
+                    }
+                    touchX = null
+                }
+            }
+            .pointerInput(points) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { touchX = it.x },
+                    onDragEnd = { touchX = null },
+                    onDragCancel = { touchX = null },
+                    onDrag = { change, _ -> touchX = change.position.x },
+                )
+            }
+    ) {
         val lo0 = points.minOf { it.kg }
         val hi0 = points.maxOf { it.kg }
         // Draw the goal only if it does not flatten the chart: within 5 kg of the data.
@@ -234,6 +273,25 @@ private fun WeightChart(points: List<WeightMark>, goal: Double?) {
             val tl = measurer.measure(LocalDate.ofEpochDay(day).format(fmt), label)
             val tx = if (alignEnd) size.width - tl.size.width else left
             drawText(tl, topLeft = Offset(tx, size.height - tl.size.height))
+        }
+
+        val tx = touchX
+        if (tx != null) {
+            val p = points.minBy { abs(x(it.day) - tx) }
+            val px = x(p.day)
+            val py = y(p.kg)
+            drawLine(colors.onSurfaceVariant.copy(alpha = 0.6f), Offset(px, 0f), Offset(px, bottom), 1.dp.toPx())
+            drawCircle(colors.surface, 6.dp.toPx(), Offset(px, py))
+            drawCircle(colors.primary, 4.dp.toPx(), Offset(px, py))
+            val tl = measurer.measure(tips.getValue(p.day), tipStyle)
+            val pad = 6.dp.toPx()
+            val w = tl.size.width + pad * 2
+            val h = tl.size.height + pad * 2
+            val bx = (px - w / 2).coerceIn(left, (size.width - w).coerceAtLeast(left))
+            // Above the point when there is room, otherwise below: the tooltip must not hide it.
+            val by = if (py - h - 8.dp.toPx() >= 0f) py - h - 8.dp.toPx() else py + 8.dp.toPx()
+            drawRoundRect(colors.inverseSurface, Offset(bx, by), Size(w, h), CornerRadius(6.dp.toPx()))
+            drawText(tl, topLeft = Offset(bx + pad, by + pad))
         }
     }
 }

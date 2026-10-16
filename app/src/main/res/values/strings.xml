@@ -46,6 +46,10 @@
     <string name="weight_fix">Correct</string>
     <string name="weight_on">Weight: %1$s</string>
     <string name="weight_kg">Weight, kg</string>
+    <string name="weight_ask_title">Today\'s weight is not recorded</string>
+    <string name="weight_ask_text">The last weigh-in is %1$s kg, %2$s. Weigh yourself before eating and save the number even if it is the same: a day without a weigh-in is a gap in the trend.</string>
+    <string name="weight_ask_record">Record weight</string>
+    <string name="weight_ask_later">Not now</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">Add for %1$s</string>

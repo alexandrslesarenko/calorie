@@ -46,6 +46,10 @@
     <string name="weight_fix">修改</string>
     <string name="weight_on">体重：%1$s</string>
     <string name="weight_kg">体重（公斤）</string>
+    <string name="weight_ask_title">今天的体重尚未记录</string>
+    <string name="weight_ask_text">上次记录：%1$s 公斤，%2$s。请在进食前称重，即使数字相同也请保存：没有记录的一天就是趋势中的空缺。</string>
+    <string name="weight_ask_record">记录体重</string>
+    <string name="weight_ask_later">稍后</string>
     <string name="kg_value">%1$s 公斤</string>
 
     <string name="add_title">添加：%1$s</string>

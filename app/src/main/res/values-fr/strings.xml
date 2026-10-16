@@ -46,6 +46,10 @@
     <string name="weight_fix">Corriger</string>
     <string name="weight_on">Poids : %1$s</string>
     <string name="weight_kg">Poids, kg</string>
+    <string name="weight_ask_title">Poids du jour non noté</string>
+    <string name="weight_ask_text">Dernière pesée : %1$s kg, %2$s. Pesez-vous avant de manger et enregistrez le chiffre même s\'il est identique : un jour sans pesée est un trou dans la tendance.</string>
+    <string name="weight_ask_record">Noter le poids</string>
+    <string name="weight_ask_later">Plus tard</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">Ajouter : %1$s</string>

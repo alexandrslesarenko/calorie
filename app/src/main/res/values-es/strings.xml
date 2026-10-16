@@ -46,6 +46,10 @@
     <string name="weight_fix">Corregir</string>
     <string name="weight_on">Peso: %1$s</string>
     <string name="weight_kg">Peso, kg</string>
+    <string name="weight_ask_title">El peso de hoy no está anotado</string>
+    <string name="weight_ask_text">Último pesaje: %1$s kg, %2$s. Pésate antes de comer y guarda la cifra aunque sea la misma: un día sin pesaje es un hueco en la tendencia.</string>
+    <string name="weight_ask_record">Anotar peso</string>
+    <string name="weight_ask_later">Ahora no</string>
     <string name="kg_value">%1$s kg</string>
 
     <string name="add_title">Añadir: %1$s</string>
