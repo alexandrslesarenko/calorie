@@ -67,10 +67,10 @@ backup.
 
 ### Choosing the recognizer
 
-Settings - Recognition: Claude Haiku 5.5 (default), Claude Haiku 4.5 or Gemini 3.5
-Flash-Lite. If the chosen model is retired, the next one with a key answers instead and
-the review screen says so. An overloaded service is waited for in the retry queue, and
-after the third refusal in a row the next model with a key answers.
+Settings - Recognition: Claude Haiku 5.5 (default) or Gemini 3.5 Flash-Lite. If the
+chosen model is retired, the next one with a key answers instead and the review screen
+says so. An overloaded service is waited for in the retry queue, and after the third
+refusal in a row the next model with a key answers.
 
 ## Privacy
 

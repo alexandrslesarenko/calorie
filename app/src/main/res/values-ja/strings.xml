@@ -232,7 +232,7 @@
     <string name="console_billing">チャージ</string>
     <string name="console_usage">利用状況</string>
     <string name="spend_title">アプリの利用額</string>
-    <string name="spend_help">各回答のトークン数と、回答したモデルの料金からの推定です（Claude Haiku 5.5：入力100万トークンあたり10セント、出力100万トークンあたり50セント、Claude Haiku 4.5：1ドルと5ドル）。正確な金額は Console の Usage ページで確認できます。</string>
+    <string name="spend_help">各回答のトークン数と、回答したモデルの料金からの推定です（Claude Haiku 5.5：入力100万トークンあたり10セント、出力100万トークンあたり50セント）。正確な金額は Console の Usage ページで確認できます。</string>
     <string name="studio_desc">キー、使用量、上限は Google のサイトで管理します。</string>
     <string name="studio_help">ページはアプリ内のブラウザタブで開き、Google アカウントでログインします。使用量のページで、1日の無料上限をどれだけ使ったかを確認できます。</string>
     <string name="studio_usage">使用量と上限</string>

@@ -123,7 +123,7 @@ object FoodPrompt {
 /**
  * Food recognition with a Claude model (Haiku 5.5 by default). The answer comes as a
  * report_food tool call with a schema: the model has to fill it in (tool_choice forces this
- * tool), so there is no free text to parse. Forced tool use works on Haiku 4.5 and 5.5;
+ * tool), so there is no free text to parse. Forced tool use works on Haiku 5.5;
  * Sonnet and Opus 5.5 reject it with a 400 and would need another request shape.
  *
  * baseUrl is set in tests (a local MockWebServer); the app uses the default address.

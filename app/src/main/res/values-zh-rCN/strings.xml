@@ -232,7 +232,7 @@
     <string name="console_billing">充值</string>
     <string name="console_usage">用量</string>
     <string name="spend_title">应用花费</string>
-    <string name="spend_help">根据每次回答的令牌数，按回答模型的价格估算：Claude Haiku 5.5 每百万输入令牌 10 美分、每百万输出令牌 50 美分，Claude Haiku 4.5 为 1 美元和 5 美元。准确金额见 Console 的 Usage 页面。</string>
+    <string name="spend_help">根据每次回答的令牌数，按回答模型的价格估算：Claude Haiku 5.5 每百万输入令牌 10 美分、每百万输出令牌 50 美分。准确金额见 Console 的 Usage 页面。</string>
     <string name="studio_desc">密钥、用量和限额在 Google 网站上管理。</string>
     <string name="studio_help">页面在内置浏览器标签页中打开，用你的 Google 账号登录。用量页面显示每日免费额度已用了多少。</string>
     <string name="studio_usage">用量和限额</string>

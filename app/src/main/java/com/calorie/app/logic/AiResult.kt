@@ -63,8 +63,8 @@ object Pricing {
     fun nanoUsd(inputTokens: Long, outputTokens: Long, r: Recognizer = Recognizer.DEFAULT): Long =
         inputTokens * r.inputNano + outputTokens * r.outputNano
 
-    /** Counters from before per-model prices were all Haiku 4.5. */
-    fun legacyNanoUsd(inputTokens: Long, outputTokens: Long): Long = nanoUsd(inputTokens, outputTokens, Recognizer.HAIKU_4_5)
+    /** Counters from before per-model prices were all Haiku 4.5 ($1 / $5 per million, no longer in the list). */
+    fun legacyNanoUsd(inputTokens: Long, outputTokens: Long): Long = inputTokens * 1000 + outputTokens * 5000
 
     fun usd(nano: Long): Double = nano / 1e9
 }

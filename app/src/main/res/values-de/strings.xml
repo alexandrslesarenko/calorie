@@ -232,7 +232,7 @@
     <string name="console_billing">Aufladen</string>
     <string name="console_usage">Verbrauch</string>
     <string name="spend_title">Ausgaben der App</string>
-    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zum Preis des Modells, das geantwortet hat. Claude Haiku 5.5 kostet 10 Cent pro Million Eingabe-Tokens und 50 Cent pro Million Ausgabe-Tokens, Claude Haiku 4.5 kostet 1 und 5 Dollar. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
+    <string name="spend_help">Geschätzt aus den Tokens jeder Antwort zum Preis des Modells, das geantwortet hat. Claude Haiku 5.5 kostet 10 Cent pro Million Eingabe-Tokens und 50 Cent pro Million Ausgabe-Tokens. Der genaue Betrag steht auf der Seite Usage in der Console.</string>
     <string name="studio_desc">Schlüssel, Nutzung und Limits werden auf der Google-Website verwaltet.</string>
     <string name="studio_help">Die Seiten öffnen sich in einem eingebauten Browser-Tab; du meldest dich mit deinem Google-Konto an. Die Nutzungsseite zeigt, wie viel vom täglichen Gratislimit verbraucht ist.</string>
     <string name="studio_usage">Nutzung und Limits</string>

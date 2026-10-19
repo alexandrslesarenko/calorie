@@ -55,7 +55,8 @@ suspend fun <T> askInOrder(
 enum class Provider { CLAUDE, GEMINI }
 
 /**
- * Food recognizers the user can choose from. key is stored in Prefs - do not rename.
+ * Food recognizers the user can choose from. key is stored in Prefs - do not rename; the key
+ * of a removed one (haiku-4-5) reads back as DEFAULT.
  * Prices in nano-dollars per token (whole numbers, see Pricing), paid list prices. Gemini on
  * its free tier costs nothing (freeTier): its price is shown as "what it would cost".
  */
@@ -69,7 +70,6 @@ enum class Recognizer(
     val freeTier: Boolean = false,
 ) {
     HAIKU_5_5("haiku-5-5", Provider.CLAUDE, "claude-haiku-5-5", "Claude Haiku 5.5", 100, 500),
-    HAIKU_4_5("haiku-4-5", Provider.CLAUDE, "claude-haiku-4-5", "Claude Haiku 4.5", 1000, 5000),
     GEMINI_LITE("gemini-flash-lite", Provider.GEMINI, "gemini-3.5-flash-lite", "Gemini 3.5 Flash-Lite", 300, 2500, freeTier = true);
 
     companion object {
