@@ -140,6 +140,7 @@
     <string name="period_days">%1$d giorni</string>
     <string name="period_all">Tutto</string>
     <string name="weight_chart_empty">Registra il peso nella scheda \"Oggi\": il grafico appare dopo due voci. Pesati al mattino, prima di colazione.</string>
+    <string name="weight_chart_bars">Barre: quanto mangiato il giorno prima rispetto al suo obiettivo, verde sotto, rosso sopra. La linea punteggiata è l\'obiettivo.</string>
 
     <string name="profile_title">Profilo</string>
     <string name="profile_help">Da sesso, età, altezza e peso si ricava il metabolismo basale (formula di Mifflin-St Jeor), dall\'attività il dispendio giornaliero. L\'obiettivo si ricalcola a ogni nuovo peso registrato.</string>

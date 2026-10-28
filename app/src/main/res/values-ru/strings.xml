@@ -140,6 +140,7 @@
     <string name="period_days">%1$d дней</string>
     <string name="period_all">Всё</string>
     <string name="weight_chart_empty">Записывайте вес на вкладке \"Сегодня\": график появится после двух записей. Взвешивайтесь утром, до завтрака.</string>
+    <string name="weight_chart_bars">Столбики: съеденное накануне к норме того дня, зелёные - ниже нормы, красные - сверх. Пунктир - уровень нормы.</string>
 
     <string name="profile_title">Профиль</string>
     <string name="profile_help">По полу, возрасту, росту и весу считается основной обмен (формула Mifflin-St Jeor), по активности - суточный расход. Норма пересчитывается при каждой новой записи веса.</string>

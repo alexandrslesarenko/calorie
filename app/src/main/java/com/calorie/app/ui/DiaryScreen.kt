@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,6 +62,10 @@ import kotlin.math.roundToInt
 /** How many days the diary list shows. */
 private const val DIARY_DAYS = 120L
 private val WEIGHT_PERIODS = listOf(30, 90, 0)
+/** Eaten / target ratio at the top of the intake chart. */
+private const val RATIO_TOP = 1.5
+/** Left gutter for the axis labels, the same on both charts so their days line up. */
+private val CHART_LEFT = 40.dp
 
 @Composable
 fun DiaryScreen(a: MainActivity) {
@@ -81,7 +86,7 @@ fun DiaryScreen(a: MainActivity) {
     }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        item { WeightSection(a, weights) }
+        item { WeightSection(a, weights, ::targetOn) }
         item {
             // A 7-day average is fairer than one day: weight follows the week, not yesterday's dinner.
             val week = totals.filter { it.day > today - 7 && it.day < today }
@@ -168,11 +173,19 @@ private fun DayRow(t: DayTotal, target: Int?, burned: Double?, isToday: Boolean,
 }
 
 @Composable
-private fun WeightSection(a: MainActivity, all: List<WeightMark>) {
+private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Long) -> Int?) {
     var period by rememberSaveable { mutableIntStateOf(30) }
     val today = LocalDate.now().toEpochDay()
     val shown = if (period == 0) all else all.filter { it.day > today - period }
     val goal = a.prefs.goalKg.takeIf { it > 0 }?.toDouble()
+    // Own query: "all" can reach further back than the diary list below.
+    val dao = remember { FoodDb.get(a).dao() }
+    val from = shown.firstOrNull()?.day ?: today
+    val totals by remember(from, today) { dao.totals(from - 1, today - 1) }.collectAsState(emptyList())
+    // Eaten against the day's target, drawn on the next day: the morning weigh-in shows
+    // yesterday's food. Today is not over yet and would always look low.
+    var touchX by remember { mutableStateOf<Float?>(null) }
+    val eaten = totals.mapNotNull { t -> targetOn(t.day)?.takeIf { it > 0 }?.let { t.day + 1 to (t.kcal to it) } }.toMap()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.weight_title), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
@@ -201,62 +214,83 @@ private fun WeightSection(a: MainActivity, all: List<WeightMark>) {
         if (shown.size < 2) {
             Text(stringResource(R.string.weight_chart_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
-            WeightChart(shown, goal)
+            WeightChart(shown, goal, eaten, touchX) { touchX = it }
+            if (eaten.isNotEmpty()) {
+                IntakeChart(shown, eaten, touchX) { touchX = it }
+                Text(stringResource(R.string.weight_chart_bars), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
 
 /**
+ * Touch on a chart: the x of the finger while it is down, null after. Only read, not consumed:
+ * a swipe over the chart still scrolls the list and the tabs. After a long press it follows
+ * the finger.
+ */
+private fun Modifier.chartTouch(key: Any, onTouch: (Float?) -> Unit) = this
+    .pointerInput(key) {
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            onTouch(down.position.x)
+            while (true) {
+                val c = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                if (!c.pressed || c.isConsumed) break
+                if ((c.position - down.position).getDistance() > viewConfiguration.touchSlop) break
+            }
+            onTouch(null)
+        }
+    }
+    .pointerInput(key) {
+        detectDragGesturesAfterLongPress(
+            onDragStart = { onTouch(it.x) },
+            onDragEnd = { onTouch(null) },
+            onDragCancel = { onTouch(null) },
+            onDrag = { change, _ -> onTouch(change.position.x) },
+        )
+    }
+
+/** Day range of the charts: both map days to x the same way. */
+private fun dayRange(points: List<WeightMark>) = points.first().day to points.last().day.coerceAtLeast(points.first().day + 1)
+
+/**
  * Weight line by day; the dashed line is the target weight when it fits a sensible scale.
- * A touch shows the date and weight of the nearest point, as in Pulsar; after a long press
- * the tooltip follows the finger.
+ * A touch here or on the intake chart below shows the date, weight and the previous day's kcal
+ * (`eaten`) of the nearest point, as in Pulsar.
  */
 @Composable
-private fun WeightChart(points: List<WeightMark>, goal: Double?) {
+private fun WeightChart(points: List<WeightMark>, goal: Double?, eaten: Map<Long, Pair<Double, Int>>, touchX: Float?, onTouch: (Float?) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontSize = 11.sp, color = colors.onSurfaceVariant)
     val tipStyle = TextStyle(fontSize = 12.sp, color = colors.inverseOnSurface)
     val fmt = remember { DateTimeFormatter.ofPattern(dayMonthPattern()) }
-    var touchX by remember { mutableStateOf<Float?>(null) }
     // Formatted outside the Canvas: stringResource is not available in a DrawScope.
-    val tips = points.associate { it.day to stringResource(R.string.weight_last, it.kg.gramsText(), LocalDate.ofEpochDay(it.day).format(fmt)) }
-    Canvas(
-        Modifier.fillMaxWidth().height(180.dp)
-            .pointerInput(points) {
-                // Only read, not consumed: a swipe over the chart still scrolls the list and the tabs.
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    touchX = down.position.x
-                    while (true) {
-                        val c = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
-                        if (!c.pressed || c.isConsumed) break
-                        if ((c.position - down.position).getDistance() > viewConfiguration.touchSlop) break
-                    }
-                    touchX = null
-                }
-            }
-            .pointerInput(points) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { touchX = it.x },
-                    onDragEnd = { touchX = null },
-                    onDragCancel = { touchX = null },
-                    onDrag = { change, _ -> touchX = change.position.x },
-                )
-            }
-    ) {
+    val tips = points.associate { p ->
+        val w = stringResource(R.string.weight_last, p.kg.gramsText(), LocalDate.ofEpochDay(p.day).format(fmt))
+        val e = eaten[p.day]
+        p.day to (if (e == null) w else w + "\n" + stringResource(R.string.kcal_of, e.first.kcalText(), e.second))
+    }
+    // The latest weight, large and faint in the middle: the number the chart is about.
+    val latest = points.last().kg.gramsText()
+    val bigStyle = TextStyle(fontSize = 100.sp, fontWeight = FontWeight.Bold, color = colors.onSurface.copy(alpha = 0.2f))
+    Canvas(Modifier.fillMaxWidth().height(180.dp).chartTouch(points, onTouch)) {
         val lo0 = points.minOf { it.kg }
         val hi0 = points.maxOf { it.kg }
         // Draw the goal only if it does not flatten the chart: within 5 kg of the data.
         val showGoal = goal != null && goal > lo0 - 5
         val lo = (if (showGoal) minOf(lo0, goal!!) else lo0) - 0.5
         val hi = hi0 + 0.5
-        val d0 = points.first().day
-        val d1 = points.last().day.coerceAtLeast(d0 + 1)
-        val left = 40.dp.toPx()
+        val (d0, d1) = dayRange(points)
+        val left = CHART_LEFT.toPx()
         val bottom = size.height - 18.dp.toPx()
         fun x(day: Long) = left + (day - d0).toFloat() / (d1 - d0) * (size.width - left)
         fun y(kg: Double) = ((hi - kg) / (hi - lo) * bottom).toFloat()
+        // As tall as the plot, unless the width runs out first: measured once, then scaled.
+        val probe = measurer.measure(latest, bigStyle)
+        val fit = minOf(bottom / probe.size.height, (size.width - left) / probe.size.width)
+        val big = measurer.measure(latest, bigStyle.copy(fontSize = bigStyle.fontSize * fit))
+        drawText(big, topLeft = Offset(left + (size.width - left - big.size.width) / 2, (bottom - big.size.height) / 2))
         for (v in listOf(hi - 0.5, lo + 0.5)) {
             val tl = measurer.measure(v.gramsText(), label)
             drawText(tl, topLeft = Offset(0f, (y(v) - tl.size.height / 2).coerceIn(0f, bottom - tl.size.height)))
@@ -287,11 +321,50 @@ private fun WeightChart(points: List<WeightMark>, goal: Double?) {
             val pad = 6.dp.toPx()
             val w = tl.size.width + pad * 2
             val h = tl.size.height + pad * 2
-            val bx = (px - w / 2).coerceIn(left, (size.width - w).coerceAtLeast(left))
-            // Above the point when there is room, otherwise below: the tooltip must not hide it.
-            val by = if (py - h - 8.dp.toPx() >= 0f) py - h - 8.dp.toPx() else py + 8.dp.toPx()
+            // At the top, in the half away from the finger: next to the point it ends up under it.
+            val bx = if (tx > left + (size.width - left) / 2) left else (size.width - w).coerceAtLeast(left)
+            val by = 0f
             drawRoundRect(colors.inverseSurface, Offset(bx, by), Size(w, h), CornerRadius(6.dp.toPx()))
             drawText(tl, topLeft = Offset(bx + pad, by + pad))
+        }
+    }
+}
+
+/**
+ * Eaten against the target, a bar per weigh-in day for the day before it (`eaten`), under the
+ * weight chart and on the same days, so a flat week can be checked against the plates. The top
+ * is 150% of the target; the dotted line is the target.
+ */
+@Composable
+private fun IntakeChart(points: List<WeightMark>, eaten: Map<Long, Pair<Double, Int>>, touchX: Float?, onTouch: (Float?) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val measurer = rememberTextMeasurer()
+    val label = TextStyle(fontSize = 11.sp, color = colors.onSurfaceVariant)
+    Canvas(Modifier.fillMaxWidth().height(72.dp).chartTouch(points, onTouch)) {
+        val (d0, d1) = dayRange(points)
+        val left = CHART_LEFT.toPx()
+        val bottom = size.height
+        fun x(day: Long) = left + (day - d0).toFloat() / (d1 - d0) * (size.width - left)
+        fun y(ratio: Double) = (bottom - ratio.coerceIn(0.0, RATIO_TOP) / RATIO_TOP * bottom).toFloat()
+        val step = (size.width - left) / (d1 - d0 + 1)
+        for ((day, e) in eaten) {
+            if (day < d0 || day > d1) continue
+            val top = y(e.first / e.second)
+            val bx0 = (x(day) - step / 2).coerceAtLeast(left)
+            val bx1 = (x(day) + step / 2).coerceAtMost(size.width)
+            val c = if (e.first > e.second) CalColors.Over else CalColors.Carbs
+            drawRect(c.copy(alpha = 0.6f), Offset(bx0, top), Size((bx1 - bx0 - 1f).coerceAtLeast(1f), bottom - top))
+        }
+        drawLine(colors.outlineVariant, Offset(left, bottom), Offset(size.width, bottom))
+        val ty = y(1.0)
+        drawLine(colors.onSurfaceVariant, Offset(left, ty), Offset(size.width, ty), 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3f, 6f)))
+        val tl = measurer.measure("100%", label)
+        drawText(tl, topLeft = Offset(0f, ty - tl.size.height / 2))
+
+        val tx = touchX
+        if (tx != null) {
+            val px = x(points.minBy { abs(x(it.day) - tx) }.day)
+            drawLine(colors.onSurfaceVariant.copy(alpha = 0.6f), Offset(px, 0f), Offset(px, bottom), 1.dp.toPx())
         }
     }
 }

@@ -33,7 +33,8 @@ new versions over the old one.
 - Diary by meals, balance of each day against the target that day had (a later change of
   weight or activity does not rewrite the past), deficit or surplus over the last week in
   kilograms of fat.
-- Weight log.
+- Weight log with a chart; under it, what was eaten the day before against the day's target,
+  so you can see how food moves the weight.
 - Backup to a file and back: the diary, weight log, daily targets, "My dishes" with pictures and profile as JSON, which can
   be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,
