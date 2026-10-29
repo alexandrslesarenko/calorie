@@ -141,6 +141,7 @@
     <string name="period_all">すべて</string>
     <string name="weight_chart_empty">\"今日\"タブで体重を記録してください。2回記録するとグラフが表示されます。朝食前の朝に測りましょう。</string>
     <string name="weight_chart_bars">棒：前日の摂取量とその日の目標の比。緑は目標以下、赤は超過。点線が目標です。</string>
+    <string name="weight_chart_burned">棒の青い部分：その日の Pulsar の活動量。</string>
 
     <string name="profile_title">プロフィール</string>
     <string name="profile_help">性別・年齢・身長・体重から基礎代謝（Mifflin-St Jeor 式）を、活動量から1日の消費量を計算します。新しい体重を記録するたびに目標を再計算します。</string>

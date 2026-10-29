@@ -95,6 +95,7 @@ import com.calorie.app.data.Source
 import com.calorie.app.logic.Confidence
 import com.calorie.app.logic.CookedValue
 import com.calorie.app.logic.Cooking
+import com.calorie.app.logic.DishSearch
 import com.calorie.app.logic.FoodDraft
 import com.calorie.app.logic.Nutrients
 import com.calorie.app.logic.gramsText
@@ -187,9 +188,8 @@ private fun AddMenu(a: MainActivity) {
                 leadingIcon = { Icon(Icons.Filled.Search, null) },
                 trailingIcon = if (query.isNotEmpty()) ({ IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, stringResource(R.string.cancel)) } }) else null,
             )
-            val q = Keys.dish(query)
             // Without a search - the first DISHES_SHOWN (favorites and recent), with a search - all matches.
-            val shown = if (q.isEmpty()) dishes.take(DISHES_SHOWN) else dishes.filter { q in it.id }
+            val shown = if (query.isBlank()) dishes.take(DISHES_SHOWN) else DishSearch.filter(dishes, query) { it.name }
             if (shown.isEmpty()) {
                 Text(stringResource(R.string.dishes_not_found), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {

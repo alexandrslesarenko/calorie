@@ -141,6 +141,7 @@
     <string name="period_all">All</string>
     <string name="weight_chart_empty">Record your weight on the Today tab: the chart appears after two entries. Weigh yourself in the morning, before breakfast.</string>
     <string name="weight_chart_bars">Bars: the previous day\'s food against its target, green below it, red above. The dotted line is the target.</string>
+    <string name="weight_chart_burned">Blue part of a bar: activity from Pulsar that day.</string>
 
     <string name="profile_title">Profile</string>
     <string name="profile_help">Sex, age, height and weight give your basal metabolic rate (Mifflin-St Jeor formula), activity gives your daily expenditure. The target is recalculated every time you record a new weight.</string>

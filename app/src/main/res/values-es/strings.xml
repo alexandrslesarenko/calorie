@@ -141,6 +141,7 @@
     <string name="period_all">Todo</string>
     <string name="weight_chart_empty">Anota tu peso en la pestaña \"Hoy\": el gráfico aparece tras dos entradas. Pésate por la mañana, antes del desayuno.</string>
     <string name="weight_chart_bars">Barras: lo comido el día anterior frente a su objetivo, verde por debajo, rojo por encima. La línea punteada es el objetivo.</string>
+    <string name="weight_chart_burned">Parte azul de una barra: la actividad de ese día según Pulsar.</string>
 
     <string name="profile_title">Perfil</string>
     <string name="profile_help">Con el sexo, la edad, la altura y el peso se calcula el metabolismo basal (fórmula de Mifflin-St Jeor), y con la actividad, el gasto diario. El objetivo se recalcula cada vez que anotas un peso nuevo.</string>

@@ -141,6 +141,7 @@
     <string name="period_all">全部</string>
     <string name="weight_chart_empty">在\"今天\"页记录体重：记录两次后会显示图表。建议早上早餐前称重。</string>
     <string name="weight_chart_bars">柱条：前一天摄入与当天目标之比，绿色为未超，红色为超出。点线为目标。</string>
+    <string name="weight_chart_burned">柱条的蓝色部分：当天 Pulsar 记录的活动消耗。</string>
 
     <string name="profile_title">个人资料</string>
     <string name="profile_help">根据性别、年龄、身高和体重计算基础代谢（Mifflin-St Jeor 公式），根据活动量计算每日消耗。每次记录新体重都会重新计算目标。</string>

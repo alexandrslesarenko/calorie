@@ -61,6 +61,7 @@ import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Source
 import com.calorie.app.logic.CookedValue
 import com.calorie.app.logic.Cooking
+import com.calorie.app.logic.DishSearch
 import com.calorie.app.logic.Keys
 import com.calorie.app.logic.gramsText
 import com.calorie.app.logic.kcalText
@@ -156,8 +157,9 @@ fun LibraryScreen(a: MainActivity) {
     var query by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { a.scanCode = null }
-    val q = Keys.dish(query)
-    val shown = dishes?.let { list -> if (q.isEmpty()) list else list.filter { q in it.id || it.barcode == query.trim() } }
+    val shown = dishes?.let { list ->
+        if (query.isBlank()) list else (list.filter { it.barcode == query.trim() } + DishSearch.filter(list, query) { it.name }).distinct()
+    }
     LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {

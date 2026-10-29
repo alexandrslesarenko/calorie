@@ -20,7 +20,8 @@ new versions over the old one.
 - "My dishes": every saved dish is remembered, and repeating it needs no request to
   Claude. Answers are also cached, so sending the same photo or text again is free.
   A product can be prepared in advance without eating it (for example from a label photo),
-  edited later and shown with a small picture.
+  edited later and shown with a small picture. Search forgives the typos of a small
+  keyboard: a neighboring key, an extra or a missed letter.
 - Label values for dry pasta or grains while you weigh them cooked: tick "Weighed after
   cooking" and type how much 100 g weigh cooked, the values are converted. The number is
   filled in for you: your own from last time, or the usual one for pasta, rice, grains,
@@ -34,7 +35,8 @@ new versions over the old one.
   weight or activity does not rewrite the past), deficit or surplus over the last week in
   kilograms of fat.
 - Weight log with a chart; under it, what was eaten the day before against the day's target,
-  so you can see how food moves the weight.
+  so you can see how food moves the weight; with Pulsar, the part of it burned on walks and
+  workouts is marked inside the bar.
 - Backup to a file and back: the diary, weight log, daily targets, "My dishes" with pictures and profile as JSON, which can
   be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,

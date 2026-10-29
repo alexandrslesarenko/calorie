@@ -141,6 +141,7 @@
     <string name="period_all">Tout</string>
     <string name="weight_chart_empty">Notez votre poids dans l\'onglet \"Aujourd\'hui\" : le graphique apparaît après deux entrées. Pesez-vous le matin, avant le petit-déjeuner.</string>
     <string name="weight_chart_bars">Barres : ce qui a été mangé la veille par rapport à son objectif, vert en dessous, rouge au-dessus. La ligne pointillée est l\'objectif.</string>
+    <string name="weight_chart_burned">Partie bleue d\'une barre : l\'activité de ce jour selon Pulsar.</string>
 
     <string name="profile_title">Profil</string>
     <string name="profile_help">Le sexe, l\'âge, la taille et le poids donnent le métabolisme de base (formule de Mifflin-St Jeor), l\'activité donne la dépense quotidienne. L\'objectif est recalculé à chaque nouveau poids noté.</string>

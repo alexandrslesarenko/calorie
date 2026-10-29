@@ -141,6 +141,7 @@
     <string name="period_all">Alle</string>
     <string name="weight_chart_empty">Trage dein Gewicht im Tab \"Heute\" ein: das Diagramm erscheint nach zwei Einträgen. Wiege dich morgens vor dem Frühstück.</string>
     <string name="weight_chart_bars">Balken: das am Vortag Gegessene im Verhältnis zu dessen Ziel, grün darunter, rot darüber. Die gepunktete Linie ist das Ziel.</string>
+    <string name="weight_chart_burned">Blauer Teil eines Balkens: Aktivität dieses Tages laut Pulsar.</string>
 
     <string name="profile_title">Profil</string>
     <string name="profile_help">Aus Geschlecht, Alter, Größe und Gewicht ergibt sich der Grundumsatz (Formel nach Mifflin-St Jeor), aus der Aktivität der Tagesverbrauch. Das Ziel wird bei jedem neuen Gewichtseintrag neu berechnet.</string>

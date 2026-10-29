@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import com.calorie.app.logic.ActiveMinute
-import com.calorie.app.logic.Burn
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -27,9 +26,11 @@ object PulsarSource {
     const val PERMISSION = "com.puls.app.permission.READ_ACTIVITY"
     private const val AUTHORITY = "com.puls.app.activity"
     private const val PATH_MINUTES = "minutes"
+    /** Days loaded: the activity level needs Burn.WINDOW_DAYS, the diary and its charts reach further. */
+    const val HISTORY_DAYS = 120
 
     /** Blocking provider query - call from a background thread. */
-    fun load(ctx: Context, days: Int = Burn.WINDOW_DAYS): PulsarData {
+    fun load(ctx: Context, days: Int = HISTORY_DAYS): PulsarData {
         val installed = runCatching { ctx.packageManager.getPackageInfo(PACKAGE, 0) }.isSuccess
         if (!installed) return PulsarData(PulsarStatus.NOT_INSTALLED)
         if (ctx.checkSelfPermission(PERMISSION) != PackageManager.PERMISSION_GRANTED) return PulsarData(PulsarStatus.NO_ACCESS)

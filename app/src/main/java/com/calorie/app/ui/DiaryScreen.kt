@@ -86,7 +86,7 @@ fun DiaryScreen(a: MainActivity) {
     }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        item { WeightSection(a, weights, ::targetOn) }
+        item { WeightSection(a, weights, ::targetOn, burned) }
         item {
             // A 7-day average is fairer than one day: weight follows the week, not yesterday's dinner.
             val week = totals.filter { it.day > today - 7 && it.day < today }
@@ -173,7 +173,7 @@ private fun DayRow(t: DayTotal, target: Int?, burned: Double?, isToday: Boolean,
 }
 
 @Composable
-private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Long) -> Int?) {
+private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Long) -> Int?, burned: Map<Long, Double>) {
     var period by rememberSaveable { mutableIntStateOf(30) }
     val today = LocalDate.now().toEpochDay()
     val shown = if (period == 0) all else all.filter { it.day > today - period }
@@ -186,6 +186,8 @@ private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Lon
     // yesterday's food. Today is not over yet and would always look low.
     var touchX by remember { mutableStateOf<Float?>(null) }
     val eaten = totals.mapNotNull { t -> targetOn(t.day)?.takeIf { it > 0 }?.let { t.day + 1 to (t.kcal to it) } }.toMap()
+    // Pulsar activity of the same day, shifted the same way; only where there is a bar to put it in.
+    val walked = burned.filterValues { it >= 1 }.mapKeys { it.key + 1 }.filterKeys { it in eaten }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.weight_title), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
@@ -214,10 +216,13 @@ private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Lon
         if (shown.size < 2) {
             Text(stringResource(R.string.weight_chart_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
-            WeightChart(shown, goal, eaten, touchX) { touchX = it }
+            WeightChart(shown, goal, eaten, walked, touchX) { touchX = it }
             if (eaten.isNotEmpty()) {
-                IntakeChart(shown, eaten, touchX) { touchX = it }
+                IntakeChart(shown, eaten, walked, touchX) { touchX = it }
                 Text(stringResource(R.string.weight_chart_bars), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (shown.any { it.day in walked }) {
+                    Text(stringResource(R.string.weight_chart_burned), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
     }
@@ -259,7 +264,9 @@ private fun dayRange(points: List<WeightMark>) = points.first().day to points.la
  * (`eaten`) of the nearest point, as in Pulsar.
  */
 @Composable
-private fun WeightChart(points: List<WeightMark>, goal: Double?, eaten: Map<Long, Pair<Double, Int>>, touchX: Float?, onTouch: (Float?) -> Unit) {
+private fun WeightChart(
+    points: List<WeightMark>, goal: Double?, eaten: Map<Long, Pair<Double, Int>>, walked: Map<Long, Double>, touchX: Float?, onTouch: (Float?) -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontSize = 11.sp, color = colors.onSurfaceVariant)
@@ -269,7 +276,12 @@ private fun WeightChart(points: List<WeightMark>, goal: Double?, eaten: Map<Long
     val tips = points.associate { p ->
         val w = stringResource(R.string.weight_last, p.kg.gramsText(), LocalDate.ofEpochDay(p.day).format(fmt))
         val e = eaten[p.day]
-        p.day to (if (e == null) w else w + "\n" + stringResource(R.string.kcal_of, e.first.kcalText(), e.second))
+        val k = walked[p.day]
+        p.day to buildString {
+            append(w)
+            if (e != null) append("\n").append(stringResource(R.string.kcal_of, e.first.kcalText(), e.second))
+            if (k != null) append("\n").append(stringResource(R.string.diary_burned, k.kcalText()))
+        }
     }
     // The latest weight, large and faint in the middle: the number the chart is about.
     val latest = points.last().kg.gramsText()
@@ -333,10 +345,11 @@ private fun WeightChart(points: List<WeightMark>, goal: Double?, eaten: Map<Long
 /**
  * Eaten against the target, a bar per weigh-in day for the day before it (`eaten`), under the
  * weight chart and on the same days, so a flat week can be checked against the plates. The top
- * is 150% of the target; the dotted line is the target.
+ * is 150% of the target; the dotted line is the target. Pulsar activity of that day (`walked`)
+ * is the top part of the bar: what is left below it is the food it did not cover.
  */
 @Composable
-private fun IntakeChart(points: List<WeightMark>, eaten: Map<Long, Pair<Double, Int>>, touchX: Float?, onTouch: (Float?) -> Unit) {
+private fun IntakeChart(points: List<WeightMark>, eaten: Map<Long, Pair<Double, Int>>, walked: Map<Long, Double>, touchX: Float?, onTouch: (Float?) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontSize = 11.sp, color = colors.onSurfaceVariant)
@@ -353,7 +366,13 @@ private fun IntakeChart(points: List<WeightMark>, eaten: Map<Long, Pair<Double, 
             val bx0 = (x(day) - step / 2).coerceAtLeast(left)
             val bx1 = (x(day) + step / 2).coerceAtMost(size.width)
             val c = if (e.first > e.second) CalColors.Over else CalColors.Carbs
-            drawRect(c.copy(alpha = 0.6f), Offset(bx0, top), Size((bx1 - bx0 - 1f).coerceAtLeast(1f), bottom - top))
+            val w = (bx1 - bx0 - 1f).coerceAtLeast(1f)
+            drawRect(c.copy(alpha = 0.6f), Offset(bx0, top), Size(w, bottom - top))
+            // Inside the bar: more burned than eaten still fills only the bar.
+            walked[day]?.let { k ->
+                val low = y((e.first - minOf(k, e.first)) / e.second)
+                if (low > top) drawRect(CalColors.Protein.copy(alpha = 0.85f), Offset(bx0, top), Size(w, low - top))
+            }
         }
         drawLine(colors.outlineVariant, Offset(left, bottom), Offset(size.width, bottom))
         val ty = y(1.0)
