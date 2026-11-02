@@ -46,6 +46,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.semantics.Role
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -93,7 +95,10 @@ import com.calorie.app.logic.BackupError
 import com.calorie.app.logic.BackupException
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Prefs
+import com.calorie.app.data.ActivityData
+import com.calorie.app.data.HcStatus
 import com.calorie.app.data.PulsarStatus
+import com.calorie.app.logic.ActivitySource
 import com.calorie.app.logic.Burn
 import com.calorie.app.logic.Calibration
 import com.calorie.app.logic.Expenditure
@@ -113,6 +118,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Date
@@ -188,16 +194,20 @@ private fun SettingsGrid(a: MainActivity) {
 @Composable
 private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modifier: Modifier) {
     Card(onClick = { if (p == SettingsPage.DISHES) a.openLibrary() else a.settingsPage = p }, modifier = modifier) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.size(32.dp).background(p.color.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(painterResource(p.icon), null, tint = p.color, modifier = Modifier.size(20.dp))
+        Box {
+            // In the top right corner of the tile: something inside needs a tap.
+            if (p == SettingsPage.PROFILE && a.activityNeedsAccess) Box(Modifier.align(Alignment.TopEnd).padding(8.dp)) { AlertDot() }
+            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.size(32.dp).background(p.color.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(p.icon), null, tint = p.color, modifier = Modifier.size(20.dp))
+                    }
+                    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleSmall) {
+                        TileTitle(if (p == SettingsPage.LANGUAGE) LANGUAGE_EN else stringResource(p.title), Modifier.weight(1f))
+                    }
                 }
-                CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleSmall) {
-                    TileTitle(if (p == SettingsPage.LANGUAGE) LANGUAGE_EN else stringResource(p.title), Modifier.weight(1f))
-                }
+                Text(status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
             }
-            Text(status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
         }
     }
 }
@@ -378,7 +388,11 @@ private fun ProfileSettings(a: MainActivity) {
     val h = height.toIntOrNull()?.takeIf { it in 120..230 }
     val w = parseNumber(weight)?.takeIf { it in 30.0..300.0 }
 
-    SettingsCard(stringResource(R.string.profile_title), help = stringResource(R.string.profile_help) + "\n\n" + stringResource(R.string.weight_trend_help)) {
+    SettingsCard(
+        stringResource(R.string.profile_title),
+        help = stringResource(R.string.profile_help) + "\n\n" + stringResource(R.string.weight_trend_help) +
+            "\n\n" + stringResource(R.string.activity_source_help),
+    ) {
         if (!editing) {
             AboutLine(stringResource(R.string.sex), sex?.let { stringResource(if (it == Sex.MALE) R.string.sex_male else R.string.sex_female) } ?: "--")
             AboutLine(stringResource(R.string.birth_date), prefs.birthDate?.let { d ->
@@ -387,13 +401,13 @@ private fun ProfileSettings(a: MainActivity) {
             } ?: "--")
             AboutLine(stringResource(R.string.height), prefs.heightCm.takeIf { it > 0 }?.let { stringResource(R.string.height_value, it) } ?: "--")
             AboutLine(stringResource(R.string.weight_title), lastWeight?.let { stringResource(R.string.kg_value, it.kg.gramsText()) } ?: "--")
-            val byPulsar = remember(lastWeight, a.profileVersion, a.pulsar) { a.pulsarFactor(lastWeight?.kg) != null }
+            val byPulsar = remember(lastWeight, a.profileVersion, a.activityData) { a.pulsarFactor(lastWeight?.kg) != null }
             val byWeight = remember(lastWeight, a.profileVersion, a.trendData) { a.trendFactor(lastWeight?.kg) != null }
             AboutLine(
                 stringResource(R.string.activity),
                 when {
                     byWeight -> stringResource(R.string.activity_by_weight)
-                    byPulsar -> stringResource(R.string.activity_by_pulsar)
+                    byPulsar -> stringResource(R.string.activity_by_pulsar, a.activityData.name)
                     else -> activityLabel(prefs.activity)
                 },
             )
@@ -455,29 +469,106 @@ private fun ProfileSettings(a: MainActivity) {
 }
 
 /**
- * Activity from Pulsar: the switch and what it gives now. When Pulsar is missing, has no
- * access or too few days, the manual level stays in force and the text says why.
+ * Activity from walks and workouts: the switch, the source (Pulsar, Health Connect or automatic)
+ * with its state, and what it gives now. When no source works or there are too few days, the
+ * manual level stays in force and the text says why.
  */
 @Composable
 private fun PulsarBlock(a: MainActivity, weightKg: Double?) {
     val prefs = a.prefs
+    val data = a.activityData
     var on by remember { mutableStateOf(prefs.activityFromPulsar) }
+    var source by remember { mutableStateOf(prefs.activitySource) }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(if (on) R.string.activity_pulsar_on else R.string.activity_pulsar_off), Modifier.weight(1f))
-        Switch(checked = on, enabled = a.pulsar.status == PulsarStatus.OK, onCheckedChange = {
+        Switch(checked = on, onCheckedChange = {
             on = it
             prefs.activityFromPulsar = it
             a.profileVersion++
         })
     }
+    if (!on) return
+    Text(stringResource(R.string.activity_source), style = MaterialTheme.typography.titleSmall)
+    FitRow { style ->
+        listOf(
+            ActivitySource.AUTO to stringResource(R.string.source_auto),
+            ActivitySource.PULSAR to ActivityData.PULSAR_NAME,
+            ActivitySource.HEALTH_CONNECT to ActivityData.HC_NAME,
+        ).forEach { (s, label) ->
+            FilterChip(selected = source == s, onClick = {
+                source = s
+                prefs.activitySource = s
+                a.reloadActivity(force = true)
+                a.profileVersion++
+            }, label = { Text(label, maxLines = 1, style = style) })
+        }
+    }
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    @Composable
+    fun note(text: String) = Text(text, style = MaterialTheme.typography.bodySmall, color = muted)
+    // Only the state of the sources in use; in the automatic mode a missing one is just a note.
+    if (source != ActivitySource.HEALTH_CONNECT) when (data.pulsar.status) {
+        PulsarStatus.NOT_INSTALLED -> note(stringResource(R.string.pulsar_not_installed))
+        PulsarStatus.NO_ACCESS -> note(stringResource(R.string.pulsar_no_access))
+        PulsarStatus.OK -> {}
+    }
+    // Health Connect is the only way to get activity when it is chosen, or in auto without Pulsar.
+    val hcOnly = source == ActivitySource.HEALTH_CONNECT || data.pulsar.status != PulsarStatus.OK
+    if (source != ActivitySource.PULSAR) HealthConnectState(a, data, strong = hcOnly)
     val text = when {
-        a.pulsar.status == PulsarStatus.NOT_INSTALLED -> stringResource(R.string.pulsar_not_installed)
-        a.pulsar.status == PulsarStatus.NO_ACCESS -> stringResource(R.string.pulsar_no_access)
-        !on -> null
+        !data.usable -> stringResource(R.string.activity_no_source)
         else -> pulsarText(a, weightKg) ?: stringResource(R.string.pulsar_few_days, Burn.MIN_DAYS)
     }
-    text?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    note(text)
+}
+
+/** Orange, not the theme color: the blue one was easy to pass by (user, 2026-11-02). */
+@Composable
+private fun AllowHealthConnect(a: MainActivity) =
+    Button(
+        onClick = { a.requestHealthConnect() },
+        colors = ButtonDefaults.buttonColors(containerColor = CalColors.Warn, contentColor = Color.White),
+    ) { Text(stringResource(R.string.hc_allow)) }
+
+/**
+ * Health Connect: what is missing and the button that fixes it. strong - it is the only source
+ * left, so a missing access breaks the activity (a filled button); next to a working Pulsar it
+ * is optional.
+ */
+@Composable
+private fun HealthConnectState(a: MainActivity, data: ActivityData, strong: Boolean) {
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    @Composable
+    fun action(label: Int, onClick: () -> Unit) =
+        if (strong) Button(onClick = onClick) { Text(stringResource(label)) }
+        else OutlinedButton(onClick = onClick) { Text(stringResource(label)) }
+    when (data.hc.status) {
+        HcStatus.UNAVAILABLE -> Text(stringResource(R.string.hc_unavailable), style = MaterialTheme.typography.bodySmall, color = muted)
+        HcStatus.NEEDS_INSTALL -> {
+            Text(stringResource(R.string.hc_install), style = MaterialTheme.typography.bodySmall, color = muted)
+            action(R.string.hc_install_button) { a.installHealthConnect() }
+        }
+        HcStatus.NO_ACCESS -> {
+            Text(stringResource(R.string.hc_no_access), style = MaterialTheme.typography.bodySmall, color = muted)
+            FitRow { _ ->
+                AllowHealthConnect(a)
+                OutlinedButton(onClick = { a.openHealthConnect() }) { Text(ActivityData.HC_NAME) }
+            }
+        }
+        HcStatus.OK -> {
+            val zone = remember { ZoneId.systemDefault() }
+            val days = remember(data) { data.hc.minutes.mapTo(HashSet()) { Burn.day(it.minute, zone) }.size }
+            val parts = listOfNotNull(
+                stringResource(R.string.hc_ok, days),
+                if (data.hc.history) null else stringResource(R.string.hc_no_history),
+                if (data.hc.calories) null else stringResource(R.string.hc_no_calories),
+            )
+            Text(parts.joinToString(" "), style = MaterialTheme.typography.bodySmall, color = muted)
+            // Access given before kcal were asked for, or kcal refused: workouts without pulse are lost.
+            if (!data.hc.calories) AllowHealthConnect(a)
+        }
+    }
 }
 
 /**
@@ -504,8 +595,8 @@ private fun WeightTrendBlock(a: MainActivity, weightKg: Double?) {
 @Composable
 private fun weightTrendText(a: MainActivity, weightKg: Double?): String? {
     val status = remember(weightKg, a.profileVersion, a.trendData) { a.weightTrend(weightKg) } ?: return null
-    val formula = remember(weightKg, a.profileVersion, a.pulsar) { a.body(weightKg)?.let { Goals.bmr(it) * a.formulaFactor(weightKg) } }
-    val held = remember(weightKg, a.profileVersion, a.pulsar, a.trendData) { a.trendHeld(weightKg) }
+    val formula = remember(weightKg, a.profileVersion, a.activityData) { a.body(weightKg)?.let { Goals.bmr(it) * a.formulaFactor(weightKg) } }
+    val held = remember(weightKg, a.profileVersion, a.activityData, a.trendData) { a.trendHeld(weightKg) }
     val t = status.trend
     return when {
         t != null -> stringResource(
@@ -521,7 +612,7 @@ private fun weightTrendText(a: MainActivity, weightKg: Double?): String? {
 /** What Pulsar measured and whether it sets the target; null - too few days. */
 @Composable
 private fun pulsarText(a: MainActivity, weightKg: Double?): String? {
-    val calib = remember(weightKg, a.profileVersion, a.pulsar) { a.calibration(weightKg) } ?: return null
+    val calib = remember(weightKg, a.profileVersion, a.activityData) { a.calibration(weightKg) } ?: return null
     val byWeight = remember(weightKg, a.profileVersion, a.trendData) { a.trendFactor(weightKg) != null }
     val note = when {
         byWeight -> stringResource(R.string.pulsar_by_weight)
@@ -552,7 +643,7 @@ private fun GoalSettings(a: MainActivity) {
     var pace by remember { mutableStateOf(prefs.pace) }
     var custom by remember { mutableStateOf(prefs.customKcal > 0) }
     var customText by remember { mutableStateOf(prefs.customKcal.takeIf { it > 0 }?.toString() ?: "") }
-    val t = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.target(lastWeight?.kg) }
+    val t = remember(lastWeight, a.profileVersion, a.activityData, a.trendData) { a.target(lastWeight?.kg) }
     val byWeight = remember(lastWeight, a.profileVersion, a.trendData) { a.trendFactor(lastWeight?.kg) != null }
     fun changed() { a.profileVersion++ }
 
@@ -591,7 +682,7 @@ private fun GoalSettings(a: MainActivity) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         // Where the expenditure comes from, so a changed target is not a mystery.
-        val held = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.trendHeld(lastWeight?.kg) }
+        val held = remember(lastWeight, a.profileVersion, a.activityData, a.trendData) { a.trendHeld(lastWeight?.kg) }
         val source = listOfNotNull(
             if (byWeight || held) weightTrendText(a, lastWeight?.kg) else null,
             if (byWeight) null else pulsarText(a, lastWeight?.kg),

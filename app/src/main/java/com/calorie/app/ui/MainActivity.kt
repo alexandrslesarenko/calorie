@@ -1,5 +1,6 @@
 package com.calorie.app.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -13,6 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -32,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -52,9 +57,16 @@ import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.OffApi
 import com.calorie.app.data.Pending
-import com.calorie.app.data.PulsarData
+import com.calorie.app.data.ActivityData
+import com.calorie.app.data.HcData
+import com.calorie.app.data.HcStatus
+import com.calorie.app.data.HealthConnectSource
 import com.calorie.app.data.PulsarSource
 import com.calorie.app.data.PulsarStatus
+import com.calorie.app.logic.ActivityMerge
+import com.calorie.app.logic.ActivitySource
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import com.calorie.app.logic.Burn
 import com.calorie.app.logic.CookKind
 import com.calorie.app.logic.CookedGuess
@@ -86,6 +98,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -96,6 +109,8 @@ private const val STATE_DAY = "day"
 private const val STATE_SETTINGS_PAGE = "settings_page"
 /** Background time after which the diary returns to today. */
 private const val RETURN_TO_TODAY_MS = 10 * 60_000L
+/** Health Connect has read quotas; a resume within this reuses the last read. */
+private const val HC_READ_MS = 5 * 60_000L
 
 /**
  * Draft row on the review screen; confidence is set only for Claude results. raw - weighed
@@ -189,8 +204,17 @@ class MainActivity : ComponentActivity() {
     var hasKey by mutableStateOf(false)
     /** Bumped on any profile or goal change so screens recalculate the target. */
     var profileVersion by mutableIntStateOf(0)
-    /** Walks and workouts from Pulsar for the last two weeks; refreshed on every resume. */
-    var pulsar by mutableStateOf(PulsarData(PulsarStatus.NOT_INSTALLED))
+    /** Walks and workouts from Pulsar and/or Health Connect (HISTORY_DAYS); refreshed on resume. */
+    var activityData by mutableStateOf(ActivityData.NONE)
+    /** Last full Health Connect read: it costs a read per workout, so not on every resume. */
+    private var hcReadAt = 0L
+    private var activityJob: Job? = null
+    /**
+     * A full Health Connect read is owed (source switched, access granted). Kept until a read
+     * succeeds: the access dialog returns right before onResume, whose reload cancels the forced
+     * one, and a plain force flag would die with it.
+     */
+    private var hcStale = false
 
     /** Diary and weight log for the weight trend; refreshed when the day changes. */
     var trendData by mutableStateOf(TrendData(LocalDate.now().toEpochDay(), emptyMap(), emptyList()))
@@ -228,6 +252,80 @@ class MainActivity : ComponentActivity() {
         if (uri != null) loadPhoto(uri) else photoCancelled()
     }
 
+    private val hcPermission = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) {
+        reloadActivity(force = true)
+    }
+
+    /**
+     * Health Connect access is missing where it matters: it is the only source left (chosen,
+     * or auto without Pulsar), or access was given but without the kcal. With a working Pulsar
+     * in auto Health Connect is optional, and a dot there would nag Pulsar-only users forever.
+     */
+    val activityNeedsAccess: Boolean
+        get() {
+            val d = activityData
+            if (!prefs.activityFromPulsar || d.source == ActivitySource.PULSAR) return false
+            val only = d.source == ActivitySource.HEALTH_CONNECT || d.pulsar.status != PulsarStatus.OK
+            return when (d.hc.status) {
+                HcStatus.NO_ACCESS, HcStatus.NEEDS_INSTALL -> only
+                HcStatus.OK -> !d.hc.calories
+                HcStatus.UNAVAILABLE -> false
+            }
+        }
+
+    fun requestHealthConnect() {
+        runCatching { hcPermission.launch(HealthConnectSource.permissions(this)) }
+            .onFailure { Toast.makeText(this, R.string.hc_open_failed, Toast.LENGTH_SHORT).show() }
+    }
+
+    /** Health Connect's page for this app: there access is given again after the dialog was refused twice. */
+    fun openHealthConnect() {
+        runCatching { startActivity(HealthConnectClient.getHealthConnectManageDataIntent(this)) }
+            .onFailure { Toast.makeText(this, R.string.hc_open_failed, Toast.LENGTH_SHORT).show() }
+    }
+
+    /** Android 12-13: Health Connect is an app from Google Play. */
+    fun installHealthConnect() {
+        val uri = Uri.parse("market://details?id=${HealthConnectSource.PROVIDER}&url=healthconnect%3A%2F%2Fonboarding")
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, uri).setPackage("com.android.vending")) }
+            .recoverCatching { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+            .onFailure { Toast.makeText(this, R.string.hc_open_failed, Toast.LENGTH_SHORT).show() }
+    }
+
+    /**
+     * Reads both sources and merges them by the chosen mode. Pulsar is a cheap provider query
+     * and is always read, so its state can be shown; Health Connect is read only when it is
+     * in use, and at most every HC_READ_MS unless forced (source switched, access granted).
+     */
+    fun reloadActivity(force: Boolean = false) {
+        // A slower load started before a source switch must not land after it.
+        if (force) hcStale = true
+        activityJob?.cancel()
+        activityJob = lifecycleScope.launch {
+            val source = prefs.activitySource
+            val old = activityData
+            val pulsar = withContext(Dispatchers.IO) { PulsarSource.load(this@MainActivity) }
+            val now = System.currentTimeMillis()
+            val fresh = !hcStale && old.hc.status == HcStatus.OK && now - hcReadAt < HC_READ_MS
+            val hc = when {
+                // Not in use: nothing is read and nothing about it is shown.
+                source == ActivitySource.PULSAR -> HcData(HcStatus.UNAVAILABLE)
+                fresh -> old.hc
+                else -> withContext(Dispatchers.IO) { HealthConnectSource.load(this@MainActivity) }
+                    ?.also {
+                        if (it.status == HcStatus.OK) hcReadAt = now
+                        hcStale = false
+                    } ?: old.hc
+            }
+            val minutes = ActivityMerge.merge(
+                source,
+                if (pulsar.status == PulsarStatus.OK) pulsar.minutes else emptyList(),
+                if (hc.status == HcStatus.OK && source != ActivitySource.PULSAR) hc.minutes else emptyList(),
+            )
+            activityData = ActivityData(source, pulsar, hc, minutes)
+        }
+    }
+
     private fun photoCancelled() {
         overlay = photoFor ?: Overlay.AddMenu
         photoFor = null
@@ -254,7 +352,7 @@ class MainActivity : ComponentActivity() {
         }
         // Keep today's target saved: once the day is over it stays the one the day is measured against.
         lifecycleScope.launch {
-            combine(dao.lastWeight(), snapshotFlow { Triple(profileVersion, pulsar, trendData) }) { w, _ -> w }.collectLatest { w ->
+            combine(dao.lastWeight(), snapshotFlow { Triple(profileVersion, activityData, trendData) }) { w, _ -> w }.collectLatest { w ->
                 target(w?.kg)?.let { dao.putDayTargets(listOf(DayTarget(LocalDate.now().toEpochDay(), it.kcal))) }
             }
         }
@@ -304,7 +402,7 @@ class MainActivity : ComponentActivity() {
             shownToday = today
         }
         trendDay = today
-        lifecycleScope.launch { pulsar = withContext(Dispatchers.IO) { PulsarSource.load(this@MainActivity) } }
+        reloadActivity()
         // A delayed retry may be held back by Doze: the app is open, so try now if due.
         lifecycleScope.launch { AiQueue.schedule(this@MainActivity) }
     }
@@ -332,7 +430,15 @@ class MainActivity : ComponentActivity() {
                     Tab(
                         selected = pager.currentPage == i,
                         onClick = { scope.launch { pager.animateScrollToPage(i) } },
-                        text = { OneLineText(stringResource(title)) },
+                        text = {
+                            // The dot leads from any tab to what needs a tap (see activityNeedsAccess).
+                            // Beside the word, not over its last letter; the word shrinks if the tab is narrow.
+                            if (i == 2 && activityNeedsAccess) Row(verticalAlignment = Alignment.Top) {
+                                OneLineText(stringResource(title), Modifier.weight(1f, fill = false))
+                                Spacer(Modifier.width(4.dp))
+                                AlertDot()
+                            } else OneLineText(stringResource(title))
+                        },
                     )
                 }
             }
@@ -357,11 +463,11 @@ class MainActivity : ComponentActivity() {
         return Body(sex, Goals.age(birth), prefs.heightCm, w)
     }
 
-    /** Activity level measured by Pulsar, if it is switched on and there are enough days. */
+    /** Activity level measured from walks and workouts, if it is switched on and there are enough days. */
     fun calibration(lastWeightKg: Double?): Calibration? {
-        if (!prefs.activityFromPulsar || pulsar.status != PulsarStatus.OK) return null
+        if (!prefs.activityFromPulsar || !activityData.usable) return null
         val b = body(lastWeightKg) ?: return null
-        return Burn.calibrate(pulsar.minutes, b, LocalDate.now())
+        return Burn.calibrate(activityData.minutes, b, LocalDate.now())
     }
 
     /** Expenditure from the weight trend or why there is none yet; null - the profile is incomplete. */

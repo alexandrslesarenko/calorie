@@ -35,19 +35,24 @@ new versions over the old one.
   weight or activity does not rewrite the past), deficit or surplus over the last week in
   kilograms of fat.
 - Weight log with a chart; under it, what was eaten the day before against the day's target,
-  so you can see how food moves the weight; with Pulsar, the part of it burned on walks and
-  workouts is marked inside the bar.
+  so you can see how food moves the weight; the part of it burned on walks and workouts
+  (from Pulsar or Health Connect) is marked inside the bar.
 - Backup to a file and back: the diary, weight log, daily targets, "My dishes" with pictures and profile as JSON, which can
   be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,
   with safety limits: not below 1200 / 1500 kcal and the basal metabolic rate, at most
   1% of body weight per week, maintenance when the goal is reached or BMI is below 18.5.
-- Optional activity from [Pulsar](https://github.com/alexandrslesarenko/pulsar): heart
-  rate on walks and workouts can lower the activity level set in the profile, but not raise
-  it - walks beyond it do not raise the target, what they burn speeds up the weight loss.
+- Optional activity from walks and workouts: heart rate from
+  [Pulsar](https://github.com/alexandrslesarenko/pulsar) or, in compatibility mode, workouts
+  and heart rate that a watch or another app (Samsung Health and the like) writes to Health
+  Connect; a workout without heart rate counts by the kcal its app wrote, but not above a MET
+  estimate for its kind. The source is Pulsar, Health Connect or automatic (Pulsar where it
+  was running, Health Connect for the rest of the day). It can lower the activity level set in the
+  profile, but not raise it - walks beyond it do not raise the target, what they burn speeds
+  up the weight loss.
 - Expenditure from the weight trend: after two weeks of a full diary and regular weigh-ins
   the app measures what you actually burn (what you ate plus what the weight lost) and uses
-  it ahead of Pulsar and the manual level, but only to lower the target, never to raise it;
+  it ahead of walks and workouts and the manual level, but only to lower the target, never to raise it;
   the goal page shows it next to the formula.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
   Japanese, Korean, Chinese (Simplified). Claude answers in the app language.
@@ -109,6 +114,15 @@ The author's builds of both apps share one release key. Builds from source made 
 machine share its debug keystore, so a self-built pair works out of the box, but a
 self-built Calorie cannot read a Pulsar installed from its Releases page. If Calorie was
 installed before Pulsar, reinstall Calorie to get the permission.
+
+## Health Connect
+
+Without Pulsar, Calorie reads workouts (`ExerciseSessionRecord`) and the heart rate inside
+them (`HeartRateRecord`) from Health Connect, read only. Walking and hiking count as walks,
+everything else as workouts. A workout without heart rate counts by the active (or total minus
+resting) kcal its app wrote, capped by a MET estimate; without kcal it is not counted. Health Connect
+gives data from 30 days before access was granted, older ones only where it supports the
+history permission.
 
 ## Disclaimer
 

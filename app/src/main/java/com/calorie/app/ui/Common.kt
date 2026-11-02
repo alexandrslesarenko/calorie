@@ -6,6 +6,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Text
 import androidx.compose.ui.layout.Layout
@@ -114,3 +115,10 @@ fun TileTitle(text: String, modifier: Modifier = Modifier) {
 /** Day and month in the locale's usual order: 24.09 in Russian, 09/24 in English. */
 fun dayMonthPattern(): String =
     android.text.format.DateFormat.getBestDateTimePattern(java.util.Locale.getDefault(), "ddMM")
+
+/**
+ * A small bright dot on a tab or tile that leads to something needing a tap. Not the theme's
+ * error color: in the dark theme it is a pale pink that is easy to miss.
+ */
+@Composable
+fun AlertDot() = androidx.compose.material3.Badge(Modifier.size(10.dp), containerColor = CalColors.Over)

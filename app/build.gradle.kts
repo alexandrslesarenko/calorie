@@ -194,6 +194,8 @@ dependencies {
     // Google barcode scanner: ready-made UI, no camera permission.
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
     implementation("androidx.exifinterface:exifinterface:1.4.1")
+    // Walks and workouts from watches and apps other than Pulsar (compatibility mode).
+    implementation("androidx.health.connect:connect-client:1.1.0")
     // Google services pull in an old Fragment, and activity results require 1.3+.
     implementation("androidx.fragment:fragment-ktx:1.8.6")
 

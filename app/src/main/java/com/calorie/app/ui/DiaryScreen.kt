@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import com.calorie.app.R
 import com.calorie.app.data.DayTotal
 import com.calorie.app.data.FoodDb
-import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.WeightMark
 import com.calorie.app.logic.Burn
 import com.calorie.app.logic.Goals
@@ -74,15 +73,15 @@ fun DiaryScreen(a: MainActivity) {
     val today = LocalDate.now().toEpochDay()
     val totals by remember(today) { dao.totals(today - DIARY_DAYS, today) }.collectAsState(emptyList())
     val weights by remember { dao.weights() }.collectAsState(emptyList())
-    val target = remember(weights.lastOrNull(), a.profileVersion, a.pulsar, a.trendData) { a.target(weights.lastOrNull()?.kg) }
+    val target = remember(weights.lastOrNull(), a.profileVersion, a.activityData, a.trendData) { a.target(weights.lastOrNull()?.kg) }
     // Each day against its own target: today's would rewrite the balance of the past.
     val saved by remember { dao.dayTargets() }.collectAsState(emptyList())
     fun targetOn(day: Long) = Goals.targetOn(day, today, target?.kcal, saved)
-    // Burned kcal per day from Pulsar, for information next to what was eaten.
-    val burned = remember(weights.lastOrNull(), a.profileVersion, a.pulsar) {
+    // Burned kcal per day from walks and workouts, for information next to what was eaten.
+    val burned = remember(weights.lastOrNull(), a.profileVersion, a.activityData) {
         val b = a.body(weights.lastOrNull()?.kg)
-        if (b == null || a.pulsar.status != PulsarStatus.OK) emptyMap()
-        else Burn.perDay(a.pulsar.minutes, b, ZoneId.systemDefault())
+        if (b == null || !a.activityData.usable) emptyMap()
+        else Burn.perDay(a.activityData.minutes, b, ZoneId.systemDefault())
     }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -186,7 +185,7 @@ private fun WeightSection(a: MainActivity, all: List<WeightMark>, targetOn: (Lon
     // yesterday's food. Today is not over yet and would always look low.
     var touchX by remember { mutableStateOf<Float?>(null) }
     val eaten = totals.mapNotNull { t -> targetOn(t.day)?.takeIf { it > 0 }?.let { t.day + 1 to (t.kcal to it) } }.toMap()
-    // Pulsar activity of the same day, shifted the same way; only where there is a bar to put it in.
+    // Activity (Pulsar or Health Connect) of the same day, shifted the same way; only where there is a bar to put it in.
     val walked = burned.filterValues { it >= 1 }.mapKeys { it.key + 1 }.filterKeys { it in eaten }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -345,8 +344,8 @@ private fun WeightChart(
 /**
  * Eaten against the target, a bar per weigh-in day for the day before it (`eaten`), under the
  * weight chart and on the same days, so a flat week can be checked against the plates. The top
- * is 150% of the target; the dotted line is the target. Pulsar activity of that day (`walked`)
- * is the top part of the bar: what is left below it is the food it did not cover.
+ * is 150% of the target; the dotted line is the target. Walks and workouts of that day (`walked`)
+ * are the top part of the bar: what is left below it is the food they did not cover.
  */
 @Composable
 private fun IntakeChart(points: List<WeightMark>, eaten: Map<Long, Pair<Double, Int>>, walked: Map<Long, Double>, touchX: Float?, onTouch: (Float?) -> Unit) {

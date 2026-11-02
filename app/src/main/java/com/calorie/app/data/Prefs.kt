@@ -2,6 +2,7 @@ package com.calorie.app.data
 
 import android.content.Context
 import com.calorie.app.logic.Activity
+import com.calorie.app.logic.ActivitySource
 import com.calorie.app.logic.CookedGuess
 import com.calorie.app.logic.Pace
 import com.calorie.app.logic.Pricing
@@ -61,10 +62,18 @@ class Prefs(context: Context) {
         get() = Pace.byKey(sp.getString("pace", null)) ?: Pace.NORMAL
         set(v) = sp.edit().putString("pace", v.key).apply()
 
-    /** Activity level measured by Pulsar instead of the manual one, when there is enough data. */
+    /** Activity level measured from walks and workouts (Pulsar or Health Connect) instead of the manual one, when there is enough data. */
     var activityFromPulsar: Boolean
         get() = sp.getBoolean("activity_from_pulsar", true)
         set(v) = sp.edit().putBoolean("activity_from_pulsar", v).apply()
+
+    /**
+     * Where walks and workouts come from. Not in the backup: Health Connect access belongs to
+     * the phone, like the language.
+     */
+    var activitySource: ActivitySource
+        get() = ActivitySource.byKey(sp.getString("activity_source", null)) ?: ActivitySource.AUTO
+        set(v) = sp.edit().putString("activity_source", v.key).apply()
 
     /** Expenditure from the weight trend ahead of Pulsar and the manual level, when there is enough data. */
     var activityFromWeight: Boolean

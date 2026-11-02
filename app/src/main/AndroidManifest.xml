@@ -5,9 +5,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Walks and workouts from Pulsar; granted only with the same signing key. -->
     <uses-permission android:name="com.puls.app.permission.READ_ACTIVITY" />
+    <!-- Walks and workouts written to Health Connect by other apps and watches; read only. -->
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <!-- Kcal of workouts without heart rate (a phone without a watch). -->
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
 
     <queries>
         <package android:name="com.puls.app" />
+        <package android:name="com.google.android.apps.healthdata" />
     </queries>
 
     <application
@@ -27,7 +35,23 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Health Connect before Android 14: why access is needed -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
         </activity>
+
+        <!-- Health Connect on Android 14+: without this alias the access dialog is not shown -->
+        <activity-alias
+            android:name=".ui.ViewPermissionUsageActivity"
+            android:exported="true"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
 
         <provider
             android:name="androidx.core.content.FileProvider"

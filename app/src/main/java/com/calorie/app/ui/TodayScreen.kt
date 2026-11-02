@@ -63,8 +63,8 @@ import com.calorie.app.data.Entry
 import com.calorie.app.data.FoodDb
 import com.calorie.app.data.Meal
 import com.calorie.app.data.Pending
-import com.calorie.app.data.PulsarStatus
 import com.calorie.app.data.Source
+import com.calorie.app.logic.ActivitySource
 import com.calorie.app.logic.Burn
 import java.time.Instant
 import java.time.ZoneId
@@ -89,7 +89,7 @@ fun TodayScreen(a: MainActivity) {
     val dao = remember { FoodDb.get(ctx).dao() }
     val entries by remember(a.day) { dao.entries(a.day) }.collectAsState(emptyList())
     val lastWeight by remember { dao.lastWeight() }.collectAsState(null)
-    val current = remember(lastWeight, a.profileVersion, a.pulsar, a.trendData) { a.target(lastWeight?.kg) }
+    val current = remember(lastWeight, a.profileVersion, a.activityData, a.trendData) { a.target(lastWeight?.kg) }
     // A past day keeps the kcal target it had; the rest (protein, limits) is today's.
     val saved by remember { dao.dayTargets() }.collectAsState(emptyList())
     val target = current?.let { t -> t.copy(kcal = Goals.targetOn(a.day, LocalDate.now().toEpochDay(), t.kcal, saved) ?: t.kcal) }
@@ -370,21 +370,21 @@ private fun PendingCard(a: MainActivity) {
     }
 }
 
-/** Mode name for a Pulsar session. */
+/** Mode name for a walk or workout. */
 @Composable
 fun modeLabel(mode: String) = stringResource(if (mode == Burn.TRAINING) R.string.mode_training else R.string.mode_walk)
 
 /**
- * Walks and workouts of the selected day from Pulsar. Shown for information: the burned
+ * Walks and workouts of the selected day from Pulsar or Health Connect. Shown for information: the burned
  * kcal reach the target through the two-week average, not by adding to today.
  */
 @Composable
 private fun ActivityCard(a: MainActivity, weightKg: Double?) {
-    if (a.pulsar.status != PulsarStatus.OK) return
+    if (!a.activityData.usable) return
     val body = remember(weightKg, a.profileVersion) { a.body(weightKg) } ?: return
     val zone = remember { ZoneId.systemDefault() }
-    val sessions = remember(a.pulsar, a.day, body) {
-        Burn.sessions(a.pulsar.minutes.filter { Burn.day(it.minute, zone) == a.day }, body)
+    val sessions = remember(a.activityData, a.day, body) {
+        Burn.sessions(a.activityData.minutes.filter { Burn.day(it.minute, zone) == a.day }, body)
     }
     if (sessions.isEmpty()) return
     val fmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
@@ -399,9 +399,14 @@ private fun ActivityCard(a: MainActivity, weightKg: Double?) {
                 if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text(modeLabel(s.mode))
+                        // In the automatic mode a day may come from either source: say which.
                         Text(
-                            stringResource(R.string.session_line, hm(s.start), hm(s.end), s.minutes, s.avgBpm),
+                            if (s.origin == ActivitySource.HEALTH_CONNECT) stringResource(R.string.session_from_hc, modeLabel(s.mode))
+                            else modeLabel(s.mode),
+                        )
+                        Text(
+                            if (s.avgBpm > 0) stringResource(R.string.session_line, hm(s.start), hm(s.end), s.minutes, s.avgBpm)
+                            else stringResource(R.string.session_line_no_hr, hm(s.start), hm(s.end), s.minutes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
