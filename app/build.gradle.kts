@@ -35,8 +35,8 @@ android {
         applicationId = "com.calorie.app"
         minSdk = 31
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.7"
+        versionCode = 8
+        versionName = "0.8"
     }
 
     signingConfigs {
