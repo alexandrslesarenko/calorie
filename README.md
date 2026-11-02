@@ -7,8 +7,8 @@ text description with Claude Haiku 5.5 or Gemini 3.5 Flash-Lite, finds packaged 
 barcode in Open Food Facts, keeps a food diary and a weight log, and computes a daily calorie target for your
 goal.
 
-Version 0.2, in early testing; the name is a working one. A ready APK is on the
-[Releases](https://github.com/alexandrslesarenko/calorie/releases) page. To get updates
+The app is in testing, and the name is a working one. A ready APK of the latest version is
+on the [Releases](https://github.com/alexandrslesarenko/calorie/releases) page. To get updates
 automatically, add the repository URL `https://github.com/alexandrslesarenko/calorie` to
 [Obtainium](https://github.com/ImranR98/Obtainium): it checks the Releases page and installs
 new versions over the old one.
@@ -17,8 +17,8 @@ new versions over the old one.
 
 - Food by photo (camera or gallery), by description in words, by barcode or by hand.
   The recognized dishes can be corrected before saving: names, grams, meal.
-- "My dishes": every saved dish is remembered, and repeating it needs no request to
-  Claude. Answers are also cached, so sending the same photo or text again is free.
+- "My dishes": every saved dish is remembered, and repeating it needs no recognition
+  request. Answers are also cached, so sending the same photo or text again is free.
   A product can be prepared in advance without eating it (for example from a label photo),
   edited later and shown with a small picture. Search forgives the typos of a small
   keyboard: a neighboring key, an extra or a missed letter.
@@ -29,33 +29,33 @@ new versions over the old one.
   the values look cooked already, so they are not converted twice.
 - A barcode is kept with the dish: products missing from Open Food Facts are found in "My
   dishes" on the next scan, also offline.
-- If Claude is overloaded or there is no connection, the request is not lost: the app
-  resends it on its own and shows the answer on Today, ready to check and add.
+- If the recognition service is overloaded or there is no connection, the request is not
+  lost: the app resends it on its own and shows the answer on Today, ready to check and add.
 - Diary by meals, balance of each day against the target that day had (a later change of
   weight or activity does not rewrite the past), deficit or surplus over the last week in
   kilograms of fat.
 - Weight log with a chart; under it, what was eaten the day before against the day's target,
   so you can see how food moves the weight; the part of it burned on walks and workouts
   (from Pulsar or Health Connect) is marked inside the bar.
-- Backup to a file and back: the diary, weight log, daily targets, "My dishes" with pictures and profile as JSON, which can
-  be added to the data on another phone or replace it; the diary as CSV for spreadsheets.
+- Backup to a file and back: the diary, weight log, daily targets, "My dishes" with
+  pictures and the profile as JSON, which can be added to the data on another phone or
+  replace it; the diary as CSV for spreadsheets.
 - Daily target from the Mifflin-St Jeor equation, activity level and the chosen pace,
   with safety limits: not below 1200 / 1500 kcal and the basal metabolic rate, at most
   1% of body weight per week, maintenance when the goal is reached or BMI is below 18.5.
 - Optional activity from walks and workouts: heart rate from
-  [Pulsar](https://github.com/alexandrslesarenko/pulsar) or, in compatibility mode, workouts
-  and heart rate that a watch or another app (Samsung Health and the like) writes to Health
-  Connect; a workout without heart rate counts by the kcal its app wrote, but not above a MET
-  estimate for its kind. The source is Pulsar, Health Connect or automatic (Pulsar where it
-  was running, Health Connect for the rest of the day). It can lower the activity level set in the
-  profile, but not raise it - walks beyond it do not raise the target, what they burn speeds
-  up the weight loss.
+  [Pulsar](https://github.com/alexandrslesarenko/pulsar) or, in compatibility mode, the
+  workouts and heart rate that a watch, the phone or another app (Samsung Health and the
+  like) writes to Health Connect. The source is Pulsar, Health Connect or automatic (Pulsar
+  where it was running, Health Connect for the rest of the day). Activity can lower the
+  activity level set in the profile, but not raise it: walks beyond it do not raise the
+  target, what they burn speeds up the weight loss.
 - Expenditure from the weight trend: after two weeks of a full diary and regular weigh-ins
   the app measures what you actually burn (what you ate plus what the weight lost) and uses
-  it ahead of walks and workouts and the manual level, but only to lower the target, never to raise it;
-  the goal page shows it next to the formula.
+  it ahead of walks and workouts and the activity level in the profile, but only to lower
+  the target, never to raise it; the goal page shows it next to the formula.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
-  Japanese, Korean, Chinese (Simplified). Claude answers in the app language.
+  Japanese, Korean, Chinese (Simplified). Recognized dishes are named in the app language.
 
 ## API key: Claude or Gemini
 
@@ -86,13 +86,17 @@ refusal in a row the next model with a key answers.
   chosen or answers as a fallback (on its free tier Google may use them). Photos are
   re-encoded before sending, so EXIF data and geotags do not leave the phone.
 - Barcodes are sent to Open Food Facts (no account or key).
-- The diary, weight log and profile stay on the phone.
+- The diary, weight log and profile stay on the phone. Walks and workouts from Pulsar and
+  Health Connect are only read and are not sent anywhere.
 
 ## Requirements
 
 - Android 12 (API 31) or newer.
 - Google Play services for the barcode scanner.
 - A Claude or Gemini API key for photo and text recognition.
+- Optional: [Pulsar](https://github.com/alexandrslesarenko/pulsar) or Health Connect for
+  walks and workouts. Health Connect is built into Android 14 and newer; on Android 12-13 it
+  is a separate app from Google Play.
 
 ## Building
 
@@ -117,12 +121,20 @@ installed before Pulsar, reinstall Calorie to get the permission.
 
 ## Health Connect
 
-Without Pulsar, Calorie reads workouts (`ExerciseSessionRecord`) and the heart rate inside
-them (`HeartRateRecord`) from Health Connect, read only. Walking and hiking count as walks,
-everything else as workouts. A workout without heart rate counts by the active (or total minus
-resting) kcal its app wrote, capped by a MET estimate; without kcal it is not counted. Health Connect
-gives data from 30 days before access was granted, older ones only where it supports the
-history permission.
+For watches and apps Pulsar does not know, Calorie reads workouts (`ExerciseSessionRecord`)
+and the heart rate inside them (`HeartRateRecord`) from Health Connect; it only reads and
+writes nothing there. Walking and hiking count as walks, everything else as workouts. A
+workout with heart rate is counted the same way as Pulsar's. A workout without heart rate
+counts by the kcal its app wrote (active, or total minus the resting part), but never above
+a MET estimate for its kind; without kcal it is not counted.
+
+Access is asked for in the profile. When Health Connect is the only source and access is
+missing, or the kcal were not allowed, the Settings tab and the Profile tile show a red dot. Health Connect gives data from 30 days before access was granted, older
+ones only where it supports the history permission.
+
+In the automatic mode Pulsar wins where it was running, and Health Connect fills the rest
+of the day; a walk recorded by both counts once. Pulsar itself can write heart rate to
+Health Connect, so a walk the phone detected while Pulsar was measuring has a pulse.
 
 ## Disclaimer
 
