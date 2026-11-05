@@ -54,6 +54,9 @@ new versions over the old one.
   the app measures what you actually burn (what you ate plus what the weight lost) and uses
   it ahead of walks and workouts and the activity level in the profile, but only to lower
   the target, never to raise it; the goal page shows it next to the formula.
+- Light and dark theme in the wallpaper color. The app builds the color scheme itself and
+  takes only the shade from the system, so the dark theme stays dark and clear on firmware
+  whose own palette looks faded (One UI 9); a switch brings back the system palette as is.
 - Interface in 9 languages: English, Russian, German, French, Spanish, Italian,
   Japanese, Korean, Chinese (Simplified). Recognized dishes are named in the app language.
 
