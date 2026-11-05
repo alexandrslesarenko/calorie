@@ -289,6 +289,10 @@
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Chiaro</string>
     <string name="theme_dark">Scuro</string>
+    <string name="colors_title">Colori</string>
+    <string name="colors_app">App</string>
+    <string name="colors_system">Sistema</string>
+    <string name="colors_help">App: la tonalità viene dal sistema (colore dello sfondo) e l\'app decide la luminosità di sfondo e schede. Sistema: esattamente la tavolozza del telefono; su alcuni firmware, come One UI 9, il tema scuro appare sbiadito.</string>
     <string name="lang_title">Lingua</string>
     <string name="lang_system">Sistema</string>
 

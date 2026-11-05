@@ -19,6 +19,11 @@ class Prefs(context: Context) {
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
 
+        /** Scheme built by the app from the system color (logic/Palette). */
+        const val COLORS_APP = "app"
+        /** The system Material You scheme as is. */
+        const val COLORS_SYSTEM = "system"
+
         const val KEY_UNKNOWN = "unknown"
         const val KEY_OK = "ok"
         const val KEY_BAD = "bad"
@@ -106,6 +111,11 @@ class Prefs(context: Context) {
     var theme: String
         get() = sp.getString("theme", THEME_SYSTEM) ?: THEME_SYSTEM
         set(v) = sp.edit().putString("theme", v).apply()
+
+    /** COLORS_APP / COLORS_SYSTEM. Not in the backup: how the system scheme looks is the phone's. */
+    var colors: String
+        get() = sp.getString("colors", COLORS_APP) ?: COLORS_APP
+        set(v) = sp.edit().putString("colors", v).apply()
 
     /** Result of the last Claude key check: KEY_OK / KEY_BAD / KEY_UNKNOWN. */
     var keyStatus: String

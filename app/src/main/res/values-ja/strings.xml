@@ -289,6 +289,10 @@
     <string name="theme_system">システム</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
+    <string name="colors_title">色</string>
+    <string name="colors_app">アプリ</string>
+    <string name="colors_system">システム</string>
+    <string name="colors_help">アプリ：色合いはシステム（壁紙の色）から取り、背景とカードの明るさはアプリが決めます。システム：スマホのパレットそのまま。One UI 9 など一部のファームウェアでは、ダークテーマが色あせて見えます。</string>
     <string name="lang_title">言語</string>
     <string name="lang_system">システム</string>
 

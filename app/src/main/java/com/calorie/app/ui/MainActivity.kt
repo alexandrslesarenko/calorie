@@ -200,6 +200,7 @@ class MainActivity : ComponentActivity() {
         }
     var settingsPage by mutableStateOf<SettingsPage?>(null)
     var themeMode by mutableStateOf(Prefs.THEME_SYSTEM)
+    var colorsMode by mutableStateOf(Prefs.COLORS_APP)
     /** Some recognizer has an API key: photo and text recognition can be offered. */
     var hasKey by mutableStateOf(false)
     /** Bumped on any profile or goal change so screens recalculate the target. */
@@ -336,6 +337,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
         themeMode = prefs.theme
+        colorsMode = prefs.colors
         // A language change recreates the activity: keep the same day and settings page.
         savedInstanceState?.let { st ->
             day = st.getLong(STATE_DAY, day)
@@ -368,7 +370,7 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 onDispose {}
             }
-            AppTheme(dark) { Surface(Modifier.fillMaxSize()) { Root() } }
+            AppTheme(dark, systemColors = colorsMode == Prefs.COLORS_SYSTEM) { Surface(Modifier.fillMaxSize()) { Root() } }
         }
     }
 

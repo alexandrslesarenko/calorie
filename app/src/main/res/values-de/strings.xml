@@ -289,6 +289,10 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
+    <string name="colors_title">Farben</string>
+    <string name="colors_app">App</string>
+    <string name="colors_system">System</string>
+    <string name="colors_help">App: Der Farbton kommt vom System (Farbe des Hintergrundbilds), die Helligkeit von Hintergrund und Karten legt die App fest. System: genau die Palette des Telefons; auf mancher Firmware, etwa One UI 9, wirkt das dunkle Design damit blass.</string>
     <string name="lang_title">Sprache</string>
     <string name="lang_system">System</string>
 

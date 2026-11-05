@@ -289,6 +289,10 @@
     <string name="theme_system">Системная</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
+    <string name="colors_title">Цвета</string>
+    <string name="colors_app">Приложения</string>
+    <string name="colors_system">Системные</string>
+    <string name="colors_help">Приложения: оттенок берётся из системы (цвет обоев), а яркость фона и карточек задаёт приложение. Системные: в точности палитра телефона; на некоторых прошивках, например One UI 9, тёмная тема с ней выглядит блёкло.</string>
     <string name="lang_title">Язык</string>
     <string name="lang_system">Системный</string>
 

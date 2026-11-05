@@ -24,12 +24,48 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import com.calorie.app.logic.Palette
 
 @Composable
-fun AppTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun AppTheme(dark: Boolean = isSystemInDarkTheme(), systemColors: Boolean = false, content: @Composable () -> Unit) {
     val ctx = LocalContext.current
-    val scheme = if (dark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
+    val system = if (dark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
+    // The seed is the dark primary in both modes: one hue whatever the theme.
+    val seed = if (systemColors) 0 else dynamicDarkColorScheme(ctx).primary.toArgb()
+    val scheme = remember(system, dark, seed) {
+        if (systemColors) system else appScheme(Palette.of(seed, dark), dark)
+    }
     MaterialTheme(colorScheme = scheme, content = content)
+}
+
+/** Material scheme from our palette; error colors stay Material's defaults. */
+private fun appScheme(p: Palette, dark: Boolean): ColorScheme {
+    fun c(v: Int) = Color(v)
+    val base = if (dark) darkColorScheme() else lightColorScheme()
+    return base.copy(
+        primary = c(p.primary), onPrimary = c(p.onPrimary),
+        primaryContainer = c(p.primaryContainer), onPrimaryContainer = c(p.onPrimaryContainer),
+        inversePrimary = c(p.inversePrimary),
+        secondary = c(p.secondary), onSecondary = c(p.onSecondary),
+        secondaryContainer = c(p.secondaryContainer), onSecondaryContainer = c(p.onSecondaryContainer),
+        tertiary = c(p.tertiary), onTertiary = c(p.onTertiary),
+        tertiaryContainer = c(p.tertiaryContainer), onTertiaryContainer = c(p.onTertiaryContainer),
+        background = c(p.background), onBackground = c(p.onBackground),
+        surface = c(p.surface), onSurface = c(p.onSurface),
+        surfaceVariant = c(p.surfaceVariant), onSurfaceVariant = c(p.onSurfaceVariant),
+        surfaceTint = c(p.surfaceTint), inverseSurface = c(p.inverseSurface), inverseOnSurface = c(p.inverseOnSurface),
+        outline = c(p.outline), outlineVariant = c(p.outlineVariant), scrim = c(p.scrim),
+        surfaceBright = c(p.surfaceBright), surfaceDim = c(p.surfaceDim),
+        surfaceContainerLowest = c(p.surfaceContainerLowest), surfaceContainerLow = c(p.surfaceContainerLow),
+        surfaceContainer = c(p.surfaceContainer), surfaceContainerHigh = c(p.surfaceContainerHigh),
+        surfaceContainerHighest = c(p.surfaceContainerHighest),
+    )
 }
 
 /**

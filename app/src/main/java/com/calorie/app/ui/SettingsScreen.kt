@@ -984,6 +984,17 @@ private fun ThemeSettings(a: MainActivity) {
             }
         }
     }
+    SettingsCard(stringResource(R.string.colors_title), help = stringResource(R.string.colors_help), secondary = true) {
+        FitRow { style ->
+            listOf(Prefs.COLORS_APP to R.string.colors_app, Prefs.COLORS_SYSTEM to R.string.colors_system).forEach { (mode, label) ->
+                FilterChip(
+                    selected = a.colorsMode == mode,
+                    onClick = { a.colorsMode = mode; a.prefs.colors = mode },
+                    label = { Text(stringResource(label), maxLines = 1, style = style) },
+                )
+            }
+        }
+    }
 }
 
 /** The system stores the language (LocaleManager): the same choice shows in Android settings. */

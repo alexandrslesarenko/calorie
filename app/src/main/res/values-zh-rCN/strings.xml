@@ -289,6 +289,10 @@
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
+    <string name="colors_title">颜色</string>
+    <string name="colors_app">应用</string>
+    <string name="colors_system">系统</string>
+    <string name="colors_help">应用：色调取自系统（壁纸颜色），背景和卡片的明暗由应用决定。系统：完全使用手机的调色板；在部分固件（如 One UI 9）上，深色主题会显得发灰。</string>
     <string name="lang_title">语言</string>
     <string name="lang_system">跟随系统</string>
 

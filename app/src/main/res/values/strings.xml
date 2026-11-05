@@ -289,6 +289,10 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="colors_title">Colors</string>
+    <string name="colors_app">App</string>
+    <string name="colors_system">System</string>
+    <string name="colors_help">App: the shade comes from the system (your wallpaper color), and the app sets how light the background and cards are. System: exactly the phone palette; on some firmware, One UI 9 for one, the dark theme looks faded with it.</string>
     <string name="lang_title">Language</string>
     <string name="lang_system">System</string>
 

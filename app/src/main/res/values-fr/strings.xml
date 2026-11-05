@@ -289,6 +289,10 @@
     <string name="theme_system">Système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
+    <string name="colors_title">Couleurs</string>
+    <string name="colors_app">Application</string>
+    <string name="colors_system">Système</string>
+    <string name="colors_help">Application : la teinte vient du système (couleur du fond d\'écran), et l\'application règle la clarté du fond et des cartes. Système : exactement la palette du téléphone ; sur certains firmwares, comme One UI 9, le thème sombre paraît alors terne.</string>
     <string name="lang_title">Langue</string>
     <string name="lang_system">Système</string>
 
