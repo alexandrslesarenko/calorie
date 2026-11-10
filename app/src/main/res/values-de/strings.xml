@@ -196,6 +196,12 @@
     <string name="hc_allow">Zugriff erlauben</string>
     <string name="hc_ok">Health Connect: %1$d Tage mit gezählten Trainings.</string>
     <string name="hc_no_history">Health Connect liefert Daten nur ab 30 Tagen vor der Freigabe.</string>
+    <string name="hc_export_on">Tagebuch und Gewicht werden an Health Connect gesendet</string>
+    <string name="hc_export_off">Tagebuch und Gewicht werden nicht an Health Connect gesendet</string>
+    <string name="hc_export_help">Jeder Tagebucheintrag (Name, Mahlzeit, kcal, Eiweiß, Fett, Kohlenhydrate) und jedes Wiegen wird in Health Connect geschrieben, wo andere Apps mit Zugriff sie lesen können. Änderungen und Löschungen hier werden dort wiederholt. Ausschalten beendet das Senden: Bereits Gesendetes bleibt und kann in der Health Connect-App gelöscht werden.</string>
+    <string name="hc_export_no_access">Kein Schreibzugriff für Tagebuch und Gewicht in Health Connect.</string>
+    <string name="hc_export_sent">Gesendet: Tagebucheinträge %1$d, Wiegungen %2$d.</string>
+    <string name="hc_export_failed">Das letzte Senden ist fehlgeschlagen. Es wird wiederholt, wenn sich das Tagebuch ändert oder die App geöffnet wird.</string>
     <string name="hc_open_failed">Health Connect konnte nicht geöffnet werden</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">Kein Zugriff auf die kcal der Trainings: Trainings ohne Puls zählen nicht.</string>

@@ -80,6 +80,14 @@ class Prefs(context: Context) {
         get() = ActivitySource.byKey(sp.getString("activity_source", null)) ?: ActivitySource.AUTO
         set(v) = sp.edit().putString("activity_source", v.key).apply()
 
+    /**
+     * Diary and weight log mirrored to Health Connect (HealthConnectExport). Off by default: it
+     * writes the user's data into a store other apps read. Not in the backup, like the source.
+     */
+    var hcExport: Boolean
+        get() = sp.getBoolean("hc_export", false)
+        set(v) = sp.edit().putBoolean("hc_export", v).apply()
+
     /** Expenditure from the weight trend ahead of Pulsar and the manual level, when there is enough data. */
     var activityFromWeight: Boolean
         get() = sp.getBoolean("activity_from_weight", true)

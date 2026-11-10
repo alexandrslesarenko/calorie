@@ -196,6 +196,12 @@
     <string name="hc_allow">Allow access</string>
     <string name="hc_ok">Health Connect: %1$d days with counted workouts.</string>
     <string name="hc_no_history">Health Connect gives data only from 30 days before access was granted.</string>
+    <string name="hc_export_on">Diary and weight are sent to Health Connect</string>
+    <string name="hc_export_off">Diary and weight are not sent to Health Connect</string>
+    <string name="hc_export_help">Every diary entry (name, meal, kcal, protein, fat, carbs) and every weigh-in is written to Health Connect, where other apps with access can read them. Edits and deletions here are repeated there. Switching off stops the sending: what was already sent stays and can be deleted in the Health Connect app.</string>
+    <string name="hc_export_no_access">No access to write the diary and weight to Health Connect.</string>
+    <string name="hc_export_sent">Sent: diary entries %1$d, weigh-ins %2$d.</string>
+    <string name="hc_export_failed">The last sending failed. It will be repeated when the diary changes or the app is opened.</string>
     <string name="hc_open_failed">Could not open Health Connect</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">No access to the kcal of workouts: those without heart rate are not counted.</string>

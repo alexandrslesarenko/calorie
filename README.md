@@ -89,8 +89,9 @@ refusal in a row the next model with a key answers.
   chosen or answers as a fallback (on its free tier Google may use them). Photos are
   re-encoded before sending, so EXIF data and geotags do not leave the phone.
 - Barcodes are sent to Open Food Facts (no account or key).
-- The diary, weight log and profile stay on the phone. Walks and workouts from Pulsar and
-  Health Connect are only read and are not sent anywhere.
+- The diary, weight log and profile stay on the phone, unless sending to Health Connect is
+  switched on (off by default). Walks and workouts from Pulsar and Health Connect are only
+  read and are not sent anywhere.
 
 ## Requirements
 
@@ -125,8 +126,7 @@ installed before Pulsar, reinstall Calorie to get the permission.
 ## Health Connect
 
 For watches and apps Pulsar does not know, Calorie reads workouts (`ExerciseSessionRecord`)
-and the heart rate inside them (`HeartRateRecord`) from Health Connect; it only reads and
-writes nothing there. Walking and hiking count as walks, everything else as workouts. A
+and the heart rate inside them (`HeartRateRecord`) from Health Connect. Walking and hiking count as walks, everything else as workouts. A
 workout with heart rate is counted the same way as Pulsar's. A workout without heart rate
 counts by the kcal its app wrote (active, or total minus the resting part), but never above
 a MET estimate for its kind; without kcal it is not counted.
@@ -138,6 +138,13 @@ ones only where it supports the history permission.
 In the automatic mode Pulsar wins where it was running, and Health Connect fills the rest
 of the day; a walk recorded by both counts once. Pulsar itself can write heart rate to
 Health Connect, so a walk the phone detected while Pulsar was measuring has a pulse.
+
+The other way, Calorie can send the diary and the weight log to Health Connect (Settings ->
+Data, off by default): each diary entry becomes a `NutritionRecord` (name, meal, kcal,
+protein, fat, carbs) and each weigh-in a `WeightRecord`. Switching it on sends the whole
+history; after that every save, edit, deletion and import is repeated there within seconds.
+Switching it off stops the sending; what was sent stays in Health Connect and is deleted in
+its app.
 
 ## Disclaimer
 

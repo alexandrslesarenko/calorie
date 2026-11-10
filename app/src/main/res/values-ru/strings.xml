@@ -196,6 +196,12 @@
     <string name="hc_allow">Разрешить доступ</string>
     <string name="hc_ok">Health Connect: дней с учтёнными тренировками - %1$d.</string>
     <string name="hc_no_history">Health Connect отдаёт данные только с 30 дней до выдачи доступа.</string>
+    <string name="hc_export_on">Дневник и вес отправляются в Health Connect</string>
+    <string name="hc_export_off">Дневник и вес не отправляются в Health Connect</string>
+    <string name="hc_export_help">Каждая запись дневника (название, приём пищи, ккал, белки, жиры, углеводы) и каждое взвешивание записываются в Health Connect, где их могут читать другие приложения с доступом. Правки и удаления здесь повторяются там. Выключение останавливает отправку: уже отправленное остаётся, удалить его можно в приложении Health Connect.</string>
+    <string name="hc_export_no_access">Нет доступа на запись дневника и веса в Health Connect.</string>
+    <string name="hc_export_sent">Отправлено: записей дневника %1$d, взвешиваний %2$d.</string>
+    <string name="hc_export_failed">Последняя отправка не удалась. Она повторится при изменении дневника или открытии приложения.</string>
     <string name="hc_open_failed">Не удалось открыть Health Connect</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">Нет доступа к калориям тренировок: тренировки без пульса не учитываются.</string>

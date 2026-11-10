@@ -61,6 +61,8 @@ import com.calorie.app.data.ActivityData
 import com.calorie.app.data.HcData
 import com.calorie.app.data.HcStatus
 import com.calorie.app.data.HealthConnectSource
+import com.calorie.app.data.HealthConnectExport
+import com.calorie.app.data.HcExportStatus
 import com.calorie.app.data.PulsarSource
 import com.calorie.app.data.PulsarStatus
 import com.calorie.app.logic.ActivityMerge
@@ -99,7 +101,9 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import java.time.LocalTime
@@ -111,6 +115,8 @@ private const val STATE_SETTINGS_PAGE = "settings_page"
 private const val RETURN_TO_TODAY_MS = 10 * 60_000L
 /** Health Connect has read quotas; a resume within this reuses the last read. */
 private const val HC_READ_MS = 5 * 60_000L
+/** Edits come in bursts (a meal of several items, an import): one pass after them. */
+private const val HC_EXPORT_DELAY_MS = 2_000L
 
 /**
  * Draft row on the review screen; confidence is set only for Claude results. raw - weighed
@@ -217,6 +223,10 @@ class MainActivity : ComponentActivity() {
      */
     private var hcStale = false
 
+    /** Diary and weight log mirrored to Health Connect (Prefs.hcExport) and how the last pass went. */
+    var hcExportOn by mutableStateOf(false)
+    var hcExportStatus by mutableStateOf(HcExportStatus())
+
     /** Diary and weight log for the weight trend; refreshed when the day changes. */
     var trendData by mutableStateOf(TrendData(LocalDate.now().toEpochDay(), emptyMap(), emptyList()))
     private var trendDay by mutableLongStateOf(LocalDate.now().toEpochDay())
@@ -273,6 +283,34 @@ class MainActivity : ComponentActivity() {
                 HcStatus.UNAVAILABLE -> false
             }
         }
+
+    private val hcExportPermission = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) {
+        // Owed in the file, not in a flag here: the pass is not tied to this activity.
+        HealthConnectExport.owe(this)
+        HealthConnectExport.request(this)
+    }
+
+    /** Export needs a tap: it is on, but write access is missing. */
+    val exportNeedsAccess: Boolean
+        get() = hcExportOn && hcExportStatus.access == false
+
+    /** Switching on asks for write access; what is already in Health Connect stays when switched off. */
+    fun setHcExport(on: Boolean) {
+        prefs.hcExport = on
+        hcExportOn = on
+        if (on) {
+            HealthConnectExport.owe(this)
+            // The answer (also an immediate one, when access is already there) starts the pass.
+            requestHcExport()
+        } else {
+            HealthConnectExport.forget(this)
+        }
+    }
+
+    fun requestHcExport() {
+        runCatching { hcExportPermission.launch(HealthConnectExport.PERMISSIONS) }
+            .onFailure { Toast.makeText(this, R.string.hc_open_failed, Toast.LENGTH_SHORT).show() }
+    }
 
     fun requestHealthConnect() {
         runCatching { hcPermission.launch(HealthConnectSource.permissions(this)) }
@@ -332,7 +370,7 @@ class MainActivity : ComponentActivity() {
         photoFor = null
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
@@ -344,6 +382,7 @@ class MainActivity : ComponentActivity() {
             settingsPage = st.getString(STATE_SETTINGS_PAGE)?.let { n -> SettingsPage.entries.firstOrNull { it.name == n } }
         }
         hasKey = AiKeys.load(this).any
+        hcExportOn = prefs.hcExport
         val dao = FoodDb.get(this).dao()
         lifecycleScope.launch {
             snapshotFlow { trendDay }.flatMapLatest { today ->
@@ -356,6 +395,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             combine(dao.lastWeight(), snapshotFlow { Triple(profileVersion, activityData, trendData) }) { w, _ -> w }.collectLatest { w ->
                 target(w?.kg)?.let { dao.putDayTargets(listOf(DayTarget(LocalDate.now().toEpochDay(), it.kcal))) }
+            }
+        }
+        lifecycleScope.launch { HealthConnectExport.status.collect { hcExportStatus = it } }
+        // Any change of the diary or the weight log (save, edit, delete, import) makes a pass:
+        // Room re-emits on every write to the table, the count is only the cheapest query.
+        lifecycleScope.launch {
+            combine(dao.entryCount(), dao.weights()) { _, _ -> }.debounce(HC_EXPORT_DELAY_MS).collect {
+                if (prefs.hcExport) HealthConnectExport.request(this@MainActivity)
             }
         }
         setContent {
@@ -405,6 +452,8 @@ class MainActivity : ComponentActivity() {
         }
         trendDay = today
         reloadActivity()
+        // Access may have been given or taken in the Health Connect app meanwhile.
+        if (prefs.hcExport) HealthConnectExport.request(this)
         // A delayed retry may be held back by Doze: the app is open, so try now if due.
         lifecycleScope.launch { AiQueue.schedule(this@MainActivity) }
     }
@@ -435,7 +484,7 @@ class MainActivity : ComponentActivity() {
                         text = {
                             // The dot leads from any tab to what needs a tap (see activityNeedsAccess).
                             // Beside the word, not over its last letter; the word shrinks if the tab is narrow.
-                            if (i == 2 && activityNeedsAccess) Row(verticalAlignment = Alignment.Top) {
+                            if (i == 2 && (activityNeedsAccess || exportNeedsAccess)) Row(verticalAlignment = Alignment.Top) {
                                 OneLineText(stringResource(title), Modifier.weight(1f, fill = false))
                                 Spacer(Modifier.width(4.dp))
                                 AlertDot()

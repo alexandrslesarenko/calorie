@@ -196,6 +196,12 @@
     <string name="hc_allow">Consenti accesso</string>
     <string name="hc_ok">Health Connect: %1$d giorni con allenamenti conteggiati.</string>
     <string name="hc_no_history">Health Connect dà i dati solo da 30 giorni prima del consenso.</string>
+    <string name="hc_export_on">Diario e peso vengono inviati a Health Connect</string>
+    <string name="hc_export_off">Diario e peso non vengono inviati a Health Connect</string>
+    <string name="hc_export_help">Ogni voce del diario (nome, pasto, kcal, proteine, grassi, carboidrati) e ogni pesata vengono scritte in Health Connect, dove altre app con accesso possono leggerle. Modifiche ed eliminazioni fatte qui vengono ripetute lì. Disattivando si ferma l\'invio: ciò che è già stato inviato resta e si può eliminare nell\'app Health Connect.</string>
+    <string name="hc_export_no_access">Nessun accesso in scrittura per diario e peso in Health Connect.</string>
+    <string name="hc_export_sent">Inviati: voci del diario %1$d, pesate %2$d.</string>
+    <string name="hc_export_failed">L\'ultimo invio non è riuscito. Verrà ripetuto quando il diario cambia o si apre l\'app.</string>
     <string name="hc_open_failed">Impossibile aprire Health Connect</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">Nessun accesso alle kcal degli allenamenti: quelli senza frequenza cardiaca non contano.</string>

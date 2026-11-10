@@ -196,6 +196,12 @@
     <string name="hc_allow">Autoriser l\'accès</string>
     <string name="hc_ok">Health Connect : %1$d jours avec des séances comptées.</string>
     <string name="hc_no_history">Health Connect ne donne les données qu\'à partir de 30 jours avant l\'autorisation.</string>
+    <string name="hc_export_on">Le journal et le poids sont envoyés à Health Connect</string>
+    <string name="hc_export_off">Le journal et le poids ne sont pas envoyés à Health Connect</string>
+    <string name="hc_export_help">Chaque entrée du journal (nom, repas, kcal, protéines, lipides, glucides) et chaque pesée sont écrites dans Health Connect, où les autres applications autorisées peuvent les lire. Les modifications et suppressions faites ici y sont répétées. Désactiver arrête l\'envoi : ce qui a déjà été envoyé reste et peut être supprimé dans l\'application Health Connect.</string>
+    <string name="hc_export_no_access">Pas d\'accès en écriture du journal et du poids dans Health Connect.</string>
+    <string name="hc_export_sent">Envoyé : entrées du journal %1$d, pesées %2$d.</string>
+    <string name="hc_export_failed">Le dernier envoi a échoué. Il sera repris quand le journal changera ou à l\'ouverture de l\'application.</string>
     <string name="hc_open_failed">Impossible d\'ouvrir Health Connect</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">Pas d\'accès aux kcal des séances : celles sans fréquence cardiaque ne comptent pas.</string>

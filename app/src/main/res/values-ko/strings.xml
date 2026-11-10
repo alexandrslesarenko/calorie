@@ -196,6 +196,12 @@
     <string name="hc_allow">접근 허용</string>
     <string name="hc_ok">Health Connect: 계산된 운동이 있는 날 %1$d일.</string>
     <string name="hc_no_history">Health Connect는 접근을 허용하기 30일 전부터의 데이터만 줍니다.</string>
+    <string name="hc_export_on">일기와 체중을 Health Connect로 보내는 중</string>
+    <string name="hc_export_off">일기와 체중을 Health Connect로 보내지 않음</string>
+    <string name="hc_export_help">일기의 각 기록(이름, 식사, kcal, 단백질, 지방, 탄수화물)과 각 체중 측정이 Health Connect에 기록되며, 접근 권한이 있는 다른 앱이 읽을 수 있습니다. 여기서 수정하거나 삭제하면 그곳에도 반영됩니다. 끄면 전송이 멈추며, 이미 보낸 데이터는 남아 있고 Health Connect 앱에서 삭제할 수 있습니다.</string>
+    <string name="hc_export_no_access">Health Connect에 일기와 체중을 기록할 권한이 없습니다.</string>
+    <string name="hc_export_sent">전송됨: 일기 기록 %1$d개, 체중 %2$d개.</string>
+    <string name="hc_export_failed">마지막 전송에 실패했습니다. 일기가 바뀌거나 앱을 열 때 다시 시도합니다.</string>
     <string name="hc_open_failed">Health Connect를 열 수 없습니다</string>
     <string name="session_from_hc">%1$s (Health Connect)</string>
     <string name="hc_no_calories">운동 kcal에 접근할 수 없어 심박수 없는 운동은 세지 않습니다.</string>

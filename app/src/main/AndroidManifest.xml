@@ -5,13 +5,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Walks and workouts from Pulsar; granted only with the same signing key. -->
     <uses-permission android:name="com.puls.app.permission.READ_ACTIVITY" />
-    <!-- Walks and workouts written to Health Connect by other apps and watches; read only. -->
+    <!-- Walks and workouts written to Health Connect by other apps and watches. -->
     <uses-permission android:name="android.permission.health.READ_EXERCISE" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <!-- Kcal of workouts without heart rate (a phone without a watch). -->
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
+    <!-- Diary and weight log mirrored to Health Connect when the user switches it on. -->
+    <uses-permission android:name="android.permission.health.WRITE_NUTRITION" />
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
 
     <queries>
         <package android:name="com.puls.app" />

@@ -196,7 +196,7 @@ private fun SettingsTile(a: MainActivity, p: SettingsPage, status: String, modif
     Card(onClick = { if (p == SettingsPage.DISHES) a.openLibrary() else a.settingsPage = p }, modifier = modifier) {
         Box {
             // In the top right corner of the tile: something inside needs a tap.
-            if (p == SettingsPage.PROFILE && a.activityNeedsAccess) Box(Modifier.align(Alignment.TopEnd).padding(8.dp)) { AlertDot() }
+            if ((p == SettingsPage.PROFILE && a.activityNeedsAccess) || (p == SettingsPage.DATA && a.exportNeedsAccess)) Box(Modifier.align(Alignment.TopEnd).padding(8.dp)) { AlertDot() }
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(Modifier.size(32.dp).background(p.color.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
@@ -1142,6 +1142,7 @@ private fun DataSettings(a: MainActivity) {
         }
     }
     message?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = if (failed) CalColors.Over else MaterialTheme.colorScheme.onSurface) }
+    HealthConnectExportCard(a)
 
     toReplace?.let { data ->
         val fmt = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
@@ -1160,5 +1161,39 @@ private fun DataSettings(a: MainActivity) {
             },
             dismissButton = { TextButton(onClick = { toReplace = null }) { Text(stringResource(R.string.cancel)) } },
         )
+    }
+}
+
+/** Diary and weight log to Health Connect: the switch and how the sending goes. */
+@Composable
+private fun HealthConnectExportCard(a: MainActivity) {
+    val on = a.hcExportOn
+    val st = a.hcExportStatus
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    SettingsCard(ActivityData.HC_NAME, help = stringResource(R.string.hc_export_help), secondary = true) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(if (on) R.string.hc_export_on else R.string.hc_export_off), Modifier.weight(1f))
+            Switch(checked = on, onCheckedChange = { a.setHcExport(it) })
+        }
+        if (!on) return@SettingsCard
+        when {
+            st.hc == HcStatus.UNAVAILABLE -> Text(stringResource(R.string.hc_unavailable), style = MaterialTheme.typography.bodySmall, color = muted)
+            st.hc == HcStatus.NEEDS_INSTALL -> {
+                Text(stringResource(R.string.hc_install), style = MaterialTheme.typography.bodySmall, color = muted)
+                Button(onClick = { a.installHealthConnect() }) { Text(stringResource(R.string.hc_install_button)) }
+            }
+            st.access == false -> {
+                Text(stringResource(R.string.hc_export_no_access), style = MaterialTheme.typography.bodySmall, color = muted)
+                FitRow { style ->
+                    Button(
+                        onClick = { a.requestHcExport() },
+                        colors = ButtonDefaults.buttonColors(containerColor = CalColors.Warn, contentColor = Color.White),
+                    ) { Text(stringResource(R.string.hc_allow), maxLines = 1, style = style) }
+                    OutlinedButton(onClick = { a.openHealthConnect() }) { Text(ActivityData.HC_NAME, maxLines = 1, style = style) }
+                }
+            }
+            st.failed -> Text(stringResource(R.string.hc_export_failed), style = MaterialTheme.typography.bodySmall, color = CalColors.Over)
+            st.at > 0 -> Text(stringResource(R.string.hc_export_sent, st.food, st.weights), style = MaterialTheme.typography.bodySmall, color = muted)
+        }
     }
 }

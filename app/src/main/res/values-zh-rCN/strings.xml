@@ -196,6 +196,12 @@
     <string name="hc_allow">允许访问</string>
     <string name="hc_ok">Health Connect：有已计入训练的天数为 %1$d 天。</string>
     <string name="hc_no_history">Health Connect 只提供授权前 30 天起的数据。</string>
+    <string name="hc_export_on">日记和体重正在发送到 Health Connect</string>
+    <string name="hc_export_off">日记和体重不发送到 Health Connect</string>
+    <string name="hc_export_help">每条日记记录（名称、餐次、千卡、蛋白质、脂肪、碳水化合物）和每次称重都会写入 Health Connect，有权限的其他应用可以读取。在这里的修改和删除会同步到那里。关闭后停止发送：已发送的数据会保留，可在 Health Connect 应用中删除。</string>
+    <string name="hc_export_no_access">没有向 Health Connect 写入日记和体重的权限。</string>
+    <string name="hc_export_sent">已发送：日记记录 %1$d 条，称重 %2$d 次。</string>
+    <string name="hc_export_failed">上次发送失败。日记变化或打开应用时会重试。</string>
     <string name="hc_open_failed">无法打开 Health Connect</string>
     <string name="session_from_hc">%1$s（Health Connect）</string>
     <string name="hc_no_calories">无法读取训练的千卡：没有心率的训练不计入。</string>
